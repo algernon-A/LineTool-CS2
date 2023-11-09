@@ -1,0 +1,109 @@
+/* Container for all UI elements, covering entire screen. */
+#line-tool-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999999;
+}
+
+/* Enclosing window. */
+.line-tool-window {
+    position: absolute;
+    bottom: 180px;
+    left: 275px;
+    width: 330px;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+/* Visible panel body. Copied from .tool-options-panel_Se6. */
+.line-tool-options-panel {
+    background-color: var(--panelColorNormal);
+    backdrop-filter: var(--panelBlur);
+    border-top-left-radius: var(--panelRadius);
+    border-top-right-radius: var(--panelRadius);
+    border-bottom-left-radius: var(--panelRadius);
+    border-bottom-right-radius: var(--panelRadius);
+    padding-top: 6rem;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 6rem;
+    pointer-events: auto;
+    color: var(--textColorDim);
+}
+
+/* Tool options row. Copied from .item-content_nNz. */
+.line-tool-options-row {
+    height: 36rem;
+    width: 330px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 4rem;
+    padding-left: 12rem;
+    padding-right: 12rem;
+    padding-bottom: 4rem;
+}
+
+/* Tool options row label. Copied from .label_RZX. */
+.line-tool-options-label {
+    flex: 1.000000;
+    max-height: 26.000000rem;
+    margin-right: 3.000000rem;
+    font-size: var(--fontSizeM);
+    font-weight: bold;
+}
+
+/* Spacing control parent panel. Copied from .content_ZIz. */
+.line-tool-spacing-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Number field. Copied from .number-field__Hd. */
+.line-tool-number-field {
+    height: 28rem;
+    width: 68rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(15, 16, 19, 0.5);
+    font-size: var(--fontSizeS);
+}
+
+/* Arrow control. Copied from .button_KVN, .end-button_ztm, and .start-button_F6T.*/
+.line-tool-arrow {
+    width: 28rem;
+    height: 28rem;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(15, 16, 19, 1);
+    border-top-left-radius: 4rem 4rem;
+    border-bottom-left-radius: 4rem 4rem;
+    border-top-right-radius: 4rem 4rem;
+    border-bottom-right-radius: 4rem 4rem;
+}
+
+/* Icon.  Copied from .icon_Ysc. */
+.line-tool-icon {
+    width: 24rem;
+    height: 24rem;
+}
+
+/* Simple component to hide its parent. */
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

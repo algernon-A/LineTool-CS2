@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<Title>Line Tool</Title>
+		<AssemblyName>LineTool</AssemblyName>
+		<AssemblyTitle>$(Title)</AssemblyTitle>
+		<Description>A Cities: Skylines 2 mod.</Description>
+		<Authors>algernon</Authors>
+		<Copyright>Copyright © 2023 algernon</Copyright>
+		<Product>$(Title)</Product>
+		<Version>0.0.1</Version>
+		<TargetFramework>net472</TargetFramework>
+		<LangVersion>9.0</LangVersion>
+		<ManagedDLLPath>$(MSBuildProgramFiles32)/Steam/steamapps/common/Cities Skylines II/Cities2_Data/Managed</ManagedDLLPath>
+		<AssemblySearchPaths>
+			$(AssemblySearchPaths);
+			$(ManagedDLLPath);
+		</AssemblySearchPaths>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="stylecop.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<AdditionalFiles Include="stylecop.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="Game" />
+		<Reference Include="Cinemachine" />
+		<Reference Include="Colossal.AssetPipeline" />
+		<Reference Include="Colossal.Collections" />
+		<Reference Include="Colossal.Core" />
+		<Reference Include="Colossal.IO.AssetDatabase" />
+		<Reference Include="Colossal.Localization" />
+		<Reference Include="Colossal.Logging" />
+		<Reference Include="Colossal.Mathematics" />
+		<Reference Include="Colossal.Mono.Cecil" />
+		<Reference Include="Colossal.UI" />
+		<Reference Include="Colossal.UI.Binding" />
+		<Reference Include="cohtml.net" />
+		<Reference Include="Unity.Burst" />
+		<Reference Include="Unity.Collections" />
+		<Reference Include="Unity.Entities" />
+		<Reference Include="Unity.InputSystem" />
+		<Reference Include="Unity.Mathematics" />
+		<Reference Include="UnityEngine" />
+		<Reference Include="UnityEngine.CoreModule" />
+		<Reference Include="UnityEngine.IMGUIModule.dll" />
+		<Reference Include="mscorlib">
+			<HintPath>$(ManagedDLLPath)\mscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="netstandard">
+			<HintPath>$(ManagedDLLPath)\netstandard.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	<ItemGroup>
+		<_UI Include="$(ProjectDir)/UI/*.css" />
+		<_UI Include="$(ProjectDir)/UI/*.html" />
+		<_UI Include="$(ProjectDir)/UI/*.js" />
+	</ItemGroup>
+	<Target Name="DeployToModDirectory" AfterTargets="Build">
+		<PropertyGroup>
+			<DeployDir>$(USERPROFILE)/AppData/LocalLow/Colossal Order/Cities Skylines II/Mods/WorkInProgress/$(SolutionName)</DeployDir>
+		</PropertyGroup>
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
+		<Copy SourceFiles="@(_UI)" DestinationFolder="$(DeployDir)/UI" />
+		<Copy SourceFiles="$(ProjectDir)/l10n.csv" DestinationFolder="$(DeployDir)" />
+	</Target>
+</Project>
