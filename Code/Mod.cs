@@ -13,11 +13,16 @@ namespace LineTool
     public sealed class Mod : IMod
     {
         /// <summary>
+        /// The mod's default name.
+        /// </summary>
+        public const string ModName = "Line Tool";
+
+        /// <summary>
         /// Called by the game when the mod is loaded.
         /// </summary>
         public void OnLoad()
         {
-            Logging.LogInfo("loading");
+            Log.Info("loading");
         }
 
         /// <summary>
@@ -26,7 +31,7 @@ namespace LineTool
         /// <param name="updateSystem">Game update system.</param>
         public void OnCreateWorld(UpdateSystem updateSystem)
         {
-            Logging.LogInfo("starting OnCreateWorld");
+            Log.Info("starting OnCreateWorld");
             Localization.LoadTranslations();
             updateSystem.UpdateAt<LineToolSystem>(SystemUpdatePhase.ToolUpdate);
         }
@@ -36,7 +41,7 @@ namespace LineTool
         /// </summary>
         public void OnDispose()
         {
-            Logging.LogInfo("disposing");
+            Log.Info("disposing");
         }
     }
 }

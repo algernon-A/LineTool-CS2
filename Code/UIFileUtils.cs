@@ -34,7 +34,7 @@ namespace LineTool
                     ExecutableAsset modAsset = AssetDatabase.global.GetAsset(SearchFilter<ExecutableAsset>.ByCondition(x => x.definition?.FullName == assemblyName));
                     if (modAsset is null)
                     {
-                        Logging.LogError("mod executable asset not found");
+                        Log.Error("mod executable asset not found");
                         return null;
                     }
 
@@ -74,7 +74,7 @@ namespace LineTool
                 string directoryPath = Path.Combine(AssemblyPath, directoryName);
                 if (!Directory.Exists(directoryPath))
                 {
-                    Logging.LogError("unable to locate UI file directory ", directoryPath);
+                    Log.Error("unable to locate UI file directory ", directoryPath);
                     return;
                 }
 
@@ -98,7 +98,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Logging.LogException(e, "exception reading UI files");
+                Log.Exception(e, "exception reading UI files");
             }
         }
 
@@ -123,7 +123,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Logging.LogException(e, "exception reading CSS file ", fileName);
+                Log.Exception(e, "exception reading CSS file ", fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -151,7 +151,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Logging.LogException(e, "exception reading CSS file ", fileName);
+                Log.Exception(e, "exception reading CSS file ", fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -179,7 +179,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Logging.LogException(e, "exception reading CSS file ", fileName);
+                Log.Exception(e, "exception reading CSS file ", fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -204,7 +204,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Logging.LogException(e, "exception reading UI file ", fileName);
+                Log.Exception(e, "exception reading UI file ", fileName);
             }
 
             // If we got here, something went wrong.

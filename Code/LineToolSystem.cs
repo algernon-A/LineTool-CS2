@@ -114,7 +114,7 @@ namespace LineTool
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
-                Logging.LogDebug("action pressed");
+                Log.Debug("action pressed");
 
                 // Check for valid raycast.
                 GetRaycastResult(out m_RaycastPoint);
@@ -130,7 +130,7 @@ namespace LineTool
                     // Record line start position and return if this is the first action.
                     if (!_validFirstPos)
                     {
-                        Logging.LogDebug("setting first position");
+                        Log.Debug("setting first position");
                         _validFirstPos = true;
                         _firstPos = position;
                         return inputDeps;
@@ -143,7 +143,7 @@ namespace LineTool
                     NativeArray<Entity> nativeArray = _prefabs.ToEntityArray(Allocator.TempJob);
 
                     // Choose random prefab.
-                    Logging.LogDebug("selecting random prefab");
+                    Log.Debug("selecting random prefab");
                     Random random = new ((uint)DateTime.Now.Ticks);
                     Entity entity = nativeArray[random.NextInt(nativeArray.Length)];
 
@@ -189,7 +189,7 @@ namespace LineTool
                 }
                 else
                 {
-                    Logging.LogDebug("invalid raycast");
+                    Log.Debug("invalid raycast");
                 }
             }
 
@@ -201,7 +201,7 @@ namespace LineTool
         /// </summary>
         protected override void OnCreate()
         {
-            Logging.LogInfo("OnCreate");
+            Log.Info("OnCreate");
             base.OnCreate();
 
             // Initialize tree prefab query.
@@ -229,7 +229,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStartRunning()
         {
-            Logging.LogDebug("OnStartRunning");
+            Log.Debug("OnStartRunning");
             base.OnStartRunning();
 
             // Ensure apply action is enabled.
@@ -250,7 +250,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStopRunning()
         {
-            Logging.LogDebug("OnStopRunning");
+            Log.Debug("OnStopRunning");
 
             // Hide UI.
             SetUIVisibility(false);
@@ -270,7 +270,7 @@ namespace LineTool
             // Activate this tool if it isn't already active.
             if (m_ToolSystem.activeTool != this)
             {
-                Logging.LogDebug("enabling tool");
+                Log.Debug("enabling tool");
 
                 m_ToolSystem.selected = Entity.Null;
                 m_ToolSystem.activeTool = this;
@@ -282,7 +282,7 @@ namespace LineTool
         /// </summary>
         private void LoadUI()
         {
-            Logging.LogInfo("loading UI files");
+            Log.Info("loading UI files");
 
             // Ensure we can get the UI view before proceeding.
             _uiView = GameManager.instance.userInterface.view.View;

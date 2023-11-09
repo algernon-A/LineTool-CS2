@@ -48,14 +48,14 @@ namespace LineTool
                         }
                         catch (Exception e)
                         {
-                            Logging.LogException(e, "exception reading localization for locale ", localeID);
+                            Log.Exception(e, "exception reading localization for locale ", localeID);
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                Logging.LogException(e, "exception reading localization file");
+                Log.Exception(e, "exception reading localization file");
             }
         }
     }
