@@ -34,7 +34,7 @@ namespace LineTool
                     ExecutableAsset modAsset = AssetDatabase.global.GetAsset(SearchFilter<ExecutableAsset>.ByCondition(x => x.definition?.FullName == assemblyName));
                     if (modAsset is null)
                     {
-                        Log.Error("mod executable asset not found");
+                        Mod.Log.Error("mod executable asset not found");
                         return null;
                     }
 
@@ -68,13 +68,15 @@ namespace LineTool
         /// <param name="directoryName">Mod sub-directory.</param>
         internal static void ReadUIFiles(View uiView, string directoryName)
         {
+            Mod.Log.Debug("reading UI files from " + directoryName);
+
             try
             {
                 // Get sub-directory.
                 string directoryPath = Path.Combine(AssemblyPath, directoryName);
                 if (!Directory.Exists(directoryPath))
                 {
-                    Log.Error("unable to locate UI file directory ", directoryPath);
+                    Mod.Log.Error("unable to locate UI file directory " + directoryPath);
                     return;
                 }
 
@@ -98,7 +100,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Log.Exception(e, "exception reading UI files");
+                Mod.Log.Error(e, "exception reading UI files");
             }
         }
 
@@ -107,7 +109,7 @@ namespace LineTool
         /// </summary>
         /// <param name="fileName">UI file name to read.</param>
         /// <returns>JavaScript text embedding the CSS (<c>null</c> if empty or error).</returns>
-        private static string ReadCSS(string fileName)
+        internal static string ReadCSS(string fileName)
         {
             try
             {
@@ -123,7 +125,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Log.Exception(e, "exception reading CSS file ", fileName);
+                Mod.Log.Error(e, "exception reading CSS file " + fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -134,8 +136,9 @@ namespace LineTool
         /// Load HTML from a UI file.
         /// </summary>
         /// <param name="fileName">UI file name to read.</param>
+        /// <param name="injectionPostfix">Injection JavaScript postfix text.</param>
         /// <returns>JavaScript text embedding the HTML (<c>null</c> if empty or error).</returns>
-        private static string ReadHTML(string fileName)
+        internal static string ReadHTML(string fileName, string injectionPostfix = "document.body.appendChild(div);")
         {
             try
             {
@@ -146,12 +149,12 @@ namespace LineTool
                 if (!string.IsNullOrEmpty(html))
                 {
                     // Return JavaScript code with HTML embedded.
-                    return $"var div = document.createElement('div'); div.innerHTML = \"{EscapeToJavaScript(html)}\"; document.body.appendChild(div);";
+                    return $"var div = document.createElement('div'); div.innerHTML = \"{EscapeToJavaScript(html)}\"; {injectionPostfix}";
                 }
             }
             catch (Exception e)
             {
-                Log.Exception(e, "exception reading CSS file ", fileName);
+                Mod.Log.Error(e, "exception reading CSS file " + fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -163,10 +166,12 @@ namespace LineTool
         /// </summary>>
         /// <param name="fileName">UI file name to read.</param>
         /// <returns>JavaScript as <see cref="string"/> (<c>null</c> if empty or error).</returns>
-        private static string ReadJS(string fileName)
+        internal static string ReadJS(string fileName)
         {
             try
             {
+                Mod.Log.Debug("reading JavaScript file " + fileName);
+
                 // Attempt to read file.
                 string js = ReadUIFile(fileName);
 
@@ -179,8 +184,10 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Log.Exception(e, "exception reading CSS file ", fileName);
+                Mod.Log.Error(e, "exception reading CSS file " + fileName);
             }
+
+            Mod.Log.Debug("failed to read JavaScript file " + fileName);
 
             // If we got here, something went wrong.; return null.
             return null;
@@ -191,7 +198,7 @@ namespace LineTool
         /// </summary>
         /// <param name="fileName">UI file name to read.</param>
         /// <returns>File contents (<c>null</c> if none or error).</returns>
-        private static string ReadUIFile(string fileName)
+        internal static string ReadUIFile(string fileName)
         {
             try
             {
@@ -204,7 +211,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Log.Exception(e, "exception reading UI file ", fileName);
+                Mod.Log.Error(e, "exception reading UI file " + fileName);
             }
 
             // If we got here, something went wrong.
@@ -216,7 +223,7 @@ namespace LineTool
         /// </summary>
         /// <param name="sourceString">HTML source.</param>
         /// <returns>Escaped HTML.</returns>
-        private static string EscapeToJavaScript(string sourceString)
+        internal static string EscapeToJavaScript(string sourceString)
         {
             // Create output StringBuilder.
             int length = sourceString.Length;

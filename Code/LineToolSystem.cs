@@ -6,12 +6,10 @@ namespace LineTool
 {
     using System;
     using System.Collections.Generic;
-    using cohtml.Net;
     using Game.Common;
     using Game.Input;
     using Game.Objects;
     using Game.Prefabs;
-    using Game.SceneFlow;
     using Game.Simulation;
     using Game.Tools;
     using Unity.Collections;
@@ -45,9 +43,6 @@ namespace LineTool
         // Tool settings.
         private float _spacing = 20f;
 
-        // UI View reference.
-        private View _uiView;
-
         /// <summary>
         /// Line tool modes.
         /// </summary>
@@ -69,6 +64,11 @@ namespace LineTool
         /// Mimics the network tool to use its icons.
         /// </summary>
         public override string toolID => "Net Tool";
+
+        /// <summary>
+        /// Gets or sets the line spacing.
+        /// </summary>
+        internal float Spacing { get => _spacing; set => _spacing = value; }
 
         /// <summary>
         /// Gets the GUI modes for the tool.
@@ -114,8 +114,6 @@ namespace LineTool
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
-                Log.Debug("action pressed");
-
                 // Check for valid raycast.
                 GetRaycastResult(out m_RaycastPoint);
                 if (m_RaycastPoint.m_HitPosition.x != 0f || m_RaycastPoint.m_HitPosition.z != 0f)
@@ -130,7 +128,7 @@ namespace LineTool
                     // Record line start position and return if this is the first action.
                     if (!_validFirstPos)
                     {
-                        Log.Debug("setting first position");
+                        Mod.Log.Debug("setting first position");
                         _validFirstPos = true;
                         _firstPos = position;
                         return inputDeps;
@@ -143,7 +141,7 @@ namespace LineTool
                     NativeArray<Entity> nativeArray = _prefabs.ToEntityArray(Allocator.TempJob);
 
                     // Choose random prefab.
-                    Log.Debug("selecting random prefab");
+                    Mod.Log.Debug("selecting random prefab");
                     Random random = new ((uint)DateTime.Now.Ticks);
                     Entity entity = nativeArray[random.NextInt(nativeArray.Length)];
 
@@ -187,10 +185,6 @@ namespace LineTool
                     // Invalidate first position now that we've placed this line.
                     _validFirstPos = false;
                 }
-                else
-                {
-                    Log.Debug("invalid raycast");
-                }
             }
 
             return inputDeps;
@@ -201,7 +195,7 @@ namespace LineTool
         /// </summary>
         protected override void OnCreate()
         {
-            Log.Info("OnCreate");
+            Mod.Log.Info("OnCreate");
             base.OnCreate();
 
             // Initialize tree prefab query.
@@ -219,9 +213,6 @@ namespace LineTool
             hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
             hotKey.performed += EnableTool;
             hotKey.Enable();
-
-            // Load tool UI.
-            LoadUI();
         }
 
         /// <summary>
@@ -229,7 +220,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStartRunning()
         {
-            Log.Debug("OnStartRunning");
+            Mod.Log.Debug("OnStartRunning");
             base.OnStartRunning();
 
             // Ensure apply action is enabled.
@@ -240,9 +231,6 @@ namespace LineTool
 
             // Reset any previously-stored starting position.
             _validFirstPos = false;
-
-            // Show UI.
-            SetUIVisibility(true);
         }
 
         /// <summary>
@@ -250,10 +238,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStopRunning()
         {
-            Log.Debug("OnStopRunning");
-
-            // Hide UI.
-            SetUIVisibility(false);
+            Mod.Log.Debug("OnStopRunning");
 
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;
@@ -270,45 +255,11 @@ namespace LineTool
             // Activate this tool if it isn't already active.
             if (m_ToolSystem.activeTool != this)
             {
-                Log.Debug("enabling tool");
+                Mod.Log.Debug("enabling tool");
 
                 m_ToolSystem.selected = Entity.Null;
                 m_ToolSystem.activeTool = this;
             }
         }
-
-        /// <summary>
-        /// Loads the UI.
-        /// </summary>
-        private void LoadUI()
-        {
-            Log.Info("loading UI files");
-
-            // Ensure we can get the UI view before proceeding.
-            _uiView = GameManager.instance.userInterface.view.View;
-            if (_uiView != null)
-            {
-                // Register event callbacks.
-                _uiView.RegisterForEvent("AdjustSpacing", (Action<float>)SetSpacing);
-
-                // Load UI files.
-                UIFileUtils.ReadUIFiles(_uiView, "UI");
-
-                // Custom panel is hidden to start.
-                SetUIVisibility(false);
-            }
-        }
-
-        /// <summary>
-        /// Sets the tool UI's visibility.
-        /// </summary>
-        /// <param name="isVisible">Visibility status to set.</param>
-        private void SetUIVisibility(bool isVisible) => UIFileUtils.ExecuteScript(_uiView, $"setVisibility('line-tool-window', {(isVisible ? "true" : "false")});");
-
-        /// <summary>
-        /// Sets the current spacing.
-        /// </summary>
-        /// <param name="spacing">Spacing to set.</param>
-        private void SetSpacing(float spacing) => _spacing = spacing;
     }
 }

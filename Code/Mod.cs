@@ -4,6 +4,7 @@
 
 namespace LineTool
 {
+    using Colossal.Logging;
     using Game;
     using Game.Modding;
 
@@ -18,10 +19,23 @@ namespace LineTool
         public const string ModName = "Line Tool";
 
         /// <summary>
+        /// Gets the mod's active log.
+        /// </summary>
+        internal static ILog Log { get; private set; }
+
+        /// <summary>
         /// Called by the game when the mod is loaded.
         /// </summary>
         public void OnLoad()
         {
+            // Initialize logger.
+            Log = LogManager.GetLogger(ModName);
+
+#if DEBUG
+            Log.Info("setting logging level to Debug");
+            Log.effectivenessLevel = Level.Debug;
+#endif
+
             Log.Info("loading");
         }
 
@@ -32,8 +46,10 @@ namespace LineTool
         public void OnCreateWorld(UpdateSystem updateSystem)
         {
             Log.Info("starting OnCreateWorld");
-            Localization.LoadTranslations();
+
+            // Activate systems.
             updateSystem.UpdateAt<LineToolSystem>(SystemUpdatePhase.ToolUpdate);
+            updateSystem.UpdateAfter<LineToolUISystem>(SystemUpdatePhase.UIUpdate);
         }
 
         /// <summary>
