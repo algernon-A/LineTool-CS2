@@ -6,18 +6,17 @@ namespace LineTool
 {
     using System;
     using System.Collections.Generic;
+    using Colossal.Logging;
     using Game.Common;
     using Game.Input;
     using Game.Objects;
     using Game.Prefabs;
     using Game.Simulation;
     using Game.Tools;
-    using Unity.Collections;
     using Unity.Entities;
     using Unity.Jobs;
     using Unity.Mathematics;
     using UnityEngine.InputSystem;
-    using Random = Unity.Mathematics.Random;
     using Transform = Game.Objects.Transform;
     using Tree = Game.Objects.Tree;
 
@@ -29,12 +28,13 @@ namespace LineTool
         private ControlPoint m_RaycastPoint;
 
         // References.
+        private ILog _log;
         private TerrainSystem _terrainSystem;
         private TerrainHeightData _terrainHeightData;
         private ProxyAction _applyAction;
 
         // Prefab selection.
-        private EntityQuery _prefabs;
+        private ObjectPrefab _selectedPrefab;
 
         // Line position.
         private bool _validFirstPos = false;
@@ -94,15 +94,27 @@ namespace LineTool
         /// <summary>
         /// Gets the prefab selected by this tool.
         /// </summary>
-        /// <returns>Always <c>null</c>.</returns>
-        public override PrefabBase GetPrefab() => null;
+        /// <returns>Currently selected prefab, or <c>null</c> if none.</returns>
+        public override PrefabBase GetPrefab() => null;// _selectedPrefab;
 
         /// <summary>
         /// Sets the prefab selected by this tool.
         /// </summary>
         /// <param name="prefab">Prefab to set.</param>
-        /// <returns>Always <c>false</c>.</returns>
-        public override bool TrySetPrefab(PrefabBase prefab) => false;
+        /// <returns><c>true</c> if a prefab is currently selected, otherwise <c>false</c>.</returns>
+        public override bool TrySetPrefab(PrefabBase prefab)
+        {
+            // Check for eligible prefab.
+            if (prefab is ObjectPrefab objectPrefab)
+            {
+                // Eligible - set it.
+                _selectedPrefab = objectPrefab;
+                return true;
+            }
+
+            // If we got here this isn't an eligible prefab.
+            return false;
+        }
 
         /// <summary>
         /// Called every tool update.
@@ -114,6 +126,12 @@ namespace LineTool
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
+                // Don't do anything if no selected prefab.
+                if (_selectedPrefab is null)
+                {
+                    return inputDeps;
+                }
+
                 // Check for valid raycast.
                 GetRaycastResult(out m_RaycastPoint);
                 if (m_RaycastPoint.m_HitPosition.x != 0f || m_RaycastPoint.m_HitPosition.z != 0f)
@@ -128,58 +146,72 @@ namespace LineTool
                     // Record line start position and return if this is the first action.
                     if (!_validFirstPos)
                     {
-                        Mod.Log.Debug("setting first position");
+                        _log.Debug("setting first position at " + position.x + ":" + position.z);
                         _validFirstPos = true;
                         _firstPos = position;
                         return inputDeps;
                     }
 
+                    Unity.Mathematics.Random random = new Unity.Mathematics.Random((uint)DateTime.Now.Ticks);
+
                     // If we got here we've got two valid points - calculate distance between them.
                     float length = math.length(position - _firstPos);
 
-                    // Set up entity selection.
-                    NativeArray<Entity> nativeArray = _prefabs.ToEntityArray(Allocator.TempJob);
+                    _log.Debug("new position is " + position.x + ":" + position.z);
+                    _log.Debug("calculated length of " + length);
 
-                    // Choose random prefab.
-                    Mod.Log.Debug("selecting random prefab");
-                    Random random = new ((uint)DateTime.Now.Ticks);
-                    Entity entity = nativeArray[random.NextInt(nativeArray.Length)];
-
-                    try
+                    if (length < 0)
                     {
-                        // Step along length and place objects.
-                        float currentDistance = 0f;
-                        while (currentDistance < length)
+                        length = 0 - length;
+                    }
+
+                    // Get selected entity.
+                    Entity entity = m_PrefabSystem.GetEntity(_selectedPrefab);
+
+                    // Step along length and place objects.
+                    float currentDistance = 0f;
+                    while (currentDistance < length)
+                    {
+
+                        _log.Debug("placing object");
+
+
+                        // Calculate interpolated point.
+                        float3 thisPoint = math.lerp(_firstPos, position, currentDistance / length);
+
+                        // Get height for this point.
+                        thisPoint.y = TerrainUtils.SampleHeight(ref _terrainHeightData, thisPoint);
+
+                        // Create transform component.
+                        Transform transformData = new()
                         {
-                            // Calculate interpolated point.
-                            float3 thisPoint = math.lerp(_firstPos, position, currentDistance / length);
+                            m_Position = thisPoint,
+                            m_Rotation = quaternion.RotateY(random.NextFloat(MathF.PI * 2f)),
+                        };
 
-                            // Get height for this point.
-                            thisPoint.y = TerrainUtils.SampleHeight(ref _terrainHeightData, thisPoint);
+                        // Create new entity.
+                        ObjectData componentData = EntityManager.GetComponentData<ObjectData>(entity);
+                        EntityCommandBuffer commandBuffer = World.GetOrCreateSystemManaged<ToolOutputBarrier>().CreateCommandBuffer();
+                        Entity newEntity = commandBuffer.CreateEntity(componentData.m_Archetype);
 
-                            // Create components.
-                            Transform transformData = new () { m_Position = thisPoint };
+                        // Set prefab and transform.
+                        commandBuffer.SetComponent(newEntity, new PrefabRef(entity));
+                        commandBuffer.SetComponent(newEntity, transformData);
+
+                        // Set tree growth to adult if this is a tree.
+                        if (EntityManager.HasComponent<Tree>(entity))
+                        {
                             Tree treeData = new ()
                             {
                                 m_State = TreeState.Adult,
                                 m_Growth = 128,
                             };
 
-                            // Create new tree.
-                            ObjectData componentData = EntityManager.GetComponentData<ObjectData>(entity);
-                            Entity newEntity = EntityManager.CreateEntity(componentData.m_Archetype);
-                            EntityManager.SetComponentData(newEntity, new PrefabRef(entity));
-                            EntityManager.SetComponentData(newEntity, transformData);
-                            EntityManager.SetComponentData(newEntity, treeData);
-
-                            // Increment distance.
-                            currentDistance += _spacing;
+                            commandBuffer.SetComponent(newEntity, treeData);
                         }
-                    }
-                    finally
-                    {
-                        // Ensure disposal of native array.
-                        nativeArray.Dispose();
+
+                        // Increment distance.
+                        currentDistance += _spacing;
                     }
 
                     // Invalidate first position now that we've placed this line.
@@ -195,12 +227,10 @@ namespace LineTool
         /// </summary>
         protected override void OnCreate()
         {
-            Mod.Log.Info("OnCreate");
             base.OnCreate();
 
-            // Initialize tree prefab query.
-            _prefabs = GetEntityQuery(ComponentType.ReadOnly<TreeData>(), ComponentType.Exclude<PlaceholderObjectElement>());
-            RequireForUpdate(_prefabs);
+            // Set log.
+            _log = Mod.Log;
 
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
@@ -209,7 +239,7 @@ namespace LineTool
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
 
             // Enable hotkey.
-            InputAction hotKey = new ("LineTool");
+            InputAction hotKey = new("LineTool");
             hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
             hotKey.performed += EnableTool;
             hotKey.Enable();
@@ -220,7 +250,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStartRunning()
         {
-            Mod.Log.Debug("OnStartRunning");
+            _log.Debug("OnStartRunning");
             base.OnStartRunning();
 
             // Ensure apply action is enabled.
@@ -231,6 +261,9 @@ namespace LineTool
 
             // Reset any previously-stored starting position.
             _validFirstPos = false;
+
+            // Clear any applications.
+            applyMode = ApplyMode.Clear;
         }
 
         /// <summary>
@@ -238,7 +271,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStopRunning()
         {
-            Mod.Log.Debug("OnStopRunning");
+            _log.Debug("OnStopRunning");
 
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;
@@ -255,7 +288,13 @@ namespace LineTool
             // Activate this tool if it isn't already active.
             if (m_ToolSystem.activeTool != this)
             {
-                Mod.Log.Debug("enabling tool");
+                _log.Debug("enabling tool");
+
+                if (World.GetOrCreateSystemManaged<ObjectToolSystem>().prefab is ObjectPrefab prefab)
+                {
+                    _log.Info("selected prefab was found: " + prefab.name);
+                    _selectedPrefab = prefab;
+                }
 
                 m_ToolSystem.selected = Entity.Null;
                 m_ToolSystem.activeTool = this;
