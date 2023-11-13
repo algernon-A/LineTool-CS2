@@ -32,6 +32,7 @@ namespace LineTool
         private TerrainSystem _terrainSystem;
         private TerrainHeightData _terrainHeightData;
         private ProxyAction _applyAction;
+        private ProxyAction _cancelAction;
 
         // Prefab selection.
         private ObjectPrefab _selectedPrefab;
@@ -123,6 +124,13 @@ namespace LineTool
         /// <returns>Job handle.</returns>
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            // Check for and perform any cancellation.
+            if (_cancelAction.WasPressedThisFrame())
+            {
+                _validFirstPos = false;
+                return inputDeps;
+            }
+
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
@@ -237,6 +245,7 @@ namespace LineTool
 
             // Set actions.
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
+            _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
 
             // Enable hotkey.
             InputAction hotKey = new("LineTool");
@@ -255,6 +264,7 @@ namespace LineTool
 
             // Ensure apply action is enabled.
             _applyAction.shouldBeEnabled = true;
+            _cancelAction.shouldBeEnabled = true;
 
             // Clear any previous raycast result.
             m_RaycastPoint = default;
@@ -275,6 +285,7 @@ namespace LineTool
 
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;
+            _cancelAction.shouldBeEnabled = false;
 
             base.OnStopRunning();
         }
