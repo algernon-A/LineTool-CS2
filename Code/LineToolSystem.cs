@@ -23,9 +23,10 @@ namespace LineTool
     /// <summary>
     /// Line tool system.
     /// </summary>
-    public sealed class LineToolSystem : ToolBaseSystem
+    public sealed class LineToolSystem : ObjectToolBaseSystem
     {
-        private ControlPoint m_RaycastPoint;
+        private ControlPoint _raycastPoint;
+        private Entity _cursorEntity = Entity.Null;
 
         // References.
         private ILog _log;
@@ -96,7 +97,7 @@ namespace LineTool
         /// Gets the prefab selected by this tool.
         /// </summary>
         /// <returns>Currently selected prefab, or <c>null</c> if none.</returns>
-        public override PrefabBase GetPrefab() => null;// _selectedPrefab;
+        public override PrefabBase GetPrefab() => _selectedPrefab;
 
         /// <summary>
         /// Sets the prefab selected by this tool.
@@ -141,11 +142,11 @@ namespace LineTool
                 }
 
                 // Check for valid raycast.
-                GetRaycastResult(out m_RaycastPoint);
-                if (m_RaycastPoint.m_HitPosition.x != 0f || m_RaycastPoint.m_HitPosition.z != 0f)
+                GetRaycastResult(out _raycastPoint);
+                if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
                 {
                     // Raycast is valid - get world position.
-                    float3 position = m_RaycastPoint.m_HitPosition;
+                    float3 position = _raycastPoint.m_HitPosition;
 
                     // Calculate terrain height.
                     _terrainHeightData = _terrainSystem.GetHeightData();
@@ -180,10 +181,6 @@ namespace LineTool
                     float currentDistance = 0f;
                     while (currentDistance < length)
                     {
-
-                        _log.Debug("placing object");
-
-
                         // Calculate interpolated point.
                         float3 thisPoint = math.lerp(_firstPos, position, currentDistance / length);
 
@@ -191,7 +188,7 @@ namespace LineTool
                         thisPoint.y = TerrainUtils.SampleHeight(ref _terrainHeightData, thisPoint);
 
                         // Create transform component.
-                        Transform transformData = new()
+                        Transform transformData = new ()
                         {
                             m_Position = thisPoint,
                             m_Rotation = quaternion.RotateY(random.NextFloat(MathF.PI * 2f)),
@@ -226,6 +223,41 @@ namespace LineTool
                     _validFirstPos = false;
                 }
             }
+            else
+            {
+                // Create preview entity if none yet exists and we have a selected preview.
+                if (_cursorEntity == Entity.Null && _selectedPrefab != null)
+                {
+                    Entity original = m_PrefabSystem.GetEntity(_selectedPrefab);
+                    if (original != Entity.Null)
+                    {
+                        // Set preview prefab.
+                        ObjectData componentData = EntityManager.GetComponentData<ObjectData>(original);
+                        _cursorEntity = EntityManager.CreateEntity(componentData.m_Archetype);
+                        EntityManager.SetComponentData(_cursorEntity, new PrefabRef(original));
+
+                        // Highlight preview.
+                        EntityManager.AddComponent<Highlighted>(_cursorEntity);
+                    }
+                }
+
+                // Update preview entity position.
+                if (_cursorEntity != Entity.Null)
+                {
+                    GetRaycastResult(out _raycastPoint);
+                    if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
+                    {
+                        // Raycast is valid - get world position.
+                        float3 position = _raycastPoint.m_HitPosition;
+                        _terrainHeightData = _terrainSystem.GetHeightData();
+                        position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
+
+                        // Apply updated position.
+                        EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                        EntityManager.AddComponent<Updated>(_cursorEntity);
+                    }
+                }
+            }
 
             return inputDeps;
         }
@@ -248,7 +280,7 @@ namespace LineTool
             _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
 
             // Enable hotkey.
-            InputAction hotKey = new("LineTool");
+            InputAction hotKey = new ("LineTool");
             hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
             hotKey.performed += EnableTool;
             hotKey.Enable();
@@ -267,7 +299,7 @@ namespace LineTool
             _cancelAction.shouldBeEnabled = true;
 
             // Clear any previous raycast result.
-            m_RaycastPoint = default;
+            _raycastPoint = default;
 
             // Reset any previously-stored starting position.
             _validFirstPos = false;
@@ -286,6 +318,12 @@ namespace LineTool
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;
             _cancelAction.shouldBeEnabled = false;
+
+            if (_cursorEntity != Entity.Null)
+            {
+                EntityManager.AddComponent<Deleted>(_cursorEntity);
+                _cursorEntity = Entity.Null;
+            }
 
             base.OnStopRunning();
         }
