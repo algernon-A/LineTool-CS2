@@ -34,9 +34,11 @@ namespace LineTool
         private TerrainHeightData _terrainHeightData;
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
+        private ToolOutputBarrier _barrier;
 
         // Prefab selection.
         private ObjectPrefab _selectedPrefab;
+        private Entity _selectedEntity;
 
         // Line position.
         private bool _validFirstPos = false;
@@ -71,6 +73,28 @@ namespace LineTool
         /// Gets or sets the line spacing.
         /// </summary>
         internal float Spacing { get => _spacing; set => _spacing = value; }
+
+        /// <summary>
+        /// Sets the currently selected preab.
+        /// </summary>
+        private PrefabBase SelectedPrefab
+        {
+            set
+            {
+                _selectedPrefab = value as ObjectPrefab;
+
+                // Update selected entity;
+                if (_selectedPrefab is null)
+                {
+                    _selectedEntity = Entity.Null;
+                }
+                else
+                {
+                    // Get selected entity.
+                    _selectedEntity = m_PrefabSystem.GetEntity(_selectedPrefab);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the GUI modes for the tool.
@@ -110,7 +134,7 @@ namespace LineTool
             if (prefab is ObjectPrefab objectPrefab)
             {
                 // Eligible - set it.
-                _selectedPrefab = objectPrefab;
+                SelectedPrefab = objectPrefab;
                 return true;
             }
 
@@ -132,6 +156,9 @@ namespace LineTool
                 return inputDeps;
             }
 
+            // Create command buffer.
+            EntityCommandBuffer commandBuffer = _barrier.CreateCommandBuffer();
+
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
@@ -152,30 +179,24 @@ namespace LineTool
                     _terrainHeightData = _terrainSystem.GetHeightData();
                     position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
 
+
                     // Record line start position and return if this is the first action.
                     if (!_validFirstPos)
                     {
-                        _log.Debug("setting first position at " + position.x + ":" + position.z);
                         _validFirstPos = true;
                         _firstPos = position;
                         return inputDeps;
                     }
 
-                    Unity.Mathematics.Random random = new Unity.Mathematics.Random((uint)DateTime.Now.Ticks);
+                    Unity.Mathematics.Random random = new ((uint)DateTime.Now.Ticks);
 
                     // If we got here we've got two valid points - calculate distance between them.
                     float length = math.length(position - _firstPos);
-
-                    _log.Debug("new position is " + position.x + ":" + position.z);
-                    _log.Debug("calculated length of " + length);
 
                     if (length < 0)
                     {
                         length = 0 - length;
                     }
-
-                    // Get selected entity.
-                    Entity entity = m_PrefabSystem.GetEntity(_selectedPrefab);
 
                     // Step along length and place objects.
                     float currentDistance = 0f;
@@ -195,25 +216,10 @@ namespace LineTool
                         };
 
                         // Create new entity.
-                        ObjectData componentData = EntityManager.GetComponentData<ObjectData>(entity);
-                        EntityCommandBuffer commandBuffer = World.GetOrCreateSystemManaged<ToolOutputBarrier>().CreateCommandBuffer();
-                        Entity newEntity = commandBuffer.CreateEntity(componentData.m_Archetype);
+                        Entity newEntity = CreateEntity(commandBuffer);
 
-                        // Set prefab and transform.
-                        commandBuffer.SetComponent(newEntity, new PrefabRef(entity));
+                        // Set entity location.
                         commandBuffer.SetComponent(newEntity, transformData);
-
-                        // Set tree growth to adult if this is a tree.
-                        if (EntityManager.HasComponent<Tree>(entity))
-                        {
-                            Tree treeData = new ()
-                            {
-                                m_State = TreeState.Adult,
-                                m_Growth = 128,
-                            };
-
-                            commandBuffer.SetComponent(newEntity, treeData);
-                        }
 
                         // Increment distance.
                         currentDistance += _spacing;
@@ -223,39 +229,37 @@ namespace LineTool
                     _validFirstPos = false;
                 }
             }
-            else
+
+            // Otherwise, update cursor entity position.
+            else if (!(_selectedPrefab is null))
             {
-                // Create preview entity if none yet exists and we have a selected preview.
-                if (_cursorEntity == Entity.Null && _selectedPrefab != null)
+                GetRaycastResult(out _raycastPoint);
+                if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
                 {
-                    Entity original = m_PrefabSystem.GetEntity(_selectedPrefab);
-                    if (original != Entity.Null)
+                    // Raycast is valid - get world position.
+                    float3 position = _raycastPoint.m_HitPosition;
+                    _terrainHeightData = _terrainSystem.GetHeightData();
+                    position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
+
+                    // Apply updated position.
+                    Transform cursorPos = new()
                     {
-                        // Set preview prefab.
-                        ObjectData componentData = EntityManager.GetComponentData<ObjectData>(original);
-                        _cursorEntity = EntityManager.CreateEntity(componentData.m_Archetype);
-                        EntityManager.SetComponentData(_cursorEntity, new PrefabRef(original));
+                        m_Position = position,
+                        m_Rotation = quaternion.identity,
+                    };
 
-                        // Highlight preview.
-                        EntityManager.AddComponent<Highlighted>(_cursorEntity);
-                    }
-                }
-
-                // Update preview entity position.
-                if (_cursorEntity != Entity.Null)
-                {
-                    GetRaycastResult(out _raycastPoint);
-                    if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
+                    // Create cursor entity if none yet exists.
+                    if (_cursorEntity == Entity.Null)
                     {
-                        // Raycast is valid - get world position.
-                        float3 position = _raycastPoint.m_HitPosition;
-                        _terrainHeightData = _terrainSystem.GetHeightData();
-                        position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
+                        _cursorEntity = CreateEntity(commandBuffer);
 
-                        // Apply updated position.
-                        EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
-                        EntityManager.AddComponent<Updated>(_cursorEntity);
+                        // Highlight cursor entity.
+                        commandBuffer.AddComponent<Highlighted>(_cursorEntity);
                     }
+
+                    // Update position.
+                    commandBuffer.SetComponent(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                    commandBuffer.AddComponent<Updated>(_cursorEntity);
                 }
             }
 
@@ -274,6 +278,7 @@ namespace LineTool
 
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
+            _barrier = World.GetOrCreateSystemManaged<ToolOutputBarrier>();
 
             // Set actions.
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
@@ -319,6 +324,7 @@ namespace LineTool
             _applyAction.shouldBeEnabled = false;
             _cancelAction.shouldBeEnabled = false;
 
+            // Cancel cursor entity.
             if (_cursorEntity != Entity.Null)
             {
                 EntityManager.AddComponent<Deleted>(_cursorEntity);
@@ -342,12 +348,41 @@ namespace LineTool
                 if (World.GetOrCreateSystemManaged<ObjectToolSystem>().prefab is ObjectPrefab prefab)
                 {
                     _log.Info("selected prefab was found: " + prefab.name);
-                    _selectedPrefab = prefab;
+                    SelectedPrefab = prefab;
                 }
 
                 m_ToolSystem.selected = Entity.Null;
                 m_ToolSystem.activeTool = this;
             }
+        }
+
+        /// <summary>
+        /// Creates a new copy of the currently selected entity.
+        /// </summary>
+        /// <param name="commandBuffer">Command buffer to use.</param>
+        /// <returns>New entity.</returns>
+        private Entity CreateEntity(EntityCommandBuffer commandBuffer)
+        {
+            // Create new entity.
+            ObjectData componentData = EntityManager.GetComponentData<ObjectData>(_selectedEntity);
+            Entity newEntity = EntityManager.CreateEntity(componentData.m_Archetype);
+
+            // Set prefab and transform.
+            commandBuffer.SetComponent(newEntity, new PrefabRef(_selectedEntity));
+
+            // Set tree growth to adult if this is a tree.
+            if (EntityManager.HasComponent<Tree>(newEntity))
+            {
+                Tree treeData = new ()
+                {
+                    m_State = TreeState.Adult,
+                    m_Growth = 128,
+                };
+
+                commandBuffer.SetComponent(newEntity, treeData);
+            }
+
+            return newEntity;
         }
     }
 }
