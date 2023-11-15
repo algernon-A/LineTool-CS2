@@ -15,7 +15,7 @@ namespace LineTool
     /// <summary>
     /// A tool UI system for LineTool.
     /// </summary>
-    public sealed class LineToolUISystem : UISystemBase
+    public sealed partial class LineToolUISystem : UISystemBase
     {
         // Cached references.
         private View _uiView;

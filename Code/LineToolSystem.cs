@@ -4,9 +4,7 @@
 
 namespace LineTool
 {
-    using System;
     using System.Collections.Generic;
-    using Colossal.Entities;
     using Colossal.Logging;
     using Game.Common;
     using Game.Input;
@@ -24,7 +22,7 @@ namespace LineTool
     /// <summary>
     /// Line tool system.
     /// </summary>
-    public sealed class LineToolSystem : ObjectToolBaseSystem
+    public sealed partial class LineToolSystem : ObjectToolBaseSystem
     {
         // Previewing.
         private readonly List<Entity> _previewEntities = new ();

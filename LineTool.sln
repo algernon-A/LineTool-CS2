@@ -7,14 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LineTool", "LineTool.csproj
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Steam|Any CPU = Steam|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
+		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Steam|Any CPU.Build.0 = Steam|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
