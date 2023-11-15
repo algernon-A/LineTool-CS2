@@ -34,11 +34,11 @@ namespace LineTool
         private TerrainHeightData _terrainHeightData;
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
-        private ToolOutputBarrier _barrier;
 
         // Prefab selection.
         private ObjectPrefab _selectedPrefab;
-        private Entity _selectedEntity;
+        private Entity _selectedEntity = Entity.Null;
+        private Entity _startMarker = Entity.Null;
 
         // Line position.
         private bool _validFirstPos = false;
@@ -156,9 +156,6 @@ namespace LineTool
                 return inputDeps;
             }
 
-            // Create command buffer.
-            EntityCommandBuffer commandBuffer = _barrier.CreateCommandBuffer();
-
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
@@ -179,13 +176,28 @@ namespace LineTool
                     _terrainHeightData = _terrainSystem.GetHeightData();
                     position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
 
-
                     // Record line start position and return if this is the first action.
                     if (!_validFirstPos)
                     {
                         _validFirstPos = true;
                         _firstPos = position;
+
+                        // Create start marker.
+                        if (_startMarker == Entity.Null)
+                        {
+                            _startMarker = CreateEntity();
+                            EntityManager.SetComponentData(_startMarker, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                            EntityManager.AddComponent<Highlighted>(_startMarker);
+                        }
+
                         return inputDeps;
+                    }
+
+                    // Remove start marker.
+                    if (_startMarker != Entity.Null)
+                    {
+                        EntityManager.AddComponent<Deleted>(_startMarker);
+                        _startMarker = Entity.Null;
                     }
 
                     Unity.Mathematics.Random random = new ((uint)DateTime.Now.Ticks);
@@ -216,10 +228,10 @@ namespace LineTool
                         };
 
                         // Create new entity.
-                        Entity newEntity = CreateEntity(commandBuffer);
+                        Entity newEntity = CreateEntity();
 
                         // Set entity location.
-                        commandBuffer.SetComponent(newEntity, transformData);
+                        EntityManager.SetComponentData(newEntity, transformData);
 
                         // Increment distance.
                         currentDistance += _spacing;
@@ -231,7 +243,7 @@ namespace LineTool
             }
 
             // Otherwise, update cursor entity position.
-            else if (!(_selectedPrefab is null))
+            else if (_selectedPrefab is not null)
             {
                 GetRaycastResult(out _raycastPoint);
                 if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
@@ -241,25 +253,18 @@ namespace LineTool
                     _terrainHeightData = _terrainSystem.GetHeightData();
                     position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
 
-                    // Apply updated position.
-                    Transform cursorPos = new()
-                    {
-                        m_Position = position,
-                        m_Rotation = quaternion.identity,
-                    };
-
                     // Create cursor entity if none yet exists.
                     if (_cursorEntity == Entity.Null)
                     {
-                        _cursorEntity = CreateEntity(commandBuffer);
+                        _cursorEntity = CreateEntity();
 
                         // Highlight cursor entity.
-                        commandBuffer.AddComponent<Highlighted>(_cursorEntity);
+                        EntityManager.AddComponent<Highlighted>(_cursorEntity);
                     }
 
                     // Update position.
-                    commandBuffer.SetComponent(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
-                    commandBuffer.AddComponent<Updated>(_cursorEntity);
+                    EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                    EntityManager.AddComponent<Updated>(_cursorEntity);
                 }
             }
 
@@ -278,7 +283,6 @@ namespace LineTool
 
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
-            _barrier = World.GetOrCreateSystemManaged<ToolOutputBarrier>();
 
             // Set actions.
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
@@ -331,6 +335,13 @@ namespace LineTool
                 _cursorEntity = Entity.Null;
             }
 
+            // Cancel start marker.
+            if (_startMarker != Entity.Null)
+            {
+                EntityManager.AddComponent<Deleted>(_startMarker);
+                _startMarker = Entity.Null;
+            }
+
             base.OnStopRunning();
         }
 
@@ -359,16 +370,15 @@ namespace LineTool
         /// <summary>
         /// Creates a new copy of the currently selected entity.
         /// </summary>
-        /// <param name="commandBuffer">Command buffer to use.</param>
         /// <returns>New entity.</returns>
-        private Entity CreateEntity(EntityCommandBuffer commandBuffer)
+        private Entity CreateEntity()
         {
             // Create new entity.
             ObjectData componentData = EntityManager.GetComponentData<ObjectData>(_selectedEntity);
             Entity newEntity = EntityManager.CreateEntity(componentData.m_Archetype);
 
             // Set prefab and transform.
-            commandBuffer.SetComponent(newEntity, new PrefabRef(_selectedEntity));
+            EntityManager.SetComponentData(newEntity, new PrefabRef(_selectedEntity));
 
             // Set tree growth to adult if this is a tree.
             if (EntityManager.HasComponent<Tree>(newEntity))
@@ -379,7 +389,7 @@ namespace LineTool
                     m_Growth = 128,
                 };
 
-                commandBuffer.SetComponent(newEntity, treeData);
+                EntityManager.SetComponentData(newEntity, treeData);
             }
 
             return newEntity;
