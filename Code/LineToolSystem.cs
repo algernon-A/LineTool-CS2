@@ -6,6 +6,7 @@ namespace LineTool
 {
     using System;
     using System.Collections.Generic;
+    using Colossal.Entities;
     using Colossal.Logging;
     using Game.Common;
     using Game.Input;
@@ -25,8 +26,21 @@ namespace LineTool
     /// </summary>
     public sealed class LineToolSystem : ObjectToolBaseSystem
     {
+        // Previewing.
+        private readonly List<Entity> _previewEntities = new ();
+
+        // Cursor.
         private ControlPoint _raycastPoint;
         private Entity _cursorEntity = Entity.Null;
+        private float2 _previousPos;
+
+        // Prefab selection.
+        private ObjectPrefab _selectedPrefab;
+        private Entity _selectedEntity = Entity.Null;
+
+        // Line position.
+        private bool _validFirstPos = false;
+        private float3 _firstPos;
 
         // References.
         private ILog _log;
@@ -34,15 +48,6 @@ namespace LineTool
         private TerrainHeightData _terrainHeightData;
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
-
-        // Prefab selection.
-        private ObjectPrefab _selectedPrefab;
-        private Entity _selectedEntity = Entity.Null;
-        private Entity _startMarker = Entity.Null;
-
-        // Line position.
-        private bool _validFirstPos = false;
-        private float3 _firstPos;
 
         // Tool settings.
         private float _spacing = 20f;
@@ -120,8 +125,8 @@ namespace LineTool
         /// <summary>
         /// Gets the prefab selected by this tool.
         /// </summary>
-        /// <returns>Currently selected prefab, or <c>null</c> if none.</returns>
-        public override PrefabBase GetPrefab() => _selectedPrefab;
+        /// <returns>C<c>null</c>.</returns>
+        public override PrefabBase GetPrefab() => null; // TODO:_selectedPrefab;
 
         /// <summary>
         /// Sets the prefab selected by this tool.
@@ -153,119 +158,134 @@ namespace LineTool
             if (_cancelAction.WasPressedThisFrame())
             {
                 _validFirstPos = false;
+
+                // Revert previewing.
+                foreach (Entity previewEntity in _previewEntities)
+                {
+                    EntityManager.AddComponent<Deleted>(previewEntity);
+                }
+
+                _previewEntities.Clear();
+
                 return inputDeps;
             }
+
+            // Don't do anything if no selected prefab.
+            if (_selectedPrefab is null)
+            {
+                return inputDeps;
+            }
+
+            // Check for valid raycast.
+            GetRaycastResult(out _raycastPoint);
+            if (_raycastPoint.m_HitPosition.x == 0f && _raycastPoint.m_HitPosition.z == 0f)
+            {
+                // Invalid raycast.
+                return inputDeps;
+            }
+
+            // Raycast is valid - get world position.
+            float3 position = _raycastPoint.m_HitPosition;
+
+            // Calculate terrain height.
+            _terrainHeightData = _terrainSystem.GetHeightData();
+            position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
 
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
-                // Don't do anything if no selected prefab.
-                if (_selectedPrefab is null)
+                _validFirstPos = true;
+                _firstPos = position;
+
+                // Remove highlighting.
+                foreach (Entity previewEntity in _previewEntities)
                 {
-                    return inputDeps;
+                    EntityManager.RemoveComponent<Highlighted>(previewEntity);
+                    EntityManager.AddComponent<Updated>(previewEntity);
                 }
 
-                // Check for valid raycast.
-                GetRaycastResult(out _raycastPoint);
-                if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
-                {
-                    // Raycast is valid - get world position.
-                    float3 position = _raycastPoint.m_HitPosition;
+                _previewEntities.Clear();
 
-                    // Calculate terrain height.
-                    _terrainHeightData = _terrainSystem.GetHeightData();
-                    position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
-
-                    // Record line start position and return if this is the first action.
-                    if (!_validFirstPos)
-                    {
-                        _validFirstPos = true;
-                        _firstPos = position;
-
-                        // Create start marker.
-                        if (_startMarker == Entity.Null)
-                        {
-                            _startMarker = CreateEntity();
-                            EntityManager.SetComponentData(_startMarker, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
-                            EntityManager.AddComponent<Highlighted>(_startMarker);
-                        }
-
-                        return inputDeps;
-                    }
-
-                    // Remove start marker.
-                    if (_startMarker != Entity.Null)
-                    {
-                        EntityManager.AddComponent<Deleted>(_startMarker);
-                        _startMarker = Entity.Null;
-                    }
-
-                    Unity.Mathematics.Random random = new ((uint)DateTime.Now.Ticks);
-
-                    // If we got here we've got two valid points - calculate distance between them.
-                    float length = math.length(position - _firstPos);
-
-                    if (length < 0)
-                    {
-                        length = 0 - length;
-                    }
-
-                    // Step along length and place objects.
-                    float currentDistance = 0f;
-                    while (currentDistance < length)
-                    {
-                        // Calculate interpolated point.
-                        float3 thisPoint = math.lerp(_firstPos, position, currentDistance / length);
-
-                        // Get height for this point.
-                        thisPoint.y = TerrainUtils.SampleHeight(ref _terrainHeightData, thisPoint);
-
-                        // Create transform component.
-                        Transform transformData = new ()
-                        {
-                            m_Position = thisPoint,
-                            m_Rotation = quaternion.RotateY(random.NextFloat(MathF.PI * 2f)),
-                        };
-
-                        // Create new entity.
-                        Entity newEntity = CreateEntity();
-
-                        // Set entity location.
-                        EntityManager.SetComponentData(newEntity, transformData);
-
-                        // Increment distance.
-                        currentDistance += _spacing;
-                    }
-
-                    // Invalidate first position now that we've placed this line.
-                    _validFirstPos = false;
-                }
+                return inputDeps;
             }
 
-            // Otherwise, update cursor entity position.
-            else if (_selectedPrefab is not null)
+            // Don't do anything further if we haven't got an initial position set.
+            if (!_validFirstPos)
             {
-                GetRaycastResult(out _raycastPoint);
-                if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
+                return inputDeps;
+            }
+
+            // Check for position change.
+            if (position.x == _previousPos.x && position.z == _previousPos.y)
+            {
+                // No position change.
+                return inputDeps;
+            }
+
+            // Update stored position.
+            _previousPos.x = position.x;
+            _previousPos.y = position.z;
+
+            // If we got here we've got two valid points - calculate distance between them.
+            float length = math.length(position - _firstPos);
+
+            if (length < 0)
+            {
+                length = 0 - length;
+            }
+
+            // Step along length and place objects.
+            int count = 0;
+            float currentDistance = 0f;
+            while (currentDistance < length)
+            {
+                // Calculate interpolated point.
+                float3 thisPoint = math.lerp(_firstPos, position, currentDistance / length);
+
+                // Get height for this point.
+                thisPoint.y = TerrainUtils.SampleHeight(ref _terrainHeightData, thisPoint);
+
+                // Create transform component.
+                Transform transformData = new ()
                 {
-                    // Raycast is valid - get world position.
-                    float3 position = _raycastPoint.m_HitPosition;
-                    _terrainHeightData = _terrainSystem.GetHeightData();
-                    position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
+                    m_Position = thisPoint,
+                    m_Rotation = quaternion.identity,
+                };
 
-                    // Create cursor entity if none yet exists.
-                    if (_cursorEntity == Entity.Null)
-                    {
-                        _cursorEntity = CreateEntity();
+                // Create new entity if required.
+                if (count >= _previewEntities.Count)
+                {
+                    // Create new entity.
+                    Entity newEntity = CreateEntity();
 
-                        // Highlight cursor entity.
-                        EntityManager.AddComponent<Highlighted>(_cursorEntity);
-                    }
-
-                    // Update position.
-                    EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
-                    EntityManager.AddComponent<Updated>(_cursorEntity);
+                    // Set entity location.
+                    EntityManager.SetComponentData(newEntity, transformData);
+                    EntityManager.AddComponent<Highlighted>(newEntity);
+                    _previewEntities.Add(newEntity);
                 }
+                else
+                {
+                    // Otherwise, use existing entity.
+                    EntityManager.SetComponentData(_previewEntities[count], transformData);
+                    EntityManager.AddComponent<Updated>(_previewEntities[count]);
+                }
+
+                // Increment distance.
+                count++;
+                currentDistance += _spacing;
+            }
+
+            // Clear any excess entities.
+            if (count < _previewEntities.Count)
+            {
+                int startCount = count;
+                while (count < _previewEntities.Count)
+                {
+                    EntityManager.AddComponent<Deleted>(_previewEntities[count++]);
+                }
+
+                // Remove excess range from list
+                _previewEntities.RemoveRange(startCount, count - startCount);
             }
 
             return inputDeps;
@@ -335,11 +355,10 @@ namespace LineTool
                 _cursorEntity = Entity.Null;
             }
 
-            // Cancel start marker.
-            if (_startMarker != Entity.Null)
+            // Revert previewing.
+            foreach (Entity previewEntity in _previewEntities)
             {
-                EntityManager.AddComponent<Deleted>(_startMarker);
-                _startMarker = Entity.Null;
+                EntityManager.AddComponent<Deleted>(previewEntity);
             }
 
             base.OnStopRunning();
