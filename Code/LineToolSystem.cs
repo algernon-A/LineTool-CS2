@@ -390,16 +390,14 @@ namespace LineTool
             // Activate this tool if it isn't already active.
             if (m_ToolSystem.activeTool != this)
             {
-                _log.Debug("enabling tool");
-
-                if (World.GetOrCreateSystemManaged<ObjectToolSystem>().prefab is ObjectPrefab prefab)
+                // Check for valid prefab selection before continuing.
+                SelectedPrefab = World.GetOrCreateSystemManaged<ObjectToolSystem>().prefab;
+                if (_selectedPrefab != null)
                 {
-                    _log.Info("selected prefab was found: " + prefab.name);
-                    SelectedPrefab = prefab;
+                    // Valid prefab selected - switch to this tool.
+                    m_ToolSystem.selected = Entity.Null;
+                    m_ToolSystem.activeTool = this;
                 }
-
-                m_ToolSystem.selected = Entity.Null;
-                m_ToolSystem.activeTool = this;
             }
         }
 
