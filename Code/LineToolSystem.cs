@@ -207,10 +207,29 @@ namespace LineTool
                 return inputDeps;
             }
 
-            // Don't do anything further if we haven't got an initial position set.
+            // Update cursor entity if we haven't got an initial position set.
             if (!_validFirstPos)
             {
+                // Create cursor entity if none yet exists.
+                if (_cursorEntity == Entity.Null)
+                {
+                    _cursorEntity = CreateEntity();
+
+                    // Highlight cursor entity.
+                    EntityManager.AddComponent<Highlighted>(_cursorEntity);
+                }
+
+                // Update cursor entity position.
+                EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                EntityManager.AddComponent<Updated>(_cursorEntity);
+
                 return inputDeps;
+            }
+            else if (_cursorEntity != Entity.Null)
+            {
+                // Cancel cursor entity.
+                EntityManager.AddComponent<Deleted>(_cursorEntity);
+                _cursorEntity = Entity.Null;
             }
 
             // Check for position change.
