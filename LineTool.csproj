@@ -29,4 +29,16 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
+	
+	<ItemGroup>
+		<_UI Include="$(ProjectDir)/UI/*.css" />
+		<_UI Include="$(ProjectDir)/UI/*.html" />
+		<_UI Include="$(ProjectDir)/UI/*.js" />
+	</ItemGroup>
+	<Target Name="DeployToModDirectory" AfterTargets="Build">
+		<PropertyGroup>
+			<DeployDir>$(USERPROFILE)/AppData/LocalLow/Colossal Order/Cities Skylines II/Mods/WorkInProgress/$(SolutionName)</DeployDir>
+		</PropertyGroup>
+		<Copy SourceFiles="@(_UI)" DestinationFolder="$(DeployDir)/UI" />
+	</Target>
 </Project>
