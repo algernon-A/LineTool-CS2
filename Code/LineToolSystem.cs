@@ -5,6 +5,7 @@
 namespace LineTool
 {
     using System.Collections.Generic;
+    using Colossal.Entities;
     using Colossal.Logging;
     using Game.Common;
     using Game.Input;
@@ -35,6 +36,7 @@ namespace LineTool
         // Prefab selection.
         private ObjectPrefab _selectedPrefab;
         private Entity _selectedEntity = Entity.Null;
+        private int _originalXP;
 
         // Line position.
         private bool _validFirstPos = false;
@@ -95,6 +97,18 @@ namespace LineTool
                 {
                     // Get selected entity.
                     _selectedEntity = m_PrefabSystem.GetEntity(_selectedPrefab);
+
+                    // Reduce any XP to zero while we're using the tool.
+                    if (EntityManager.TryGetComponent(_selectedEntity, out PlaceableObjectData placeableData))
+                    {
+                        _originalXP = placeableData.m_XPReward;
+                        placeableData.m_XPReward = 0;
+                        EntityManager.SetComponentData(_selectedEntity, placeableData);
+                    }
+                    else
+                    {
+                        _originalXP = 0;
+                    }
                 }
             }
         }
@@ -376,6 +390,14 @@ namespace LineTool
             foreach (Entity previewEntity in _previewEntities)
             {
                 EntityManager.AddComponent<Deleted>(previewEntity);
+            }
+
+            // Restore original prefab XP, if we changed it.
+            if (_originalXP != 0 && EntityManager.TryGetComponent(_selectedEntity, out PlaceableObjectData placeableData))
+            {
+                placeableData.m_XPReward = _originalXP;
+                EntityManager.SetComponentData(_selectedEntity, placeableData);
+                _originalXP = 0;
             }
 
             base.OnStopRunning();
