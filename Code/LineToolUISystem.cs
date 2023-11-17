@@ -7,6 +7,7 @@ namespace LineTool
     using System;
     using System.IO;
     using cohtml.Net;
+    using Colossal.Logging;
     using Game.SceneFlow;
     using Game.Tools;
     using Game.UI;
@@ -21,6 +22,7 @@ namespace LineTool
         private View _uiView;
         private ToolSystem _toolSystem;
         private LineToolSystem _lineToolSystem;
+        private ILog _log;
 
         // Internal status.
         private bool _toolIsActive = false;
@@ -37,17 +39,20 @@ namespace LineTool
         {
             base.OnCreate();
 
+            // Set log.
+            _log = Mod.Log;
+
             // Set references.
             _uiView = GameManager.instance.userInterface.view.View;
             _toolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
             _lineToolSystem = World.GetOrCreateSystemManaged<LineToolSystem>();
 
             // Read injection data.
-            _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"item_bZY\"; div.id = \"line-tool-spacing\"; document.getElementsByClassName(\"tool-options-panel_Se6\")[0].appendChild(div);");
+            _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-spacing\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
 
-            log.Debug(_injectedHTML);
-            log.Debug(_injectedJS);
+            _log.Debug(_injectedHTML);
+            _log.Debug(_injectedJS);
 
             // Set initial spacing variable in UI.
             UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing};");
@@ -55,6 +60,8 @@ namespace LineTool
             // Register event callbacks.
             _uiView.RegisterForEvent("ToolOptionsReady", (Action)ToolOptionsReady);
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);
+            _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
+            _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
         }
 
         /// <summary>
@@ -70,7 +77,7 @@ namespace LineTool
                 if (!_toolIsActive)
                 {
                     // Tool is now active but previously wasn't; attempt to get game's tool options menu.
-                    UIFileUtils.ExecuteScript(_uiView, "var toolOptions = document.getElementsByClassName(\"tool-options-panel_Se6\"); if (toolOptions && toolOptions.length > 0) { engine.trigger('ToolOptionsReady', toolOptions[0].innerHTML);}");
+                    UIFileUtils.ExecuteScript(_uiView, "var toolOptions = document.getElementsByClassName(\"tool-side-column_l9i\"); if (toolOptions && toolOptions.length > 0) { engine.trigger('ToolOptionsReady', toolOptions[0].innerHTML);}");
 
                     // If we were successful in getting the game's tool options menu, attach our custom controls.
                     if (_gotComponent)
@@ -112,5 +119,21 @@ namespace LineTool
         /// Event callback to indicate that the game's tool UI panel is ready.
         /// </summary>
         private void ToolOptionsReady() => _gotComponent = true;
+
+        /// <summary>
+        /// Event callback to set straight line mode.
+        /// </summary>
+        private void SetStraightMode()
+        {
+            _log.Info("setting straight line mode");
+        }
+
+        /// <summary>
+        /// Event callback to set simple curve mode.
+        /// </summary>
+        private void SetSimpleCurveMode()
+        {
+            _log.Info("setting simple curve line mode");
+        }
     }
 }

@@ -114,16 +114,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Gets the GUI modes for the tool.
-        /// </summary>
-        /// <param name="modes">List of tool modes.</param>
-        public override void GetUIModes(List<ToolMode> modes)
-        {
-            modes.Add(new ToolMode(Mode.Straight.ToString(), 0));
-            modes.Add(new ToolMode(Mode.SimpleCurve.ToString(), 1));
-        }
-
-        /// <summary>
         /// Called when the raycast is initialized.
         /// </summary>
         public override void InitializeRaycast()
