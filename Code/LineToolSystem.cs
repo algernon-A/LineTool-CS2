@@ -38,9 +38,8 @@ namespace LineTool
         private Entity _selectedEntity = Entity.Null;
         private int _originalXP;
 
-        // Line position.
-        private bool _validFirstPos = false;
-        private float3 _firstPos;
+        // Line calculations.
+        private List<PointData> _points = new ();
 
         // References.
         private ILog _log;
@@ -49,24 +48,12 @@ namespace LineTool
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
 
+        // Mode.
+        private LineMode _currentMode;
+        private LineModeBase _mode;
+
         // Tool settings.
         private float _spacing = 20f;
-
-        /// <summary>
-        /// Line tool modes.
-        /// </summary>
-        public enum Mode
-        {
-            /// <summary>
-            /// Straight line.
-            /// </summary>
-            Straight,
-
-            /// <summary>
-            /// Simple curve.
-            /// </summary>
-            SimpleCurve,
-        }
 
         /// <summary>
         /// Gets the tool's ID string.
@@ -78,6 +65,37 @@ namespace LineTool
         /// Gets or sets the line spacing.
         /// </summary>
         internal float Spacing { get => _spacing; set => _spacing = value; }
+
+        /// <summary>
+        /// Gets or sets the current line mode.
+        /// </summary>
+        internal LineMode Mode
+        {
+            get => _currentMode;
+
+            set
+            {
+                // Don't do anything if no change.
+                if (value == _currentMode)
+                {
+                    return;
+                }
+
+                // Apply updated tool mode.
+                switch (value)
+                {
+                    case LineMode.Straight:
+                        _mode = new StraightMode(_mode);
+                        break;
+                    case LineMode.SimpleCurve:
+                        _mode = new SimpleCurveMode(_mode);
+                        break;
+                }
+
+                // Update mode.
+                _currentMode = value;
+            }
+        }
 
         /// <summary>
         /// Sets the currently selected preab.
@@ -159,7 +177,8 @@ namespace LineTool
             // Check for and perform any cancellation.
             if (_cancelAction.WasPressedThisFrame())
             {
-                _validFirstPos = false;
+                // Reset current mode settings.
+                _mode.Reset();
 
                 // Revert previewing.
                 foreach (Entity previewEntity in _previewEntities)
@@ -196,23 +215,28 @@ namespace LineTool
             // Handle apply action.
             if (_applyAction.WasPressedThisFrame())
             {
-                _validFirstPos = true;
-                _firstPos = position;
-
-                // Remove highlighting.
-                foreach (Entity previewEntity in _previewEntities)
+                // Handle click.
+                if (_mode.HandleClick(position))
                 {
-                    EntityManager.RemoveComponent<Highlighted>(previewEntity);
-                    EntityManager.AddComponent<Updated>(previewEntity);
+                    // We're placing items - remove highlighting.
+                    foreach (Entity previewEntity in _previewEntities)
+                    {
+                        EntityManager.RemoveComponent<Highlighted>(previewEntity);
+                        EntityManager.AddComponent<Updated>(previewEntity);
+                    }
+
+                    // Clear preview.
+                    _previewEntities.Clear();
+
+                    // Reset tool mode.
+                    _mode.ItemsPlaced(position);
+
+                    return inputDeps;
                 }
-
-                _previewEntities.Clear();
-
-                return inputDeps;
             }
 
             // Update cursor entity if we haven't got an initial position set.
-            if (!_validFirstPos)
+            if (!_mode.HasStart)
             {
                 // Create cursor entity if none yet exists.
                 if (_cursorEntity == Entity.Null)
@@ -247,30 +271,19 @@ namespace LineTool
             _previousPos.x = position.x;
             _previousPos.y = position.z;
 
-            // If we got here we've got two valid points - calculate distance between them.
-            float length = math.length(position - _firstPos);
-
-            if (length < 0)
-            {
-                length = 0 - length;
-            }
+            // If we got here we're (re)calculating points.
+            _points.Clear();
+            _mode.CalculatePoints(position, Spacing, 0f, _points, ref _terrainHeightData);
 
             // Step along length and place objects.
             int count = 0;
-            float currentDistance = 0f;
-            while (currentDistance < length)
+            foreach (PointData thisPoint in _points)
             {
-                // Calculate interpolated point.
-                float3 thisPoint = math.lerp(_firstPos, position, currentDistance / length);
-
-                // Get height for this point.
-                thisPoint.y = TerrainUtils.SampleHeight(ref _terrainHeightData, thisPoint);
-
                 // Create transform component.
                 Transform transformData = new ()
                 {
-                    m_Position = thisPoint,
-                    m_Rotation = quaternion.identity,
+                    m_Position = thisPoint.Position,
+                    m_Rotation = thisPoint.Rotation,
                 };
 
                 // Create new entity if required.
@@ -292,8 +305,7 @@ namespace LineTool
                 }
 
                 // Increment distance.
-                count++;
-                currentDistance += _spacing;
+                ++count;
             }
 
             // Clear any excess entities.
@@ -325,6 +337,10 @@ namespace LineTool
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
 
+            // Set default mode.
+            _currentMode = LineMode.Straight;
+            _mode = new StraightMode();
+
             // Set actions.
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
             _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
@@ -352,7 +368,7 @@ namespace LineTool
             _raycastPoint = default;
 
             // Reset any previously-stored starting position.
-            _validFirstPos = false;
+            _mode.Reset();
 
             // Clear any applications.
             applyMode = ApplyMode.Clear;

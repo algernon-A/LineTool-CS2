@@ -26,7 +26,6 @@ namespace LineTool
 
         // Internal status.
         private bool _toolIsActive = false;
-        private bool _gotComponent = false;
 
         // UI injection data.
         private string _injectedHTML;
@@ -51,14 +50,10 @@ namespace LineTool
             _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-spacing\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
 
-            _log.Debug(_injectedHTML);
-            _log.Debug(_injectedJS);
-
             // Set initial spacing variable in UI.
             UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing};");
 
             // Register event callbacks.
-            _uiView.RegisterForEvent("ToolOptionsReady", (Action)ToolOptionsReady);
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);
             _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
@@ -79,20 +74,31 @@ namespace LineTool
                     // Tool is now active but previously wasn't; attempt to get game's tool options menu.
                     UIFileUtils.ExecuteScript(_uiView, "var toolOptions = document.getElementsByClassName(\"tool-side-column_l9i\"); if (toolOptions && toolOptions.length > 0) { engine.trigger('ToolOptionsReady', toolOptions[0].innerHTML);}");
 
-                    // If we were successful in getting the game's tool options menu, attach our custom controls.
-                    if (_gotComponent)
+                    // Attach our custom controls.
+                    // Inject scripts.
+                    Mod.Log.Debug("injecting component data");
+                    UIFileUtils.ExecuteScript(_uiView, _injectedHTML);
+                    UIFileUtils.ExecuteScript(_uiView, _injectedJS);
+
+                    // Determine active tool mode.
+                    string modeElement;
+                    switch (_lineToolSystem.Mode)
                     {
-                        // Inject scripts.
-                        Mod.Log.Debug("injecting component data");
-                        UIFileUtils.ExecuteScript(_uiView, _injectedHTML);
-                        UIFileUtils.ExecuteScript(_uiView, _injectedJS);
+                        default:
+                        case LineMode.Straight:
+                            modeElement = "line-tool-straight";
+                            break;
 
-                        // gotComponent has now been processed).
-                        _gotComponent = false;
-
-                        // Record current tool state.
-                        _toolIsActive = true;
+                        case LineMode.SimpleCurve:
+                            modeElement = "line-tool-simplecurve";
+                            break;
                     }
+
+                    // Select active tool button.
+                    UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"{modeElement}\").classList.add(\"selected\");");
+
+                    // Record current tool state.
+                    _toolIsActive = true;
                 }
             }
             else
@@ -113,27 +119,16 @@ namespace LineTool
         /// Event callback to set current spacing.
         /// </summary>
         /// <param name="spacing">Value to set.</param>
-        private void SetSpacing(float spacing) => World.GetOrCreateSystemManaged<LineToolSystem>().Spacing = spacing;
-
-        /// <summary>
-        /// Event callback to indicate that the game's tool UI panel is ready.
-        /// </summary>
-        private void ToolOptionsReady() => _gotComponent = true;
+        private void SetSpacing(float spacing) => _lineToolSystem.Spacing = spacing;
 
         /// <summary>
         /// Event callback to set straight line mode.
         /// </summary>
-        private void SetStraightMode()
-        {
-            _log.Info("setting straight line mode");
-        }
+        private void SetStraightMode() => _lineToolSystem.Mode = LineMode.Straight;
 
         /// <summary>
         /// Event callback to set simple curve mode.
         /// </summary>
-        private void SetSimpleCurveMode()
-        {
-            _log.Info("setting simple curve line mode");
-        }
+        private void SetSimpleCurveMode() => _lineToolSystem.Mode = LineMode.SimpleCurve;
     }
 }

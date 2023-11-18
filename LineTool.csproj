@@ -6,7 +6,7 @@
 		<Authors>algernon</Authors>
 		<Copyright>Copyright © 2023 algernon</Copyright>
 		<Product>$(Title)</Product>
-		<Version>0.1</Version>
+		<Version>0.1.1</Version>
 		<LangVersion>9.0</LangVersion>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
