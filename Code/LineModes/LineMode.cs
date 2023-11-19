@@ -18,5 +18,10 @@ namespace LineTool
         /// Simple curve.
         /// </summary>
         SimpleCurve,
+
+        /// <summary>
+        /// Circle.
+        /// </summary>
+        Circle,
     }
 }

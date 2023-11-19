@@ -12,7 +12,7 @@ namespace LineTool
     using UnityEngine;
 
     /// <summary>
-    /// Straight-line placement mode.
+    /// Simple curve placement mode.
     /// </summary>
     public class SimpleCurveMode : LineModeBase
     {

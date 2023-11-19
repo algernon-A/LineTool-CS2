@@ -28,6 +28,9 @@ namespace LineTool
         // Previewing.
         private readonly List<Entity> _previewEntities = new ();
 
+        // Line calculations.
+        private readonly List<PointData> _points = new ();
+
         // Cursor.
         private ControlPoint _raycastPoint;
         private Entity _cursorEntity = Entity.Null;
@@ -37,9 +40,6 @@ namespace LineTool
         private ObjectPrefab _selectedPrefab;
         private Entity _selectedEntity = Entity.Null;
         private int _originalXP;
-
-        // Line calculations.
-        private List<PointData> _points = new ();
 
         // References.
         private ILog _log;
@@ -89,6 +89,9 @@ namespace LineTool
                         break;
                     case LineMode.SimpleCurve:
                         _mode = new SimpleCurveMode(_mode);
+                        break;
+                    case LineMode.Circle:
+                        _mode = new CircleMode(_mode);
                         break;
                 }
 

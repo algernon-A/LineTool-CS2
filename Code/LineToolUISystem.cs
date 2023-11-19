@@ -57,6 +57,7 @@ namespace LineTool
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);
             _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
+            _uiView.RegisterForEvent("SetCircleMode", (Action)SetCircleMode);
         }
 
         /// <summary>
@@ -76,23 +77,17 @@ namespace LineTool
 
                     // Attach our custom controls.
                     // Inject scripts.
-                    Mod.Log.Debug("injecting component data");
+                    _log.Debug("injecting component data");
                     UIFileUtils.ExecuteScript(_uiView, _injectedHTML);
                     UIFileUtils.ExecuteScript(_uiView, _injectedJS);
 
                     // Determine active tool mode.
-                    string modeElement;
-                    switch (_lineToolSystem.Mode)
+                    string modeElement = _lineToolSystem.Mode switch
                     {
-                        default:
-                        case LineMode.Straight:
-                            modeElement = "line-tool-straight";
-                            break;
-
-                        case LineMode.SimpleCurve:
-                            modeElement = "line-tool-simplecurve";
-                            break;
-                    }
+                        LineMode.SimpleCurve => "line-tool-simplecurve",
+                        LineMode.Circle => "line-tool-circle",
+                        _ => "line-tool-straight",
+                    };
 
                     // Select active tool button.
                     UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"{modeElement}\").classList.add(\"selected\");");
@@ -130,5 +125,10 @@ namespace LineTool
         /// Event callback to set simple curve mode.
         /// </summary>
         private void SetSimpleCurveMode() => _lineToolSystem.Mode = LineMode.SimpleCurve;
+
+        /// <summary>
+        /// Event callback to set circle mode.
+        /// </summary>
+        private void SetCircleMode() => _lineToolSystem.Mode = LineMode.Circle;
     }
 }
