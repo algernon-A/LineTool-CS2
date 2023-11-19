@@ -5,6 +5,7 @@
 namespace LineTool
 {
     using System.Collections.Generic;
+    using Game.Rendering;
     using Game.Simulation;
     using Unity.Mathematics;
 
@@ -47,14 +48,6 @@ namespace LineTool
         /// Gets a value indicating whether a valid starting position has been recorded.
         /// </summary>
         public bool HasStart => m_validStart;
-
-        /// <summary>
-        /// Clears the current selection.
-        /// </summary>
-        public virtual void Reset()
-        {
-            m_validStart = false;
-        }
 
         /// <summary>
         /// Handles a mouse click.
@@ -120,6 +113,23 @@ namespace LineTool
                 pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.identity, });
                 currentDistance += spacing;
             }
+        }
+
+        /// <summary>
+        /// Draws any applicable overlay.
+        /// </summary>
+        /// <param name="currentPos">Current cursor world position.</param>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        public virtual void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer)
+        {
+        }
+
+        /// <summary>
+        /// Clears the current selection.
+        /// </summary>
+        public virtual void Reset()
+        {
+            m_validStart = false;
         }
     }
 }

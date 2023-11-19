@@ -7,6 +7,7 @@ namespace LineTool
     using System.Collections.Generic;
     using Colossal.Mathematics;
     using Game.Net;
+    using Game.Rendering;
     using Game.Simulation;
     using Unity.Mathematics;
     using UnityEngine;
@@ -111,6 +112,21 @@ namespace LineTool
 
                 // Get next t factor.
                 tFactor = BezierStep(tFactor, spacing);
+            }
+        }
+
+        /// <summary>
+        /// Draws any applicable overlay.
+        /// </summary>
+        /// <param name="currentPos">Current cursor world position.</param>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        public override void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer)
+        {
+            // Draw an elbow overlay if we've got valid starting and elbow positions.
+            if (m_validStart && m_validElbow)
+            {
+                DrawDashedLine(m_startPos, m_elbowPoint, overlayBuffer);
+                DrawDashedLine(m_elbowPoint, currentPos, overlayBuffer);
             }
         }
 
@@ -330,6 +346,31 @@ namespace LineTool
             }
 
             return Mathf.Lerp(num, num2, Mathf.Clamp01((distance - f) / num8));
+        }
+
+        /// <summary>
+        /// Draws a dashed line overlay between the two given points.
+        /// </summary>
+        /// <param name="startPos">Line start position.</param>
+        /// <param name="endPos">Line end position.</param>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        private void DrawDashedLine(float3 startPos, float3 endPos, OverlayRenderSystem.Buffer overlayBuffer)
+        {
+            const float LineWidth = 1f;
+
+            Line3.Segment segment = new (startPos, endPos);
+            float distance = math.distance(startPos.xz, endPos.xz);
+
+            // Don't draw lines for short distances.
+            if (distance > LineWidth * 8f)
+            {
+                // Offset segment, mimicing game simple curve overlay, to ensure dash spacing.
+                float3 offset = (segment.b - segment.a) * (LineWidth * 4f / distance);
+                Line3.Segment line = new (segment.a + offset, segment.b - offset);
+
+                // Draw line - distance figures mimic game simple curve overlay.
+                overlayBuffer.DrawDashedLine(Color.white, line, LineWidth * 3f, LineWidth * 5f, LineWidth * 3f);
+            }
         }
     }
 }

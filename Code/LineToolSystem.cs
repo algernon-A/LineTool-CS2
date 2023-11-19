@@ -11,8 +11,10 @@ namespace LineTool
     using Game.Input;
     using Game.Objects;
     using Game.Prefabs;
+    using Game.Rendering;
     using Game.Simulation;
     using Game.Tools;
+    using Unity.Collections;
     using Unity.Entities;
     using Unity.Jobs;
     using Unity.Mathematics;
@@ -47,6 +49,7 @@ namespace LineTool
         private TerrainHeightData _terrainHeightData;
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
+        private OverlayRenderSystem.Buffer _overlayBuffer;
 
         // Mode.
         private LineMode _currentMode;
@@ -263,6 +266,9 @@ namespace LineTool
                 _cursorEntity = Entity.Null;
             }
 
+            // Render any overlay.
+            _mode.DrawOverlay(position, _overlayBuffer);
+
             // Check for position change.
             if (position.x == _previousPos.x && position.z == _previousPos.y)
             {
@@ -339,6 +345,7 @@ namespace LineTool
 
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
+            _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
 
             // Set default mode.
             _currentMode = LineMode.Straight;
