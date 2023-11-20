@@ -4,6 +4,9 @@
 
 namespace LineTool
 {
+    using System.IO;
+    using System.Reflection;
+    using Colossal.IO.AssetDatabase;
     using Colossal.Logging;
     using Game;
     using Game.Modding;
@@ -18,6 +21,42 @@ namespace LineTool
         /// </summary>
         public const string ModName = "Line Tool";
 
+        // Mod assembly path cache.
+        private string s_assemblyPath = null;
+
+        /// <summary>
+        /// Gets the active instance reference.
+        /// </summary>
+        public static Mod Instance { get; private set; }
+
+        /// <summary>
+        /// Gets the mod directory file path of the currently executing mod assembly.
+        /// </summary>
+        public string AssemblyPath
+        {
+            get
+            {
+                // Update cached path if the existing one is invalid.
+                if (string.IsNullOrWhiteSpace(s_assemblyPath))
+                {
+                    // No path cached - find current executable asset.
+                    string assemblyName = Assembly.GetExecutingAssembly().FullName;
+                    ExecutableAsset modAsset = AssetDatabase.global.GetAsset(SearchFilter<ExecutableAsset>.ByCondition(x => x.definition?.FullName == assemblyName));
+                    if (modAsset is null)
+                    {
+                        Log.Error("mod executable asset not found");
+                        return null;
+                    }
+
+                    // Update cached path.
+                    s_assemblyPath = Path.GetDirectoryName(modAsset.GetMeta().path);
+                }
+
+                // Return cached path.
+                return s_assemblyPath;
+            }
+        }
+
         /// <summary>
         /// Gets the mod's active log.
         /// </summary>
@@ -28,6 +67,9 @@ namespace LineTool
         /// </summary>
         public void OnLoad()
         {
+            // Set instance reference.
+            Instance = this;
+
             // Initialize logger.
             Log = LogManager.GetLogger(ModName);
             Log.Info("setting logging level to Debug");
