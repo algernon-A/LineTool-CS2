@@ -349,6 +349,14 @@ namespace LineTool
                     // Otherwise, use existing entity.
                     EntityManager.SetComponentData(_previewEntities[count], transformData);
                     EntityManager.AddComponent<Updated>(_previewEntities[count]);
+
+                    // Ensure any trees are still adults.
+                    if (EntityManager.TryGetComponent<Tree>(_previewEntities[count], out Tree tree))
+                    {
+                        tree.m_State = TreeState.Adult;
+                        tree.m_Growth = 128;
+                        EntityManager.SetComponentData(_previewEntities[count], tree);
+                    }
                 }
 
                 // Increment distance.
