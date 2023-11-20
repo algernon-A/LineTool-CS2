@@ -9,8 +9,10 @@ namespace LineTool
     using Game.Net;
     using Game.Rendering;
     using Game.Simulation;
+    using Unity.Collections;
     using Unity.Mathematics;
     using UnityEngine;
+    using static Game.Rendering.GuideLinesSystem;
 
     /// <summary>
     /// Simple curve placement mode.
@@ -79,7 +81,7 @@ namespace LineTool
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, float spacing, float rotation, List<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, float spacing, float rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -120,13 +122,22 @@ namespace LineTool
         /// </summary>
         /// <param name="currentPos">Current cursor world position.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
-        public override void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer)
+        /// <param name="tooltips">Tooltip list.</param>
+        public override void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<GuideLinesSystem.TooltipInfo> tooltips)
         {
             // Draw an elbow overlay if we've got valid starting and elbow positions.
             if (m_validStart && m_validElbow)
             {
-                DrawDashedLine(m_startPos, m_elbowPoint, overlayBuffer);
-                DrawDashedLine(m_elbowPoint, currentPos, overlayBuffer);
+                // Calculate lines.
+                Line3.Segment line1 = new (m_startPos, m_elbowPoint);
+                Line3.Segment line2 = new (m_elbowPoint, currentPos);
+
+                // Draw lines.
+                DrawDashedLine(m_startPos, m_elbowPoint, line1, overlayBuffer);
+                DrawDashedLine(m_elbowPoint, currentPos, line2, overlayBuffer);
+
+                // Draw angle.
+                DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
             }
         }
 
@@ -353,12 +364,12 @@ namespace LineTool
         /// </summary>
         /// <param name="startPos">Line start position.</param>
         /// <param name="endPos">Line end position.</param>
+        /// <param name="segment">Line segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
-        private void DrawDashedLine(float3 startPos, float3 endPos, OverlayRenderSystem.Buffer overlayBuffer)
+        private void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer)
         {
             const float LineWidth = 1f;
 
-            Line3.Segment segment = new (startPos, endPos);
             float distance = math.distance(startPos.xz, endPos.xz);
 
             // Don't draw lines for short distances.
@@ -370,6 +381,135 @@ namespace LineTool
 
                 // Draw line - distance figures mimic game simple curve overlay.
                 overlayBuffer.DrawDashedLine(Color.white, line, LineWidth * 3f, LineWidth * 5f, LineWidth * 3f);
+            }
+        }
+
+        /// <summary>
+        /// Draws an angle indicator between two lines.
+        /// </summary>
+        /// <param name="line1">Line 1.</param>
+        /// <param name="line2">Line 2.</param>
+        /// <param name="lineWidth">Overlay line width.</param>
+        /// <param name="lineLength">Overlay line length.</param>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        /// <param name="tooltips">Tooltip list.</param>
+        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float lineWidth, float lineLength, OverlayRenderSystem.Buffer overlayBuffer, NativeList<GuideLinesSystem.TooltipInfo> tooltips)
+        {
+            bool angleSide = false;
+
+            // Calculate distances.
+            float distance1 = math.distance(line1.a.xz, line1.b.xz);
+            float distance2 = math.distance(line2.a.xz, line2.b.xz);
+
+            // Minimum line length check.
+            if (distance1 > lineWidth * 7f && distance2 > lineWidth * 7f)
+            {
+                float2 direction1 = (line1.b.xz - line1.a.xz) / distance1;
+                float2 direction2 = (line2.a.xz - line2.b.xz) / distance2;
+                float size = math.min(lineLength, math.min(distance1, distance2)) * 0.5f;
+                int angle = Mathf.RoundToInt(math.degrees(math.acos(math.clamp(math.dot(direction1, direction2), -1f, 1f))));
+                if (angle < 180)
+                {
+                    angleSide = math.dot(MathUtils.Right(direction1), direction2) < 0f;
+                }
+
+                DrawAngleIndicator(line1, line2, direction1, direction2, size, lineWidth, angle, angleSide, overlayBuffer, tooltips);
+            }
+        }
+
+        /// <summary>
+        /// Draws an angle indicator.
+        /// </summary>
+        /// <param name="line1">Line 1.</param>
+        /// <param name="line2">Line 2.</param>
+        /// <param name="direction1">Direction 1.</param>
+        /// <param name="direction2">Direction 2.</param>
+        /// <param name="size">Line size.</param>
+        /// <param name="lineWidth">Overlay line width.</param>
+        /// <param name="angle">Angle to draw.</param>
+        /// <param name="angleSide">Angle side.</param>
+        /// <param name="buffer">Overlay buffer.</param>
+        /// <param name="tooltips">Tooltip list.</param>
+        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float2 direction1, float2 direction2, float size, float lineWidth, int angle, bool angleSide, OverlayRenderSystem.Buffer buffer, NativeList<TooltipInfo> tooltips)
+        {
+            if (angle == 180)
+            {
+                float2 @float = angleSide ? MathUtils.Right(direction1) : MathUtils.Left(direction1);
+                float2 float2 = angleSide ? MathUtils.Right(direction2) : MathUtils.Left(direction2);
+                float3 b = line1.b;
+                b.xz -= direction1 * size;
+                float3 b2 = line1.b;
+                float3 b3 = line1.b;
+                b2.xz += (@float * (size - (lineWidth * 0.5f))) - (direction1 * size);
+                b3.xz += (@float * size) - (direction1 * (size + (lineWidth * 0.5f)));
+                float3 a = line2.a;
+                float3 a2 = line2.a;
+                a.xz -= (float2 * size) + (direction2 * (size + (lineWidth * 0.5f)));
+                a2.xz -= (float2 * (size - (lineWidth * 0.5f))) + (direction2 * size);
+                float3 a3 = line2.a;
+                a3.xz -= direction2 * size;
+                buffer.DrawLine(Color.white, new Line3.Segment(b, b2), lineWidth);
+                buffer.DrawLine(Color.white, new Line3.Segment(b3, a), lineWidth);
+                buffer.DrawLine(Color.white, new Line3.Segment(a2, a3), lineWidth);
+                float3 b4 = line1.b;
+                b4.xz += @float * (size * 1.5f);
+                TooltipInfo value = new (TooltipType.Angle, b4, angle);
+                tooltips.Add(in value);
+            }
+            else if (angle > 90)
+            {
+                float2 float3 = math.normalize(direction1 + direction2);
+                float3 b5 = line1.b;
+                b5.xz -= direction1 * size;
+                float3 startTangent = default;
+                startTangent.xz = angleSide ? MathUtils.Right(direction1) : MathUtils.Left(direction1);
+                float3 b6 = line1.b;
+                b6.xz -= float3 * size;
+                float3 float4 = default;
+                float4.xz = angleSide ? MathUtils.Right(float3) : MathUtils.Left(float3);
+                float3 a4 = line2.a;
+                a4.xz -= direction2 * size;
+                float3 endTangent = default;
+                endTangent.xz = angleSide ? MathUtils.Right(direction2) : MathUtils.Left(direction2);
+                buffer.DrawCurve(Color.white, NetUtils.FitCurve(b5, startTangent, float4, b6), lineWidth);
+                buffer.DrawCurve(Color.white, NetUtils.FitCurve(b6, float4, endTangent, a4), lineWidth);
+                float3 b7 = line1.b;
+                b7.xz -= float3 * (size * 1.5f);
+                TooltipInfo value = new (TooltipType.Angle, b7, angle);
+                tooltips.Add(in value);
+            }
+            else if (angle == 90)
+            {
+                float3 b8 = line1.b;
+                b8.xz -= direction1 * size;
+                float3 b9 = line1.b;
+                float3 b10 = line1.b;
+                b9.xz -= (direction2 * (size - (lineWidth * 0.5f))) + (direction1 * size);
+                b10.xz -= (direction2 * size) + (direction1 * (size + (lineWidth * 0.5f)));
+                float3 a5 = line2.a;
+                a5.xz -= direction2 * size;
+                buffer.DrawLine(Color.white, new Line3.Segment(b8, b9), lineWidth);
+                buffer.DrawLine(Color.white, new Line3.Segment(b10, a5), lineWidth);
+                float3 b11 = line1.b;
+                b11.xz -= math.normalizesafe(direction1 + direction2) * (size * 1.5f);
+                TooltipInfo value = new (TooltipType.Angle, b11, angle);
+                tooltips.Add(in value);
+            }
+            else if (angle > 0)
+            {
+                float3 b12 = line1.b;
+                b12.xz -= direction1 * size;
+                float3 startTangent2 = default;
+                startTangent2.xz = angleSide ? MathUtils.Right(direction1) : MathUtils.Left(direction1);
+                float3 a6 = line2.a;
+                a6.xz -= direction2 * size;
+                float3 endTangent2 = default;
+                endTangent2.xz = angleSide ? MathUtils.Right(direction2) : MathUtils.Left(direction2);
+                buffer.DrawCurve(Color.white, NetUtils.FitCurve(b12, startTangent2, endTangent2, a6), lineWidth);
+                float3 b13 = line1.b;
+                b13.xz -= math.normalizesafe(direction1 + direction2) * (size * 1.5f);
+                TooltipInfo value = new (TooltipType.Angle, b13, angle);
+                tooltips.Add(in value);
             }
         }
     }

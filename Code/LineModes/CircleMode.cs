@@ -4,8 +4,8 @@
 
 namespace LineTool
 {
-    using System.Collections.Generic;
     using Game.Simulation;
+    using Unity.Collections;
     using Unity.Mathematics;
 
     /// <summary>
@@ -30,7 +30,7 @@ namespace LineTool
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, float spacing, float rotation, List<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, float spacing, float rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)

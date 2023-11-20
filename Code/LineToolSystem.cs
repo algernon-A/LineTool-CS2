@@ -4,7 +4,6 @@
 
 namespace LineTool
 {
-    using System.Collections.Generic;
     using Colossal.Entities;
     using Colossal.Logging;
     using Game.Common;
@@ -28,10 +27,11 @@ namespace LineTool
     public sealed partial class LineToolSystem : ObjectToolBaseSystem
     {
         // Previewing.
-        private readonly List<Entity> _previewEntities = new ();
+        private readonly NativeList<Entity> _previewEntities = new (Allocator.Persistent);
+        private readonly NativeList<GuideLinesSystem.TooltipInfo> _tooltips = new (8, Allocator.Persistent);
 
         // Line calculations.
-        private readonly List<PointData> _points = new ();
+        private readonly NativeList<PointData> _points = new (Allocator.Persistent);
 
         // Cursor.
         private ControlPoint _raycastPoint;
@@ -68,6 +68,11 @@ namespace LineTool
         /// Gets or sets the line spacing.
         /// </summary>
         internal float Spacing { get => _spacing; set => _spacing = value; }
+
+        /// <summary>
+        /// Gets the tooltip list.
+        /// </summary>
+        internal NativeList<GuideLinesSystem.TooltipInfo> Tooltips => _tooltips;
 
         /// <summary>
         /// Gets or sets the current line mode.
@@ -174,12 +179,44 @@ namespace LineTool
         }
 
         /// <summary>
+        /// Called when the system is created.
+        /// </summary>
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+
+            // Set log.
+            _log = Mod.Log;
+
+            // Get system references.
+            _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
+            _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
+
+            // Set default mode.
+            _currentMode = LineMode.Straight;
+            _mode = new StraightMode();
+
+            // Set actions.
+            _applyAction = InputManager.instance.FindAction("Tool", "Apply");
+            _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
+
+            // Enable hotkey.
+            InputAction hotKey = new ("LineTool");
+            hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
+            hotKey.performed += EnableTool;
+            hotKey.Enable();
+        }
+
+        /// <summary>
         /// Called every tool update.
         /// </summary>
         /// <param name="inputDeps">Input dependencies.</param>
         /// <returns>Job handle.</returns>
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            // Clear tooltips.
+            _tooltips.Clear();
+
             // Check for and perform any cancellation.
             if (_cancelAction.WasPressedThisFrame())
             {
@@ -267,7 +304,7 @@ namespace LineTool
             }
 
             // Render any overlay.
-            _mode.DrawOverlay(position, _overlayBuffer);
+            _mode.DrawOverlay(position, _overlayBuffer, _tooltips);
 
             // Check for position change.
             if (position.x == _previousPos.x && position.z == _previousPos.y)
@@ -296,7 +333,7 @@ namespace LineTool
                 };
 
                 // Create new entity if required.
-                if (count >= _previewEntities.Count)
+                if (count >= _previewEntities.Length)
                 {
                     // Create new entity.
                     Entity newEntity = CreateEntity();
@@ -318,10 +355,10 @@ namespace LineTool
             }
 
             // Clear any excess entities.
-            if (count < _previewEntities.Count)
+            if (count < _previewEntities.Length)
             {
                 int startCount = count;
-                while (count < _previewEntities.Count)
+                while (count < _previewEntities.Length)
                 {
                     EntityManager.AddComponent<Deleted>(_previewEntities[count++]);
                 }
@@ -331,35 +368,6 @@ namespace LineTool
             }
 
             return inputDeps;
-        }
-
-        /// <summary>
-        /// Called when the system is created.
-        /// </summary>
-        protected override void OnCreate()
-        {
-            base.OnCreate();
-
-            // Set log.
-            _log = Mod.Log;
-
-            // Get system references.
-            _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
-            _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
-
-            // Set default mode.
-            _currentMode = LineMode.Straight;
-            _mode = new StraightMode();
-
-            // Set actions.
-            _applyAction = InputManager.instance.FindAction("Tool", "Apply");
-            _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
-
-            // Enable hotkey.
-            InputAction hotKey = new ("LineTool");
-            hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
-            hotKey.performed += EnableTool;
-            hotKey.Enable();
         }
 
         /// <summary>
@@ -417,6 +425,19 @@ namespace LineTool
             }
 
             base.OnStopRunning();
+        }
+
+        /// <summary>
+        /// Called when the system is destroyed.
+        /// </summary>
+        protected override void OnDestroy()
+        {
+            // Dispose of unmanaged lists.
+            _previewEntities.Dispose();
+            _points.Dispose();
+            _tooltips.Dispose();
+
+            base.OnDestroy();
         }
 
         /// <summary>

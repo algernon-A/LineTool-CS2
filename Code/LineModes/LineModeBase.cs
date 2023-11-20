@@ -4,9 +4,9 @@
 
 namespace LineTool
 {
-    using System.Collections.Generic;
     using Game.Rendering;
     using Game.Simulation;
+    using Unity.Collections;
     using Unity.Mathematics;
 
     /// <summary>
@@ -88,7 +88,7 @@ namespace LineTool
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public virtual void CalculatePoints(float3 currentPos, float spacing, float rotation, List<PointData> pointList, ref TerrainHeightData heightData)
+        public virtual void CalculatePoints(float3 currentPos, float spacing, float rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -120,7 +120,8 @@ namespace LineTool
         /// </summary>
         /// <param name="currentPos">Current cursor world position.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
-        public virtual void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer)
+        /// <param name="tooltips">Tooltip list.</param>
+        public virtual void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<GuideLinesSystem.TooltipInfo> tooltips)
         {
         }
 
