@@ -31,9 +31,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<_UI Include="$(ProjectDir)/UI/*.css" />
-		<_UI Include="$(ProjectDir)/UI/*.html" />
-		<_UI Include="$(ProjectDir)/UI/*.js" />
+		<_UI Include="$(ProjectDir)/UI/*.*" />
 	</ItemGroup>
 	<Target Name="DeployToModDirectory" AfterTargets="Build">
 		<PropertyGroup>

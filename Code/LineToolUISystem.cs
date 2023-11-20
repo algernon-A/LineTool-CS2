@@ -58,6 +58,10 @@ namespace LineTool
             _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
             _uiView.RegisterForEvent("SetCircleMode", (Action)SetCircleMode);
+
+            // Add mod UI resource directory to UI resource handler.
+            GameUIResourceHandler uiResourceHandler = GameManager.instance.userInterface.view.uiSystem.resourceHandler as GameUIResourceHandler;
+            uiResourceHandler?.HostLocationsMap.Add("linetoolui", new System.Collections.Generic.List<string> { Mod.Instance.AssemblyPath + "/UI" });
         }
 
         /// <summary>
