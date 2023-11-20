@@ -18,6 +18,7 @@ namespace LineTool
     using Unity.Jobs;
     using Unity.Mathematics;
     using UnityEngine.InputSystem;
+    using static Game.Rendering.GuideLinesSystem;
     using Transform = Game.Objects.Transform;
     using Tree = Game.Objects.Tree;
 
@@ -28,7 +29,7 @@ namespace LineTool
     {
         // Previewing.
         private readonly NativeList<Entity> _previewEntities = new (Allocator.Persistent);
-        private readonly NativeList<GuideLinesSystem.TooltipInfo> _tooltips = new (8, Allocator.Persistent);
+        private readonly NativeList<TooltipInfo> _tooltips = new (8, Allocator.Persistent);
 
         // Line calculations.
         private readonly NativeList<PointData> _points = new (Allocator.Persistent);
@@ -72,7 +73,7 @@ namespace LineTool
         /// <summary>
         /// Gets the tooltip list.
         /// </summary>
-        internal NativeList<GuideLinesSystem.TooltipInfo> Tooltips => _tooltips;
+        internal NativeList<TooltipInfo> Tooltips => _tooltips;
 
         /// <summary>
         /// Gets or sets the current line mode.

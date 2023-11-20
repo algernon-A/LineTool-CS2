@@ -4,7 +4,6 @@
 
 namespace LineTool
 {
-    using System.Collections.Generic;
     using Colossal.Mathematics;
     using Game.Net;
     using Game.Rendering;
@@ -123,21 +122,29 @@ namespace LineTool
         /// <param name="currentPos">Current cursor world position.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<GuideLinesSystem.TooltipInfo> tooltips)
+        public override void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
         {
-            // Draw an elbow overlay if we've got valid starting and elbow positions.
-            if (m_validStart && m_validElbow)
+            if (m_validStart)
             {
-                // Calculate lines.
-                Line3.Segment line1 = new (m_startPos, m_elbowPoint);
-                Line3.Segment line2 = new (m_elbowPoint, currentPos);
+                // Draw an elbow overlay if we've got valid starting and elbow positions.
+                if (m_validElbow)
+                {
+                    // Calculate lines.
+                    Line3.Segment line1 = new (m_startPos, m_elbowPoint);
+                    Line3.Segment line2 = new (m_elbowPoint, currentPos);
 
-                // Draw lines.
-                DrawDashedLine(m_startPos, m_elbowPoint, line1, overlayBuffer);
-                DrawDashedLine(m_elbowPoint, currentPos, line2, overlayBuffer);
+                    // Draw lines.
+                    DrawDashedLine(m_startPos, m_elbowPoint, line1, overlayBuffer, tooltips);
+                    DrawDashedLine(m_elbowPoint, currentPos, line2, overlayBuffer, tooltips);
 
-                // Draw angle.
-                DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
+                    // Draw angle.
+                    DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
+                }
+                else
+                {
+                    // Initial position only; just draw a straight line.
+                    base.DrawOverlay(currentPos, overlayBuffer, tooltips);
+                }
             }
         }
 
@@ -360,31 +367,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Draws a dashed line overlay between the two given points.
-        /// </summary>
-        /// <param name="startPos">Line start position.</param>
-        /// <param name="endPos">Line end position.</param>
-        /// <param name="segment">Line segment.</param>
-        /// <param name="overlayBuffer">Overlay buffer.</param>
-        private void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer)
-        {
-            const float LineWidth = 1f;
-
-            float distance = math.distance(startPos.xz, endPos.xz);
-
-            // Don't draw lines for short distances.
-            if (distance > LineWidth * 8f)
-            {
-                // Offset segment, mimicing game simple curve overlay, to ensure dash spacing.
-                float3 offset = (segment.b - segment.a) * (LineWidth * 4f / distance);
-                Line3.Segment line = new (segment.a + offset, segment.b - offset);
-
-                // Draw line - distance figures mimic game simple curve overlay.
-                overlayBuffer.DrawDashedLine(Color.white, line, LineWidth * 3f, LineWidth * 5f, LineWidth * 3f);
-            }
-        }
-
-        /// <summary>
         /// Draws an angle indicator between two lines.
         /// </summary>
         /// <param name="line1">Line 1.</param>
@@ -393,7 +375,7 @@ namespace LineTool
         /// <param name="lineLength">Overlay line length.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float lineWidth, float lineLength, OverlayRenderSystem.Buffer overlayBuffer, NativeList<GuideLinesSystem.TooltipInfo> tooltips)
+        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float lineWidth, float lineLength, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
         {
             bool angleSide = false;
 

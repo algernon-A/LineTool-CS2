@@ -4,10 +4,13 @@
 
 namespace LineTool
 {
+    using Colossal.Mathematics;
     using Game.Rendering;
     using Game.Simulation;
     using Unity.Collections;
     using Unity.Mathematics;
+    using UnityEngine;
+    using static Game.Rendering.GuideLinesSystem;
 
     /// <summary>
     /// Line placement mode.
@@ -121,8 +124,9 @@ namespace LineTool
         /// <param name="currentPos">Current cursor world position.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public virtual void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<GuideLinesSystem.TooltipInfo> tooltips)
+        public virtual void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
         {
+            DrawDashedLine(m_startPos, currentPos, new Line3.Segment(m_startPos, currentPos), overlayBuffer, tooltips);
         }
 
         /// <summary>
@@ -131,6 +135,39 @@ namespace LineTool
         public virtual void Reset()
         {
             m_validStart = false;
+        }
+
+        /// <summary>
+        /// Draws a dashed line overlay between the two given points.
+        /// </summary>
+        /// <param name="startPos">Line start position.</param>
+        /// <param name="endPos">Line end position.</param>
+        /// <param name="segment">Line segment.</param>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        /// <param name="tooltips">Tooltip list.</param>
+        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        {
+            const float LineWidth = 1f;
+
+            float distance = math.distance(startPos.xz, endPos.xz);
+
+            // Don't draw lines for short distances.
+            if (distance > LineWidth * 8f)
+            {
+                // Offset segment, mimicing game simple curve overlay, to ensure dash spacing.
+                float3 offset = (segment.b - segment.a) * (LineWidth * 4f / distance);
+                Line3.Segment line = new (segment.a + offset, segment.b - offset);
+
+                // Draw line - distance figures mimic game simple curve overlay.
+                overlayBuffer.DrawDashedLine(Color.white, line, LineWidth * 3f, LineWidth * 5f, LineWidth * 3f);
+
+                // Add length tooltip.
+                int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
+                if (length > 0)
+                {
+                    tooltips.Add(new TooltipInfo(TooltipType.Length, (startPos + endPos) * 0.5f, length));
+                }
+            }
         }
     }
 }

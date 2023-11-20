@@ -5,13 +5,11 @@
 namespace LineTool
 {
     using System.Collections.Generic;
-    using Game.Rendering;
     using Game.UI.Tooltip;
     using Game.UI.Widgets;
     using Unity.Collections;
-    using Unity.Jobs;
     using Unity.Mathematics;
-    using UnityEngine.Scripting;
+    using static Game.Rendering.GuideLinesSystem;
 
     /// <summary>
     /// The Line Tool tooltip system.
@@ -37,11 +35,12 @@ namespace LineTool
         /// </summary>
         protected override void OnUpdate()
         {
-            NativeList<GuideLinesSystem.TooltipInfo> tooltips = _lineToolSystem.Tooltips;
-
-            for (int i = 0; i < tooltips.Length; i++)
+            // Iterate through all tooltips in buffer.
+            NativeList<TooltipInfo> tooltips = _lineToolSystem.Tooltips;
+            for (int i = 0; i < tooltips.Length; ++i)
             {
-                GuideLinesSystem.TooltipInfo tooltipInfo = tooltips[i];
+                // Create new tooltip tenplate and add to list if needed.
+                TooltipInfo tooltipInfo = tooltips[i];
                 if (_tooltipGroups.Count <= i)
                 {
                     _tooltipGroups.Add(new TooltipGroup
@@ -53,29 +52,32 @@ namespace LineTool
                     });
                 }
 
+                // Set tooltip position.
                 TooltipGroup tooltipGroup = _tooltipGroups[i];
-                float2 @float = TooltipSystemBase.WorldToTooltipPos(tooltipInfo.m_Position);
-                if (!tooltipGroup.position.Equals(@float))
+                float2 tooltipPos = TooltipSystemBase.WorldToTooltipPos(tooltipInfo.m_Position);
+                if (!tooltipGroup.position.Equals(tooltipPos))
                 {
-                    tooltipGroup.position = @float;
+                    tooltipGroup.position = tooltipPos;
                     tooltipGroup.SetChildrenChanged();
                 }
 
+                // Set tooltip content.
                 IntTooltip intTooltip = tooltipGroup.children[0] as IntTooltip;
                 switch (tooltipInfo.m_Type)
                 {
-                    case GuideLinesSystem.TooltipType.Angle:
+                    case TooltipType.Angle:
                         intTooltip.icon = "Media/Glyphs/Angle.svg";
                         intTooltip.value = tooltipInfo.m_IntValue;
                         intTooltip.unit = "angle";
                         break;
-                    case GuideLinesSystem.TooltipType.Length:
+                    case TooltipType.Length:
                         intTooltip.icon = "Media/Glyphs/Length.svg";
                         intTooltip.value = tooltipInfo.m_IntValue;
                         intTooltip.unit = "length";
                         break;
                 }
 
+                // Add tooltop group. to UI.
                 AddGroup(tooltipGroup);
             }
         }
