@@ -50,8 +50,8 @@ namespace LineTool
             _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-spacing\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
 
-            // Set initial spacing variable in UI.
-            UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing};");
+            // Set initial spacing variable in UI (multiply by 10 for accuracy conversion).
+            UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing * 10};");
 
             // Register event callbacks.
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);

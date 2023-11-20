@@ -1,9 +1,24 @@
 // Function to adjust spacing.
 if (typeof adjustSpacing !== 'function') {
-    function adjustSpacing(adjustment) {
-        lineToolSpacing += adjustment;
-        engine.trigger('SetLineToolSpacing', lineToolSpacing);
-        document.getElementById("line-tool-spacing-field").innerHTML = lineToolSpacing + " m";
+    function adjustSpacing(event, adjustment) {
+        // Adjust for modifier keys - multiplying adjustment by 10 for FP rounding.
+        var finalAdjustment = adjustment;
+        if (event) {
+            if (event.shiftKey)
+                finalAdjustment *= 100;
+            else if (!event.ctrlKey)
+                finalAdjustment *= 10;
+        }
+
+        // Don't apply if adjutment will bring us below zero.
+        newSpacing = lineToolSpacing + finalAdjustment;
+        if (newSpacing < 1) return;
+
+        // Apply spacing.
+        lineToolSpacing = newSpacing;
+        var roundedSpacing = newSpacing / 10;
+        engine.trigger('SetLineToolSpacing', roundedSpacing);
+        document.getElementById("line-tool-spacing-field").innerHTML = roundedSpacing + " m";
     }
 }
 
@@ -35,11 +50,11 @@ if (typeof handleCircleMode !== 'function') {
 }
 
 // Set initial spacing.
-adjustSpacing(0);
+adjustSpacing(null, 0);
 
 // Add button event handlers.
-document.getElementById("line-tool-spacing-down").onclick = function() { adjustSpacing(-1); }
-document.getElementById("line-tool-spacing-up").onclick = function () { adjustSpacing(1); }
+document.getElementById("line-tool-spacing-down").onmousedown = (event) => { adjustSpacing(event, -1); }
+document.getElementById("line-tool-spacing-up").onmousedown = (event) => { adjustSpacing(event, 1); }
 
 document.getElementById("line-tool-straight").onclick = handleStraightMode;
 document.getElementById("line-tool-simplecurve").onclick = handleSimpleCurveMode;
