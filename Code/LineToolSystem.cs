@@ -408,6 +408,9 @@ namespace LineTool
         {
             _log.Debug("OnStopRunning");
 
+            // Clear tooltips.
+            _tooltips.Clear();
+
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;
             _cancelAction.shouldBeEnabled = false;
@@ -424,6 +427,9 @@ namespace LineTool
             {
                 EntityManager.AddComponent<Deleted>(previewEntity);
             }
+
+            // Clear previewed entity buffer.
+            _previewEntities.Clear();
 
             // Restore original prefab XP, if we changed it.
             if (_originalXP != 0 && EntityManager.TryGetComponent(_selectedEntity, out PlaceableObjectData placeableData))
