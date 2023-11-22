@@ -50,11 +50,13 @@ namespace LineTool
             _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-spacing\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
 
-            // Set initial spacing variable in UI (multiply by 10 for accuracy conversion).
+            // Set initial variables in UI (multiply spacing by 10 for accuracy conversion).
             UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing * 10};");
+            UIFileUtils.ExecuteScript(_uiView, $"var lineToolRotation = {_lineToolSystem.Rotation};");
 
             // Register event callbacks.
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);
+            _uiView.RegisterForEvent("SetLineToolRotation", (Action<int>)SetRotation);
             _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
             _uiView.RegisterForEvent("SetCircleMode", (Action)SetCircleMode);
@@ -119,6 +121,12 @@ namespace LineTool
         /// </summary>
         /// <param name="spacing">Value to set.</param>
         private void SetSpacing(float spacing) => _lineToolSystem.Spacing = spacing;
+
+        /// <summary>
+        /// Event callback to set current rotation.
+        /// </summary>
+        /// <param name="spacing">Value to set.</param>
+        private void SetRotation(int roatation) => _lineToolSystem.Rotation = roatation;
 
         /// <summary>
         /// Event callback to set straight line mode.

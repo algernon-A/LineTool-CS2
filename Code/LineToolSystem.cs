@@ -58,6 +58,7 @@ namespace LineTool
 
         // Tool settings.
         private float _spacing = 20f;
+        private int _rotation = 0;
 
         /// <summary>
         /// Gets the tool's ID string.
@@ -69,6 +70,11 @@ namespace LineTool
         /// Gets or sets the line spacing.
         /// </summary>
         internal float Spacing { get => _spacing; set => _spacing = value; }
+
+        /// <summary>
+        /// Gets or sets the oject rotation.
+        /// </summary>
+        internal int Rotation { get => _rotation; set => _rotation = value; }
 
         /// <summary>
         /// Gets the tooltip list.
@@ -320,7 +326,7 @@ namespace LineTool
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, Spacing, 0f, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, Spacing, Rotation, _points, ref _terrainHeightData);
 
             // Step along length and place objects.
             int count = 0;

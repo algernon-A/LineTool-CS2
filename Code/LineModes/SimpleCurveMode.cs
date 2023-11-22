@@ -80,7 +80,7 @@ namespace LineTool
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, float spacing, float rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, float spacing, int rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -98,6 +98,9 @@ namespace LineTool
             // Calculate bezier.
             _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, m_elbowPoint), new Line3.Segment(currentPos, m_elbowPoint));
 
+            // Rotation quaternion.
+            quaternion eulerRotation = quaternion.Euler(0f, rotation, 0f);
+
             // Create points.
             float tFactor = 0f;
             while (tFactor < 1.0f)
@@ -109,7 +112,7 @@ namespace LineTool
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.identity, });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = eulerRotation, });
 
                 // Get next t factor.
                 tFactor = BezierStep(tFactor, spacing);

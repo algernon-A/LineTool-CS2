@@ -22,6 +22,24 @@ if (typeof adjustSpacing !== 'function') {
     }
 }
 
+if (typeof adjustRotation !== 'function') {
+    function adjustRotation(event, adjustment) {
+        // Adjust for modifier keys.
+        var finalAdjustment = adjustment;
+        if (event) {
+            if (event.shiftKey)
+                finalAdjustment *= 100;
+            else if (!event.ctrlKey)
+                finalAdjustment *= 10;
+        }
+        
+        // Apply rotation.
+        lineToolRotation += finalAdjustment;
+        engine.trigger('SetLineToolRotation', lineToolRotation);
+        document.getElementById("line-tool-rotation-field").innerHTML = lineToolRotation + "&deg;";
+    }
+}
+
 if (typeof handleStraightMode !== 'function') {
     function handleStraightMode() {
         document.getElementById("line-tool-simplecurve").classList.remove("selected");
@@ -55,6 +73,9 @@ adjustSpacing(null, 0);
 // Add button event handlers.
 document.getElementById("line-tool-spacing-down").onmousedown = (event) => { adjustSpacing(event, -1); }
 document.getElementById("line-tool-spacing-up").onmousedown = (event) => { adjustSpacing(event, 1); }
+
+document.getElementById("line-tool-rotation-down").onmousedown = (event) => { adjustRotation(event, -1); }
+document.getElementById("line-tool-rotation-up").onmousedown = (event) => { adjustRotation(event, 1); }
 
 document.getElementById("line-tool-straight").onclick = handleStraightMode;
 document.getElementById("line-tool-simplecurve").onclick = handleSimpleCurveMode;

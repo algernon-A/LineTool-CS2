@@ -91,7 +91,7 @@ namespace LineTool
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public virtual void CalculatePoints(float3 currentPos, float spacing, float rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public virtual void CalculatePoints(float3 currentPos, float spacing, int rotation, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -101,6 +101,9 @@ namespace LineTool
 
             // Calculate length.
             float length = math.length(currentPos - m_startPos);
+
+            // Rotation quaternion.
+            quaternion eulerRotation = quaternion.Euler(0f, rotation, 0f);
 
             // Create points.
             float currentDistance = 0f;
@@ -113,7 +116,7 @@ namespace LineTool
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.identity, });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = eulerRotation, });
                 currentDistance += spacing;
             }
         }
