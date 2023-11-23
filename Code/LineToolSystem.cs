@@ -36,8 +36,8 @@ namespace LineTool
 
         // Cursor.
         private ControlPoint _raycastPoint;
+        private float3 _previousPos;
         private Entity _cursorEntity = Entity.Null;
-        private float2 _previousPos;
 
         // Prefab selection.
         private ObjectPrefab _selectedPrefab;
@@ -59,6 +59,7 @@ namespace LineTool
         // Tool settings.
         private float _spacing = 20f;
         private int _rotation = 0;
+        private bool _dirty = false;
 
         /// <summary>
         /// Gets the tool's ID string.
@@ -69,12 +70,29 @@ namespace LineTool
         /// <summary>
         /// Gets or sets the line spacing.
         /// </summary>
-        internal float Spacing { get => _spacing; set => _spacing = value; }
+        internal float Spacing
+        {
+            get => _spacing;
+
+            set
+            {
+                _spacing = value;
+                _dirty = true;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the oject rotation.
         /// </summary>
-        internal int Rotation { get => _rotation; set => _rotation = value; }
+        internal int Rotation
+        {
+            get => _rotation;
+            set
+            {
+                _rotation = value;
+                _dirty = true;
+            }
+        }
 
         /// <summary>
         /// Gets the tooltip list.
@@ -224,23 +242,6 @@ namespace LineTool
             // Clear tooltips.
             _tooltips.Clear();
 
-            // Check for and perform any cancellation.
-            if (_cancelAction.WasPressedThisFrame())
-            {
-                // Reset current mode settings.
-                _mode.Reset();
-
-                // Revert previewing.
-                foreach (Entity previewEntity in _previewEntities)
-                {
-                    EntityManager.AddComponent<Deleted>(previewEntity);
-                }
-
-                _previewEntities.Clear();
-
-                return inputDeps;
-            }
-
             // Don't do anything if no selected prefab.
             if (_selectedPrefab is null)
             {
@@ -248,85 +249,99 @@ namespace LineTool
             }
 
             // Check for valid raycast.
+            float3 position = _previousPos;
             GetRaycastResult(out _raycastPoint);
-            if (_raycastPoint.m_HitPosition.x == 0f && _raycastPoint.m_HitPosition.z == 0f)
+            if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
             {
-                // Invalid raycast.
-                return inputDeps;
-            }
-
-            // Raycast is valid - get world position.
-            float3 position = _raycastPoint.m_HitPosition;
-
-            // Calculate terrain height.
-            _terrainHeightData = _terrainSystem.GetHeightData();
-            position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
-
-            // Handle apply action.
-            if (_applyAction.WasPressedThisFrame())
-            {
-                // Handle click.
-                if (_mode.HandleClick(position))
+                // Valid raycast - update position.
+                position = _raycastPoint.m_HitPosition;
+                // Check for and perform any cancellation.
+                if (_cancelAction.WasPressedThisFrame())
                 {
-                    // We're placing items - remove highlighting.
+                    // Reset current mode settings.
+                    _mode.Reset();
+
+                    // Revert previewing.
                     foreach (Entity previewEntity in _previewEntities)
                     {
-                        EntityManager.RemoveComponent<Highlighted>(previewEntity);
-                        EntityManager.AddComponent<Updated>(previewEntity);
+                        EntityManager.AddComponent<Deleted>(previewEntity);
                     }
 
-                    // Clear preview.
                     _previewEntities.Clear();
-
-                    // Reset tool mode.
-                    _mode.ItemsPlaced(position);
 
                     return inputDeps;
                 }
-            }
 
-            // Update cursor entity if we haven't got an initial position set.
-            if (!_mode.HasStart)
-            {
-                // Create cursor entity if none yet exists.
-                if (_cursorEntity == Entity.Null)
+                // Calculate terrain height.
+                _terrainHeightData = _terrainSystem.GetHeightData();
+                position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
+
+                // Handle apply action.
+                if (_applyAction.WasPressedThisFrame())
                 {
-                    _cursorEntity = CreateEntity();
+                    // Handle click.
+                    if (_mode.HandleClick(position))
+                    {
+                        // We're placing items - remove highlighting.
+                        foreach (Entity previewEntity in _previewEntities)
+                        {
+                            EntityManager.RemoveComponent<Highlighted>(previewEntity);
+                            EntityManager.AddComponent<Updated>(previewEntity);
+                        }
 
-                    // Highlight cursor entity.
-                    EntityManager.AddComponent<Highlighted>(_cursorEntity);
+                        // Clear preview.
+                        _previewEntities.Clear();
+
+                        // Reset tool mode.
+                        _mode.ItemsPlaced(position);
+
+                        return inputDeps;
+                    }
                 }
 
-                // Update cursor entity position.
-                EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
-                EntityManager.AddComponent<Updated>(_cursorEntity);
+                // Update cursor entity if we haven't got an initial position set.
+                if (!_mode.HasStart)
+                {
+                    // Create cursor entity if none yet exists.
+                    if (_cursorEntity == Entity.Null)
+                    {
+                        _cursorEntity = CreateEntity();
 
-                return inputDeps;
-            }
-            else if (_cursorEntity != Entity.Null)
-            {
-                // Cancel cursor entity.
-                EntityManager.AddComponent<Deleted>(_cursorEntity);
-                _cursorEntity = Entity.Null;
+                        // Highlight cursor entity.
+                        EntityManager.AddComponent<Highlighted>(_cursorEntity);
+                    }
+
+                    // Update cursor entity position.
+                    EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                    EntityManager.AddComponent<Updated>(_cursorEntity);
+
+                    return inputDeps;
+                }
+                else if (_cursorEntity != Entity.Null)
+                {
+                    // Cancel cursor entity.
+                    EntityManager.AddComponent<Deleted>(_cursorEntity);
+                    _cursorEntity = Entity.Null;
+                }
             }
 
             // Render any overlay.
             _mode.DrawOverlay(position, _overlayBuffer, _tooltips);
 
-            // Check for position change.
-            if (position.x == _previousPos.x && position.z == _previousPos.y)
+            // Check for position change or update needed.
+            if (!_dirty && position.x == _previousPos.x && position.z == _previousPos.y)
             {
-                // No position change.
+                // No update needed.
                 return inputDeps;
             }
 
-            // Update stored position.
-            _previousPos.x = position.x;
-            _previousPos.y = position.z;
+            // Update stored position and clear dirty flag.
+            _previousPos = position;
+            _dirty = false;
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, Spacing, Rotation, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, Spacing, _rotation, _points, ref _terrainHeightData);
 
             // Step along length and place objects.
             int count = 0;
