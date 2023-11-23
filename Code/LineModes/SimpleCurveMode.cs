@@ -99,7 +99,7 @@ namespace LineTool
             _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, m_elbowPoint), new Line3.Segment(currentPos, m_elbowPoint));
 
             // Rotation quaternion.
-            quaternion eulerRotation = quaternion.Euler(0f, rotation, 0f);
+            quaternion eulerRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
 
             // Create points.
             float tFactor = 0f;

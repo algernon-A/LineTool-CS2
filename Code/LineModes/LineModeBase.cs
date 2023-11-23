@@ -103,7 +103,7 @@ namespace LineTool
             float length = math.length(currentPos - m_startPos);
 
             // Rotation quaternion.
-            quaternion eulerRotation = quaternion.Euler(0f, rotation, 0f);
+            quaternion eulerRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
 
             // Create points.
             float currentDistance = 0f;

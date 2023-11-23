@@ -32,9 +32,17 @@ if (typeof adjustRotation !== 'function') {
             else if (!event.ctrlKey)
                 finalAdjustment *= 10;
         }
-        
-        // Apply rotation.
+
+        // Bounds check rotation.
         lineToolRotation += finalAdjustment;
+        if (lineToolRotation > 360) {
+            lineToolRotation -= 360;
+        }
+        if (lineToolRotation < 0) {
+            lineToolRotation += 360;
+        }
+
+        // Apply rotation.
         engine.trigger('SetLineToolRotation', lineToolRotation);
         document.getElementById("line-tool-rotation-field").innerHTML = lineToolRotation + "&deg;";
     }
@@ -67,8 +75,9 @@ if (typeof handleCircleMode !== 'function') {
     }
 }
 
-// Set initial spacing.
+// Set initial figures.
 adjustSpacing(null, 0);
+adjustRotation(null, 0);
 
 // Add button event handlers.
 document.getElementById("line-tool-spacing-down").onmousedown = (event) => { adjustSpacing(event, -1); }

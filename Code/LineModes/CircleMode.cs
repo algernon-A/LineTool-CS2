@@ -59,7 +59,7 @@ namespace LineTool
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.Euler(0f, i + rotation, 0f), });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.Euler(0f, math.radians(i + rotation), 0f), });
             }
         }
 
