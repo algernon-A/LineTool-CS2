@@ -4,6 +4,7 @@
 
 namespace LineTool
 {
+    using System.Reflection;
     using Colossal.Entities;
     using Colossal.Logging;
     using Game.Common;
@@ -61,11 +62,15 @@ namespace LineTool
         private int _rotation = 0;
         private bool _dirty = false;
 
+        // Tree Controller integration.
+        private ToolBaseSystem _treeControllerTool;
+        private PropertyInfo _nextTreeState = null;
+
         /// <summary>
         /// Gets the tool's ID string.
         /// Mimics the network tool to use its icons.
         /// </summary>
-        public override string toolID => "Net Tool";
+        public override string toolID => "Line Tool";
 
         /// <summary>
         /// Gets or sets the line spacing.
@@ -132,6 +137,11 @@ namespace LineTool
                 _currentMode = value;
             }
         }
+
+        /// <summary>
+        /// Gets the currently selected entity.
+        /// </summary>
+        internal Entity SelectedEntity => _selectedEntity;
 
         /// <summary>
         /// Sets the currently selected preab.
@@ -230,6 +240,23 @@ namespace LineTool
             hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
             hotKey.performed += EnableTool;
             hotKey.Enable();
+
+            // Try to get tree controller tool.
+            if (World.GetExistingSystemManaged<ToolSystem>().tools.Find(x => x.toolID.Equals("Tree Controller Tool")) is ToolBaseSystem treeControllerTool)
+            {
+                // Found it - attempt to reflect NextTreeState property getter.
+                _log.Info("found tree controller");
+                _nextTreeState = treeControllerTool.GetType().GetProperty("NextTreeState");
+                if (_nextTreeState is not null)
+                {
+                    _treeControllerTool = treeControllerTool;
+                    _log.Info("reflected NextTreeState");
+                }
+            }
+            else
+            {
+                _log.Info("tree controller tool not found");
+            }
         }
 
         /// <summary>
@@ -255,6 +282,7 @@ namespace LineTool
             {
                 // Valid raycast - update position.
                 position = _raycastPoint.m_HitPosition;
+
                 // Check for and perform any cancellation.
                 if (_cancelAction.WasPressedThisFrame())
                 {
@@ -374,9 +402,12 @@ namespace LineTool
                     // Ensure any trees are still adults.
                     if (EntityManager.TryGetComponent<Tree>(_previewEntities[count], out Tree tree))
                     {
-                        tree.m_State = TreeState.Adult;
-                        tree.m_Growth = 128;
-                        EntityManager.SetComponentData(_previewEntities[count], tree);
+                        if (tree.m_Growth != 128)
+                        {
+                            tree.m_State = GetTreeState();
+                            tree.m_Growth = 128;
+                            EntityManager.SetComponentData(_previewEntities[count], tree);
+                        }
                     }
                 }
 
@@ -514,7 +545,7 @@ namespace LineTool
             {
                 Tree treeData = new ()
                 {
-                    m_State = TreeState.Adult,
+                    m_State = GetTreeState(),
                     m_Growth = 128,
                 };
 
@@ -522,6 +553,25 @@ namespace LineTool
             }
 
             return newEntity;
+        }
+
+        /// <summary>
+        /// Gets the tree state to apply to the next created tree.
+        /// Uses Tree Controller to determine this if available, otherwise returns <see cref="TreeState.Adult"/>.
+        /// </summary>
+        /// <returns>Tree state to apply.</returns>
+        private TreeState GetTreeState()
+        {
+            if (_treeControllerTool is null)
+            {
+                // Use this if Tree Controller is unavailable.
+                return TreeState.Adult;
+            }
+            else
+            {
+                // Tree controller state.
+                return (TreeState)_nextTreeState.GetValue(_treeControllerTool);
+            }
         }
     }
 }

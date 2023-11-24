@@ -22,6 +22,7 @@ if (typeof adjustSpacing !== 'function') {
     }
 }
 
+// Function to adjust rotation.
 if (typeof adjustRotation !== 'function') {
     function adjustRotation(event, adjustment) {
         // Adjust for modifier keys.
@@ -48,6 +49,19 @@ if (typeof adjustRotation !== 'function') {
     }
 }
 
+// Function to show the Tree Control age panel.
+if (typeof addLineToolTreeControl !== 'function') {
+    function addLineToolTreeControl(event, adjustment) {
+        if (typeof buildTreeAgeItem == 'function') {
+            var treeControlIntegration = document.createElement("line-tool-tree-control");
+            treeControlIntegration.className = "item-content_nNz";
+            document.getElementById("line-tool-settings").appendChild(treeControlIntegration);
+            buildTreeAgeItem(treeControlIntegration, "beforebegin");
+        }
+    }
+}
+
+// Function to activate straight mode.
 if (typeof handleStraightMode !== 'function') {
     function handleStraightMode() {
         document.getElementById("line-tool-simplecurve").classList.remove("selected");
@@ -57,6 +71,7 @@ if (typeof handleStraightMode !== 'function') {
     }
 }
 
+// Function to activate simple curve mode.
 if (typeof handleSimpleCurveMode !== 'function') {
     function handleSimpleCurveMode() {
         document.getElementById("line-tool-straight").classList.remove("selected");
@@ -66,6 +81,7 @@ if (typeof handleSimpleCurveMode !== 'function') {
     }
 }
 
+// Function to activate circle mode.
 if (typeof handleCircleMode !== 'function') {
     function handleCircleMode() {
         document.getElementById("line-tool-straight").classList.remove("selected");

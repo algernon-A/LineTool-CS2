@@ -8,6 +8,7 @@ namespace LineTool
     using System.IO;
     using cohtml.Net;
     using Colossal.Logging;
+    using Game.Prefabs;
     using Game.SceneFlow;
     using Game.Tools;
     using Game.UI;
@@ -98,6 +99,12 @@ namespace LineTool
                     // Select active tool button.
                     UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"{modeElement}\").classList.add(\"selected\");");
 
+                    // Show tree control menu if tree control is active.
+                    if (EntityManager.HasComponent<TreeData>(_lineToolSystem.SelectedEntity))
+                    {
+                        UIFileUtils.ExecuteScript(_uiView, "addLineToolTreeControl();");
+                    }
+
                     // Record current tool state.
                     _toolIsActive = true;
                 }
@@ -125,8 +132,8 @@ namespace LineTool
         /// <summary>
         /// Event callback to set current rotation.
         /// </summary>
-        /// <param name="spacing">Value to set.</param>
-        private void SetRotation(int roatation) => _lineToolSystem.Rotation = roatation;
+        /// <param name="rotation">Value to set.</param>
+        private void SetRotation(int rotation) => _lineToolSystem.Rotation = rotation;
 
         /// <summary>
         /// Event callback to set straight line mode.
