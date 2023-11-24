@@ -34,6 +34,8 @@ namespace LineTool
 
         // Line calculations.
         private readonly NativeList<PointData> _points = new (Allocator.Persistent);
+        private bool _fixedPreview = false;
+        private float3 _fixedPos;
 
         // Cursor.
         private ControlPoint _raycastPoint;
@@ -49,9 +51,12 @@ namespace LineTool
         private ILog _log;
         private TerrainSystem _terrainSystem;
         private TerrainHeightData _terrainHeightData;
+        private OverlayRenderSystem.Buffer _overlayBuffer;
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
-        private OverlayRenderSystem.Buffer _overlayBuffer;
+
+        // Custom input actions.
+        private InputAction _fixedPreviewAction;
 
         // Mode.
         private LineMode _currentMode;
@@ -226,6 +231,9 @@ namespace LineTool
             {
                 ResetTreeState(_previewEntities[i]);
             }
+
+            // Set dirty flag.
+            _dirty = true;
         }
 
         /// <summary>
@@ -250,8 +258,13 @@ namespace LineTool
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
             _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
 
+            // Enable fixed preview control.
+            _fixedPreviewAction = new ("LineTool-FixPreview");
+            _fixedPreviewAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
+            _fixedPreviewAction.Enable();
+
             // Enable hotkey.
-            InputAction hotKey = new ("LineTool");
+            InputAction hotKey = new ("LineTool-Hotkey");
             hotKey.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Keyboard>/l");
             hotKey.performed += EnableTool;
             hotKey.Enable();
@@ -291,12 +304,16 @@ namespace LineTool
             }
 
             // Check for valid raycast.
-            float3 position = _previousPos;
+            float3 position = _fixedPreview ? _fixedPos : _previousPos;
             GetRaycastResult(out _raycastPoint);
             if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
             {
                 // Valid raycast - update position.
-                position = _raycastPoint.m_HitPosition;
+                position = _fixedPreview ? _fixedPos : _raycastPoint.m_HitPosition;
+
+                // Calculate terrain height.
+                _terrainHeightData = _terrainSystem.GetHeightData();
+                position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
 
                 // Check for and perform any cancellation.
                 if (_cancelAction.WasPressedThisFrame())
@@ -315,13 +332,27 @@ namespace LineTool
                     return inputDeps;
                 }
 
-                // Calculate terrain height.
-                _terrainHeightData = _terrainSystem.GetHeightData();
-                position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
-
-                // Handle apply action.
-                if (_applyAction.WasPressedThisFrame())
+                // If no cancellation, handle any fixed preview action.
+                else if (_fixedPreviewAction.WasPressedThisFrame())
                 {
+                    _log.Info("FixedPos");
+
+                    _fixedPreview = true;
+                    _fixedPos = position;
+                }
+
+                // Handle apply action if no other actions.
+                else if (_applyAction.WasPressedThisFrame())
+                {
+                    _log.Info("Apply");
+
+                    // Were we in fixed state?
+                    if (_fixedPreview)
+                    {
+                        // Yes - cancel fixed preview.
+                        _fixedPreview = false;
+                    }
+
                     // Handle click.
                     if (_mode.HandleClick(position))
                     {
