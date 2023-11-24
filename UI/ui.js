@@ -57,6 +57,7 @@ if (typeof addLineToolTreeControl !== 'function') {
             treeControlIntegration.className = "item-content_nNz";
             document.getElementById("line-tool-settings").appendChild(treeControlIntegration);
             buildTreeAgeItem(treeControlIntegration, "beforebegin");
+            document.getElementById("YYTC-change-age-buttons-panel").onclick = function() { engine.trigger('LineToolTreeControlUpdated') };
         }
     }
 }

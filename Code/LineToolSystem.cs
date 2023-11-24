@@ -87,7 +87,7 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Gets or sets the oject rotation.
+        /// Gets or sets the`object rotation.
         /// </summary>
         internal int Rotation
         {
@@ -144,7 +144,7 @@ namespace LineTool
         internal Entity SelectedEntity => _selectedEntity;
 
         /// <summary>
-        /// Sets the currently selected preab.
+        /// Sets the currently selected prefab.
         /// </summary>
         private PrefabBase SelectedPrefab
         {
@@ -211,6 +211,21 @@ namespace LineTool
 
             // If we got here this isn't an eligible prefab.
             return false;
+        }
+
+        /// <summary>
+        /// Refreshes all displayed prefabs to align with current Tree Control settings.
+        /// </summary>
+        internal void RefreshTreeControl()
+        {
+            // Update cursor entity.
+            ResetTreeState(_cursorEntity);
+
+            // Update all previewed trees.
+            for (int i = 0; i < _previewEntities.Length; ++i)
+            {
+                ResetTreeState(_previewEntities[i]);
+            }
         }
 
         /// <summary>
@@ -571,6 +586,22 @@ namespace LineTool
             {
                 // Tree controller state.
                 return (TreeState)_nextTreeState.GetValue(_treeControllerTool);
+            }
+        }
+
+        /// <summary>
+        /// Resets a tree to current tree state settings.
+        /// </summary>
+        /// <param name="entity">Tree entity.</param>
+        private void ResetTreeState(Entity entity)
+        {
+            if (entity != Entity.Null)
+            {
+                if (EntityManager.TryGetComponent<Tree>(entity, out Tree tree))
+                {
+                    tree.m_State = GetTreeState();
+                    EntityManager.SetComponentData(entity, tree);
+                }
             }
         }
     }

@@ -61,6 +61,7 @@ namespace LineTool
             _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
             _uiView.RegisterForEvent("SetCircleMode", (Action)SetCircleMode);
+            _uiView.RegisterForEvent("LineToolTreeControlUpdated", (Action)TreeControlUpdated);
 
             // Add mod UI resource directory to UI resource handler.
             GameUIResourceHandler uiResourceHandler = GameManager.instance.userInterface.view.uiSystem.resourceHandler as GameUIResourceHandler;
@@ -149,5 +150,10 @@ namespace LineTool
         /// Event callback to set circle mode.
         /// </summary>
         private void SetCircleMode() => _lineToolSystem.Mode = LineMode.Circle;
+
+        /// <summary>
+        /// Event callback to update Tree Control settings.
+        /// </summary>
+        private void TreeControlUpdated() => _lineToolSystem.RefreshTreeControl();
     }
 }
