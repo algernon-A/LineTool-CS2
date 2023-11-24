@@ -335,8 +335,6 @@ namespace LineTool
                 // If no cancellation, handle any fixed preview action.
                 else if (_fixedPreviewAction.WasPressedThisFrame())
                 {
-                    _log.Info("FixedPos");
-
                     _fixedPreview = true;
                     _fixedPos = position;
                 }
@@ -344,8 +342,6 @@ namespace LineTool
                 // Handle apply action if no other actions.
                 else if (_applyAction.WasPressedThisFrame())
                 {
-                    _log.Info("Apply");
-
                     // Were we in fixed state?
                     if (_fixedPreview)
                     {
