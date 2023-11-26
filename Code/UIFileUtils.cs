@@ -34,7 +34,7 @@ namespace LineTool
                     ExecutableAsset modAsset = AssetDatabase.global.GetAsset(SearchFilter<ExecutableAsset>.ByCondition(x => x.definition?.FullName == assemblyName));
                     if (modAsset is null)
                     {
-                        Mod.Log.Error("mod executable asset not found");
+                        Mod.Instance.Log.Error("mod executable asset not found");
                         return null;
                     }
 
@@ -68,7 +68,7 @@ namespace LineTool
         /// <param name="directoryName">Mod sub-directory.</param>
         internal static void ReadUIFiles(View uiView, string directoryName)
         {
-            Mod.Log.Debug("reading UI files from " + directoryName);
+            Mod.Instance.Log.Debug("reading UI files from " + directoryName);
 
             try
             {
@@ -76,7 +76,7 @@ namespace LineTool
                 string directoryPath = Path.Combine(AssemblyPath, directoryName);
                 if (!Directory.Exists(directoryPath))
                 {
-                    Mod.Log.Error("unable to locate UI file directory " + directoryPath);
+                    Mod.Instance.Log.Error("unable to locate UI file directory " + directoryPath);
                     return;
                 }
 
@@ -100,7 +100,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Mod.Log.Error(e, "exception reading UI files");
+                Mod.Instance.Log.Error(e, "exception reading UI files");
             }
         }
 
@@ -125,7 +125,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Mod.Log.Error(e, "exception reading CSS file " + fileName);
+                Mod.Instance.Log.Error(e, "exception reading CSS file " + fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -154,7 +154,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Mod.Log.Error(e, "exception reading CSS file " + fileName);
+                Mod.Instance.Log.Error(e, "exception reading CSS file " + fileName);
             }
 
             // If we got here, something went wrong.; return null.
@@ -170,7 +170,7 @@ namespace LineTool
         {
             try
             {
-                Mod.Log.Debug("reading JavaScript file " + fileName);
+                Mod.Instance.Log.Debug("reading JavaScript file " + fileName);
 
                 // Attempt to read file.
                 string js = ReadUIFile(fileName);
@@ -184,10 +184,10 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Mod.Log.Error(e, "exception reading CSS file " + fileName);
+                Mod.Instance.Log.Error(e, "exception reading CSS file " + fileName);
             }
 
-            Mod.Log.Debug("failed to read JavaScript file " + fileName);
+            Mod.Instance.Log.Debug("failed to read JavaScript file " + fileName);
 
             // If we got here, something went wrong.; return null.
             return null;
@@ -211,7 +211,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                Mod.Log.Error(e, "exception reading UI file " + fileName);
+                Mod.Instance.Log.Error(e, "exception reading UI file " + fileName);
             }
 
             // If we got here, something went wrong.

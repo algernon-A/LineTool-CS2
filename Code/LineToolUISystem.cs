@@ -40,7 +40,7 @@ namespace LineTool
             base.OnCreate();
 
             // Set log.
-            _log = Mod.Log;
+            _log = Mod.Instance.Log;
 
             // Set references.
             _uiView = GameManager.instance.userInterface.view.View;

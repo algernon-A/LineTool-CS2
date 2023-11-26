@@ -52,10 +52,10 @@ namespace LineTool
         private TerrainSystem _terrainSystem;
         private TerrainHeightData _terrainHeightData;
         private OverlayRenderSystem.Buffer _overlayBuffer;
+
+        // Input actions.
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
-
-        // Custom input actions.
         private InputAction _fixedPreviewAction;
 
         // Mode.
@@ -73,7 +73,6 @@ namespace LineTool
 
         /// <summary>
         /// Gets the tool's ID string.
-        /// Mimics the network tool to use its icons.
         /// </summary>
         public override string toolID => "Line Tool";
 
@@ -244,7 +243,7 @@ namespace LineTool
             base.OnCreate();
 
             // Set log.
-            _log = Mod.Log;
+            _log = Mod.Instance.Log;
 
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
@@ -305,8 +304,7 @@ namespace LineTool
 
             // Check for valid raycast.
             float3 position = _fixedPreview ? _fixedPos : _previousPos;
-            GetRaycastResult(out _raycastPoint);
-            if (_raycastPoint.m_HitPosition.x != 0f || _raycastPoint.m_HitPosition.z != 0f)
+            if (GetRaycastResult(out _raycastPoint))
             {
                 // Valid raycast - update position.
                 position = _fixedPreview ? _fixedPos : _raycastPoint.m_HitPosition;

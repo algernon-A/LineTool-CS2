@@ -60,7 +60,7 @@ namespace LineTool
         /// <summary>
         /// Gets the mod's active log.
         /// </summary>
-        internal static ILog Log { get; private set; }
+        internal ILog Log { get; private set; }
 
         /// <summary>
         /// Called by the game when the mod is loaded.
