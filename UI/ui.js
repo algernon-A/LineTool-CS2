@@ -53,10 +53,8 @@ if (typeof adjustRotation !== 'function') {
 if (typeof addLineToolTreeControl !== 'function') {
     function addLineToolTreeControl(event, adjustment) {
         if (typeof buildTreeAgeItem == 'function') {
-            var treeControlIntegration = document.createElement("line-tool-tree-control");
-            treeControlIntegration.className = "item-content_nNz";
-            document.getElementById("line-tool-settings").appendChild(treeControlIntegration);
-            buildTreeAgeItem(treeControlIntegration, "beforebegin");
+            var modeLine = document.getElementById("line-tool-mode");
+            buildTreeAgeItem(modeLine, "afterend");
             document.getElementById("YYTC-change-age-buttons-panel").onclick = function() { engine.trigger('LineToolTreeControlUpdated') };
         }
     }

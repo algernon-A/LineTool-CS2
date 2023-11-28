@@ -48,7 +48,7 @@ namespace LineTool
             _lineToolSystem = World.GetOrCreateSystemManaged<LineToolSystem>();
 
             // Read injection data.
-            _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-spacing\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
+            _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-panel\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
 
             // Set initial variables in UI (multiply spacing by 10 for accuracy conversion).
@@ -116,7 +116,7 @@ namespace LineTool
                 if (_toolIsActive)
                 {
                     // Remove DOM activation.
-                    UIFileUtils.ExecuteScript(_uiView, "var spacing = document.getElementById(\"line-tool-spacing\"); if (spacing) spacing.parentElement.removeChild(spacing);");
+                    UIFileUtils.ExecuteScript(_uiView, "var panel = document.getElementById(\"line-tool-panel\"); if (panel) panel.parentElement.removeChild(panel);");
 
                     // Record current tool state.
                     _toolIsActive = false;
