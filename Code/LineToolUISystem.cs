@@ -51,6 +51,9 @@ namespace LineTool
             _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-panel\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
 
+            // Inject .css.
+            UIFileUtils.ExecuteScript(_uiView, UIFileUtils.ReadCSS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.css")));
+
             // Set initial variables in UI (multiply spacing by 10 for accuracy conversion).
             UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing * 10};");
             UIFileUtils.ExecuteScript(_uiView, $"var lineToolRotation = {_lineToolSystem.Rotation};");
@@ -105,6 +108,9 @@ namespace LineTool
                     if (_lineToolSystem.RandomRotation)
                     {
                         UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"line-tool-rotation-random\").classList.add(\"selected\");");
+
+                        // Hide rotation button.
+                        UIFileUtils.ExecuteScript(_uiView, "lineToolSetRotationVisibility(false);");
                     }
 
                     // Show tree control menu if tree control is active.

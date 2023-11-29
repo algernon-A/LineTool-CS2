@@ -623,8 +623,6 @@ namespace LineTool
                 // Use position to init RNG.
                 _random.InitState((uint)(math.abs(position.x) + math.abs(position.y) + math.abs(position.z)) * 1000);
                 rotation = _random.NextInt(360);
-
-                _log.Info("getting random " + rotation);
             }
 
             // Generate return quaternion.

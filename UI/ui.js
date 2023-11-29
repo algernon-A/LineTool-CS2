@@ -56,10 +56,16 @@ if (typeof lineToolRandomRotation !== 'function') {
         if (adjustRotationButton.classList.contains("selected")) {
             adjustRotationButton.classList.remove("selected");
             engine.trigger('SetLineToolRandomRotation', false);
+
+            // Show rotation tools.
+            lineToolSetRotationVisibility(true);
         }
         else {
             adjustRotationButton.classList.add("selected");
             engine.trigger('SetLineToolRandomRotation', true);
+
+            // Hide rotation tools.
+            lineToolSetRotationVisibility(false);
         }
     }
 }
@@ -105,6 +111,38 @@ if (typeof lineToolHandleCircleMode !== 'function') {
     }
 }
 
+// Function to set rotation selection control visibility
+if (typeof lineToolSetRotationVisibility !== 'function') {
+    function lineToolSetRotationVisibility(isVisible) {
+        lineToolSetButtonVisibility(document.getElementById("line-tool-rotation-up"), isVisible);
+        lineToolSetButtonVisibility(document.getElementById("line-tool-rotation-down"), isVisible);
+        if (isVisible) {
+            document.getElementById("line-tool-rotation-field").style.visibility = "visible";
+        }
+        else {
+            document.getElementById("line-tool-rotation-field").style.visibility = "hidden";
+        }
+    }
+}
+
+// Function to set the visibility status of a button with icon child.
+if (typeof lineToolSetButtonVisibility !== 'function') {
+    function lineToolSetButtonVisibility(button, isVisible) {
+        var firstChild = button.firstChild;
+        if (isVisible) {
+            button.classList.remove("hidden");
+            firstChild.classList.remove("hidden");
+            firstChild.style.display = "inline";
+        }
+        else {
+            button.classList.add("hidden");
+            firstChild.classList.add("hidden");
+            firstChild.style.display = "none";
+        }
+    }
+}
+
+
 // Set initial figures.
 lineToolAdjustSpacing(null, 0);
 lineToolAdjustRotation(null, 0);
@@ -116,7 +154,6 @@ document.getElementById("line-tool-spacing-up").onmousedown = (event) => { lineT
 document.getElementById("line-tool-rotation-random").onmousedown = () => { lineToolRandomRotation(); }
 document.getElementById("line-tool-rotation-up").onmousedown = (event) => { lineToolAdjustRotation(event, 1); }
 document.getElementById("line-tool-rotation-down").onmousedown = (event) => { lineToolAdjustRotation(event, -1); }
-document.getElementById("line-tool-rotation-up").onmousedown = (event) => { lineToolAdjustRotation(event, 1); }
 
 document.getElementById("line-tool-straight").onclick = lineToolHandleStraightMode;
 document.getElementById("line-tool-simplecurve").onclick = lineToolHandleSimpleCurveMode;
