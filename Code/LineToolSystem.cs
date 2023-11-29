@@ -20,6 +20,7 @@ namespace LineTool
     using Unity.Mathematics;
     using UnityEngine.InputSystem;
     using static Game.Rendering.GuideLinesSystem;
+    using Random = Unity.Mathematics.Random;
     using Transform = Game.Objects.Transform;
     using Tree = Game.Objects.Tree;
 
@@ -36,6 +37,7 @@ namespace LineTool
         private readonly NativeList<PointData> _points = new (Allocator.Persistent);
         private bool _fixedPreview = false;
         private float3 _fixedPos;
+        private Random _random = new ();
 
         // Cursor.
         private ControlPoint _raycastPoint;
@@ -64,6 +66,7 @@ namespace LineTool
 
         // Tool settings.
         private float _spacing = 20f;
+        private bool _randomRotation = false;
         private int _rotation = 0;
         private bool _dirty = false;
 
@@ -91,7 +94,20 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Gets or sets the`object rotation.
+        /// Gets or sets a value indicating whether random rotation is active.
+        /// </summary>
+        internal bool RandomRotation
+        {
+            get => _randomRotation;
+            set
+            {
+                _randomRotation = value;
+                _dirty = true;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rotation setting.
         /// </summary>
         internal int Rotation
         {
@@ -380,8 +396,11 @@ namespace LineTool
                     }
 
                     // Update cursor entity position.
-                    EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = quaternion.identity, });
+                    EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = GetEffectiveRotation(position) });
                     EntityManager.AddComponent<Updated>(_cursorEntity);
+
+                    // Ensure cursor entity tree state.
+                    EnsureTreeState(_cursorEntity);
 
                     return inputDeps;
                 }
@@ -415,11 +434,13 @@ namespace LineTool
             int count = 0;
             foreach (PointData thisPoint in _points)
             {
+                UnityEngine.Random.InitState((int)(thisPoint.Position.x + thisPoint.Position.y + thisPoint.Position.z));
+
                 // Create transform component.
                 Transform transformData = new ()
                 {
                     m_Position = thisPoint.Position,
-                    m_Rotation = thisPoint.Rotation,
+                    m_Rotation = _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                 };
 
                 // Create new entity if required.
@@ -440,15 +461,7 @@ namespace LineTool
                     EntityManager.AddComponent<Updated>(_previewEntities[count]);
 
                     // Ensure any trees are still adults.
-                    if (EntityManager.TryGetComponent<Tree>(_previewEntities[count], out Tree tree))
-                    {
-                        if (tree.m_Growth != 128)
-                        {
-                            tree.m_State = GetTreeState();
-                            tree.m_Growth = 128;
-                            EntityManager.SetComponentData(_previewEntities[count], tree);
-                        }
-                    }
+                    EnsureTreeState(_previewEntities[count]);
                 }
 
                 // Increment distance.
@@ -593,6 +606,49 @@ namespace LineTool
             }
 
             return newEntity;
+        }
+
+        /// <summary>
+        /// Gets the effective object rotation depending on current settings.
+        /// </summary>
+        /// <param name="position">Object position (to seed random number generator).</param>
+        /// <returns>Effective rotation quaternion according to current settings.</returns>
+        private quaternion GetEffectiveRotation(float3 position)
+        {
+            int rotation = _rotation;
+
+
+            // Override fixed rotation with a random value if we're using random rotation.
+            if (_randomRotation)
+            {
+                // Use position to init RNG.
+                _random.InitState((uint)(math.abs(position.x) + math.abs(position.y) + math.abs(position.z)) * 1000);
+                rotation = _random.NextInt(360);
+
+                _log.Info("getting random " + rotation);
+            }
+
+            // Generate return quaternion.
+            return quaternion.Euler(0, math.radians(rotation), 0);
+        }
+
+        /// <summary>
+        /// Ensures any previewed trees have the correct age group.
+        /// This resolves an issue where previewed trees will have their age group reset if they ever get blocked while previwing.
+        /// </summary>
+        /// <param name="entity">Entity to check.</param>
+        private void EnsureTreeState(Entity entity)
+        {
+            // Ensure any trees are still adults.
+            if (EntityManager.TryGetComponent<Tree>(entity, out Tree tree))
+            {
+                if (tree.m_Growth != 128)
+                {
+                    tree.m_State = GetTreeState();
+                    tree.m_Growth = 128;
+                    EntityManager.SetComponentData(entity, tree);
+                }
+            }
         }
 
         /// <summary>

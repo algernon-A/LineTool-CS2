@@ -103,7 +103,7 @@ namespace LineTool
             float length = math.length(currentPos - m_startPos);
 
             // Rotation quaternion.
-            quaternion eulerRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
+            quaternion rotationQuaternion = quaternion.Euler(0f, math.radians(rotation), 0f);
 
             // Create points.
             float currentDistance = 0f;
@@ -116,7 +116,7 @@ namespace LineTool
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = eulerRotation, });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = rotationQuaternion, });
                 currentDistance += spacing;
             }
         }
@@ -157,7 +157,7 @@ namespace LineTool
             // Don't draw lines for short distances.
             if (distance > LineWidth * 8f)
             {
-                // Offset segment, mimicing game simple curve overlay, to ensure dash spacing.
+                // Offset segment, mimicking game simple curve overlay, to ensure dash spacing.
                 float3 offset = (segment.b - segment.a) * (LineWidth * 4f / distance);
                 Line3.Segment line = new (segment.a + offset, segment.b - offset);
 

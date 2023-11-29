@@ -57,6 +57,7 @@ namespace LineTool
 
             // Register event callbacks.
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);
+            _uiView.RegisterForEvent("SetLineToolRandomRotation", (Action<bool>)SetRandomRotation);
             _uiView.RegisterForEvent("SetLineToolRotation", (Action<int>)SetRotation);
             _uiView.RegisterForEvent("SetStraightMode", (Action)SetStraightMode);
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
@@ -100,6 +101,12 @@ namespace LineTool
                     // Select active tool button.
                     UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"{modeElement}\").classList.add(\"selected\");");
 
+                    // Select random rotation button if needed.
+                    if (_lineToolSystem.RandomRotation)
+                    {
+                        UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"line-tool-rotation-random\").classList.add(\"selected\");");
+                    }
+
                     // Show tree control menu if tree control is active.
                     if (EntityManager.HasComponent<TreeData>(_lineToolSystem.SelectedEntity))
                     {
@@ -129,6 +136,12 @@ namespace LineTool
         /// </summary>
         /// <param name="spacing">Value to set.</param>
         private void SetSpacing(float spacing) => _lineToolSystem.Spacing = spacing;
+
+        /// <summary>
+        /// Event callback to set the random rotation override.
+        /// </summary>
+        /// <param name="isRandom">Value to set.</param>
+        private void SetRandomRotation(bool isRandom) => _lineToolSystem.RandomRotation = isRandom;
 
         /// <summary>
         /// Event callback to set current rotation.
