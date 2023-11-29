@@ -39,7 +39,7 @@ namespace LineTool
             NativeList<TooltipInfo> tooltips = _lineToolSystem.Tooltips;
             for (int i = 0; i < tooltips.Length; ++i)
             {
-                // Create new tooltip tenplate and add to list if needed.
+                // Create new tooltip template and add to list if needed.
                 TooltipInfo tooltipInfo = tooltips[i];
                 if (_tooltipGroups.Count <= i)
                 {

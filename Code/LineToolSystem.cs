@@ -617,7 +617,6 @@ namespace LineTool
         {
             int rotation = _rotation;
 
-
             // Override fixed rotation with a random value if we're using random rotation.
             if (_randomRotation)
             {
@@ -634,7 +633,7 @@ namespace LineTool
 
         /// <summary>
         /// Ensures any previewed trees have the correct age group.
-        /// This resolves an issue where previewed trees will have their age group reset if they ever get blocked while previwing.
+        /// This resolves an issue where previewed trees will have their age group reset if they ever get blocked while previewing.
         /// </summary>
         /// <param name="entity">Entity to check.</param>
         private void EnsureTreeState(Entity entity)
