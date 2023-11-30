@@ -31,13 +31,14 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<_UI Include="$(ProjectDir)/UI/*.*" />
+	  <EmbeddedResource Include="UI\ui.css" />
+	  <EmbeddedResource Include="UI\ui.html" />
+	  <EmbeddedResource Include="UI\ui.js" />
 	</ItemGroup>
 	
 	<Target Name="DeployToModDirectory" AfterTargets="Build">
 		<PropertyGroup>
 			<DeployDir>$(USERPROFILE)/AppData/LocalLow/Colossal Order/Cities Skylines II/Mods/WorkInProgress/$(SolutionName)</DeployDir>
 		</PropertyGroup>
-		<Copy SourceFiles="@(_UI)" DestinationFolder="$(DeployDir)/UI" />
 	</Target>
 </Project>

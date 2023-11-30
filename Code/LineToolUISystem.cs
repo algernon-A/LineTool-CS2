@@ -6,6 +6,8 @@ namespace LineTool
 {
     using System;
     using System.IO;
+    using System.Reflection;
+    using System.Text;
     using cohtml.Net;
     using Colossal.Logging;
     using Game.Prefabs;
@@ -48,15 +50,15 @@ namespace LineTool
             _lineToolSystem = World.GetOrCreateSystemManaged<LineToolSystem>();
 
             // Read injection data.
-            _injectedHTML = UIFileUtils.ReadHTML(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-panel\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
-            _injectedJS = UIFileUtils.ReadJS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.js"));
+            _injectedHTML = ReadHTML(Path.Combine("LineTool.UI.ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-panel\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
+            _injectedJS = ReadJS("LineTool.UI.ui.js");
 
             // Inject .css.
-            UIFileUtils.ExecuteScript(_uiView, UIFileUtils.ReadCSS(Path.Combine(UIFileUtils.AssemblyPath, "UI", "ui.css")));
+            ExecuteScript(_uiView, ReadCSS("LineTool.UI.ui.css"));
 
             // Set initial variables in UI (multiply spacing by 10 for accuracy conversion).
-            UIFileUtils.ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing * 10};");
-            UIFileUtils.ExecuteScript(_uiView, $"var lineToolRotation = {_lineToolSystem.Rotation};");
+            ExecuteScript(_uiView, $"var lineToolSpacing = {_lineToolSystem.Spacing * 10};");
+            ExecuteScript(_uiView, $"var lineToolRotation = {_lineToolSystem.Rotation};");
 
             // Register event callbacks.
             _uiView.RegisterForEvent("SetLineToolSpacing", (Action<float>)SetSpacing);
@@ -66,10 +68,6 @@ namespace LineTool
             _uiView.RegisterForEvent("SetSimpleCurveMode", (Action)SetSimpleCurveMode);
             _uiView.RegisterForEvent("SetCircleMode", (Action)SetCircleMode);
             _uiView.RegisterForEvent("LineToolTreeControlUpdated", (Action)TreeControlUpdated);
-
-            // Add mod UI resource directory to UI resource handler.
-            GameUIResourceHandler uiResourceHandler = GameManager.instance.userInterface.view.uiSystem.resourceHandler as GameUIResourceHandler;
-            uiResourceHandler?.HostLocationsMap.Add("linetoolui", new System.Collections.Generic.List<string> { Mod.Instance.AssemblyPath + "/UI" });
         }
 
         /// <summary>
@@ -85,13 +83,13 @@ namespace LineTool
                 if (!_toolIsActive)
                 {
                     // Tool is now active but previously wasn't; attempt to get game's tool options menu.
-                    UIFileUtils.ExecuteScript(_uiView, "var toolOptions = document.getElementsByClassName(\"tool-side-column_l9i\"); if (toolOptions && toolOptions.length > 0) { engine.trigger('ToolOptionsReady', toolOptions[0].innerHTML);}");
+                    ExecuteScript(_uiView, "var toolOptions = document.getElementsByClassName(\"tool-side-column_l9i\"); if (toolOptions && toolOptions.length > 0) { engine.trigger('ToolOptionsReady', toolOptions[0].innerHTML);}");
 
                     // Attach our custom controls.
                     // Inject scripts.
                     _log.Debug("injecting component data");
-                    UIFileUtils.ExecuteScript(_uiView, _injectedHTML);
-                    UIFileUtils.ExecuteScript(_uiView, _injectedJS);
+                    ExecuteScript(_uiView, _injectedHTML);
+                    ExecuteScript(_uiView, _injectedJS);
 
                     // Determine active tool mode.
                     string modeElement = _lineToolSystem.Mode switch
@@ -102,21 +100,21 @@ namespace LineTool
                     };
 
                     // Select active tool button.
-                    UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"{modeElement}\").classList.add(\"selected\");");
+                    ExecuteScript(_uiView, $"document.getElementById(\"{modeElement}\").classList.add(\"selected\");");
 
                     // Select random rotation button if needed.
                     if (_lineToolSystem.RandomRotation)
                     {
-                        UIFileUtils.ExecuteScript(_uiView, $"document.getElementById(\"line-tool-rotation-random\").classList.add(\"selected\");");
+                        ExecuteScript(_uiView, $"document.getElementById(\"line-tool-rotation-random\").classList.add(\"selected\");");
 
                         // Hide rotation button.
-                        UIFileUtils.ExecuteScript(_uiView, "lineToolSetRotationVisibility(false);");
+                        ExecuteScript(_uiView, "lineToolSetRotationVisibility(false);");
                     }
 
                     // Show tree control menu if tree control is active.
                     if (EntityManager.HasComponent<TreeData>(_lineToolSystem.SelectedEntity))
                     {
-                        UIFileUtils.ExecuteScript(_uiView, "addLineToolTreeControl();");
+                        ExecuteScript(_uiView, "addLineToolTreeControl();");
                     }
 
                     // Record current tool state.
@@ -129,12 +127,174 @@ namespace LineTool
                 if (_toolIsActive)
                 {
                     // Remove DOM activation.
-                    UIFileUtils.ExecuteScript(_uiView, "var panel = document.getElementById(\"line-tool-panel\"); if (panel) panel.parentElement.removeChild(panel);");
+                    ExecuteScript(_uiView, "var panel = document.getElementById(\"line-tool-panel\"); if (panel) panel.parentElement.removeChild(panel);");
 
                     // Record current tool state.
                     _toolIsActive = false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Executes JavaScript in the given View.
+        /// </summary>
+        /// <param name="view"><see cref="View"/> to execute in.</param>
+        /// <param name="script">Script to execute.</param>
+        private void ExecuteScript(View view, string script)
+        {
+            // Null check.
+            if (!string.IsNullOrEmpty(script))
+            {
+                view?.ExecuteScript(script);
+            }
+        }
+
+        /// <summary>
+        /// Load CSS from an embedded UI file.
+        /// </summary>
+        /// <param name="fileName">Embedded UI file name to read.</param>
+        /// <returns>JavaScript <see cref="string"/> embedding the CSS (<c>null</c> if empty or error).</returns>
+        private string ReadCSS(string fileName)
+        {
+            try
+            {
+                // Attempt to read file.
+                string css = ReadUIFile(fileName);
+
+                // Don't do anything if file wasn't read.
+                if (!string.IsNullOrEmpty(css))
+                {
+                    // Return JavaScript code with CSS embedded.
+                    return $"var style = document.createElement('style'); style.type = 'text/css'; style.innerHTML = \"{EscapeToJavaScript(css)}\"; document.head.appendChild(style);";
+                }
+            }
+            catch (Exception e)
+            {
+                Mod.Instance.Log.Error(e, "exception reading CSS file " + fileName);
+            }
+
+            // If we got here, something went wrong.; return null.
+            Mod.Instance.Log.Error("failed to read embedded CSS file " + fileName);
+            return null;
+        }
+
+        /// <summary>
+        /// Load HTML from an embedded UI file.
+        /// </summary>
+        /// <param name="fileName">Embedded UI file name to read.</param>
+        /// <param name="injectionPostfix">Injection JavaScript postfix text.</param>
+        /// <returns>JavaScript <see cref="string"/> embedding the HTML (<c>null</c> if empty or error).</returns>
+        private string ReadHTML(string fileName, string injectionPostfix = "document.body.appendChild(div);")
+        {
+            try
+            {
+                // Attempt to read file.
+                string html = ReadUIFile(fileName);
+
+                // Don't do anything if file wasn't read.
+                if (!string.IsNullOrEmpty(html))
+                {
+                    // Return JavaScript code with HTML embedded.
+                    return $"var div = document.createElement('div'); div.innerHTML = \"{EscapeToJavaScript(html)}\"; {injectionPostfix}";
+                }
+            }
+            catch (Exception e)
+            {
+                Mod.Instance.Log.Error(e, "exception reading embedded HTML file " + fileName);
+            }
+
+            // If we got here, something went wrong.; return null.
+            Mod.Instance.Log.Error("failed to read embedded HTML file " + fileName);
+            return null;
+        }
+
+        /// <summary>
+        /// Load JavaScript from an embedded UI file.
+        /// </summary>>
+        /// <param name="fileName">UI file name to read.</param>
+        /// <returns>JavaScript as <see cref="string"/> (<c>null</c> if empty or error).</returns>
+        private string ReadJS(string fileName)
+        {
+            try
+            {
+                // Attempt to read file.
+                string js = ReadUIFile(fileName);
+
+                // Don't do anything if file wasn't read.
+                if (!string.IsNullOrEmpty(js))
+                {
+                    // Return JavaScript code with HTML embedded.
+                    return js;
+                }
+            }
+            catch (Exception e)
+            {
+                Mod.Instance.Log.Error(e, "exception reading embedded JavaScript file " + fileName);
+            }
+
+            // If we got here, something went wrong; return null.
+            Mod.Instance.Log.Error("failed to read embedded JavaScript file " + fileName);
+            return null;
+        }
+
+        /// <summary>
+        /// Reads an embedded UI text file.
+        /// </summary>
+        /// <param name="fileName">Embedded UI file name to read.</param>
+        /// <returns>File contents (<c>null</c> if none or error).</returns>
+        private string ReadUIFile(string fileName)
+        {
+            try
+            {
+                // Read file.
+                using Stream embeddedStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(fileName);
+                using StreamReader reader = new (embeddedStream);
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (Exception e)
+            {
+                Mod.Instance.Log.Error(e, "exception reading embedded UI file " + fileName);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Escapes HTML or CSS input for in-lining into JavaScript.
+        /// </summary>
+        /// <param name="sourceString">HTML source.</param>
+        /// <returns>Escaped HTML as <see cref="string"/>.</returns>
+        private string EscapeToJavaScript(string sourceString)
+        {
+            // Create output StringBuilder.
+            int length = sourceString.Length;
+            StringBuilder stringBuilder = new (length * 2);
+
+            // Iterate through each char.
+            int index = -1;
+            while (++index < length)
+            {
+                char ch = sourceString[index];
+
+                // Just skip line breaks.
+                if (ch == '\n' || ch == '\r')
+                {
+                    continue;
+                }
+
+                // Escape any double or single quotes.
+                if (ch == '"' || ch == '\'')
+                {
+                    stringBuilder.Append('\\');
+                }
+
+                // Add character to output.
+                stringBuilder.Append(ch);
+            }
+
+            return stringBuilder.ToString();
         }
 
         /// <summary>
