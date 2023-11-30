@@ -62,7 +62,7 @@ namespace LineTool
 
         // Mode.
         private LineMode _currentMode;
-        private LineModeBase _mode;
+        private LineBase _mode;
 
         // Tool settings.
         private float _spacing = 20f;
@@ -143,13 +143,13 @@ namespace LineTool
                 switch (value)
                 {
                     case LineMode.Straight:
-                        _mode = new StraightMode(_mode);
+                        _mode = new StraightLine(_mode);
                         break;
                     case LineMode.SimpleCurve:
-                        _mode = new SimpleCurveMode(_mode);
+                        _mode = new SimpleCurve(_mode);
                         break;
                     case LineMode.Circle:
-                        _mode = new CircleMode(_mode);
+                        _mode = new Circle(_mode);
                         break;
                 }
 
@@ -267,7 +267,7 @@ namespace LineTool
 
             // Set default mode.
             _currentMode = LineMode.Straight;
-            _mode = new StraightMode();
+            _mode = new StraightLine();
 
             // Set actions.
             _applyAction = InputManager.instance.FindAction("Tool", "Apply");
@@ -621,7 +621,7 @@ namespace LineTool
             if (_randomRotation)
             {
                 // Use position to init RNG.
-                _random.InitState((uint)(math.abs(position.x) + math.abs(position.y) + math.abs(position.z)) * 1000);
+                _random.InitState((uint)(math.abs(position.x) + math.abs(position.y) + math.abs(position.z)) * 10000);
                 rotation = _random.NextInt(360);
             }
 

@@ -1,4 +1,4 @@
-﻿// <copyright file="CircleMode.cs" company="algernon (K. Algernon A. Sheppard)">
+﻿// <copyright file="Circle.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // </copyright>
 
@@ -11,13 +11,13 @@ namespace LineTool
     /// <summary>
     ///  Circle placement mode.
     /// </summary>
-    public class CircleMode : LineModeBase
+    public class Circle : LineBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CircleMode"/> class.
+        /// Initializes a new instance of the <see cref="Circle"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public CircleMode(LineModeBase mode)
+        public Circle(LineBase mode)
             : base(mode)
         {
         }

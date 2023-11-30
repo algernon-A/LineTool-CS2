@@ -1,3 +1,7 @@
+// <copyright file="ui.js" company="algernon (K. Algernon A. Sheppard)">
+// Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
+// </copyright>
+
 // Function to adjust spacing.
 if (typeof lineToolAdjustSpacing !== 'function') {
     function lineToolAdjustSpacing(event, adjustment) {

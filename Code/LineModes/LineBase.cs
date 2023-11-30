@@ -1,4 +1,4 @@
-﻿// <copyright file="LineModeBase.cs" company="algernon (K. Algernon A. Sheppard)">
+﻿// <copyright file="LineBase.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // </copyright>
 
@@ -16,7 +16,7 @@ namespace LineTool
     /// Line placement mode.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Protected fields")]
-    public abstract class LineModeBase
+    public abstract class LineBase
     {
         /// <summary>
         /// Indicates whether a valid starting position has been recorded.
@@ -29,19 +29,19 @@ namespace LineTool
         protected float3 m_startPos;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LineModeBase"/> class.
+        /// Initializes a new instance of the <see cref="LineBase"/> class.
         /// </summary>
-        public LineModeBase()
+        public LineBase()
         {
             // Basic state.
             m_validStart = false;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LineModeBase"/> class.
+        /// Initializes a new instance of the <see cref="LineBase"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public LineModeBase(LineModeBase mode)
+        public LineBase(LineBase mode)
         {
             m_validStart = mode.m_validStart;
             m_startPos = mode.m_startPos;

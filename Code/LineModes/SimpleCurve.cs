@@ -1,4 +1,4 @@
-﻿// <copyright file="SimpleCurveMode.cs" company="algernon (K. Algernon A. Sheppard)">
+﻿// <copyright file="SimpleCurve.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // </copyright>
 
@@ -16,7 +16,7 @@ namespace LineTool
     /// <summary>
     /// Simple curve placement mode.
     /// </summary>
-    public class SimpleCurveMode : LineModeBase
+    public class SimpleCurve : LineBase
     {
         // Current elbow point.
         private bool m_validElbow = false;
@@ -26,10 +26,10 @@ namespace LineTool
         private Bezier4x3 _thisBezier;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SimpleCurveMode"/> class.
+        /// Initializes a new instance of the <see cref="SimpleCurve"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public SimpleCurveMode(LineModeBase mode)
+        public SimpleCurve(LineBase mode)
             : base(mode)
         {
         }
@@ -95,11 +95,11 @@ namespace LineTool
                 return;
             }
 
-            // Calculate bezier.
+            // Calculate Bezier.
             _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, m_elbowPoint), new Line3.Segment(currentPos, m_elbowPoint));
 
             // Rotation quaternion.
-            quaternion eulerRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
+            quaternion qRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
 
             // Create points.
             float tFactor = 0f;
@@ -112,7 +112,7 @@ namespace LineTool
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = eulerRotation, });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
 
                 // Get next t factor.
                 tFactor = BezierStep(tFactor, spacing);
@@ -290,83 +290,97 @@ namespace LineTool
         /// <returns>Ending t-factor.</returns>
         private float Travel(float start, float distance)
         {
-            Vector3 vector = MathUtils.Position(_thisBezier, start);
-            float num;
-            float num2;
-            float f;
-            float f2;
+            Vector3 startPos = MathUtils.Position(_thisBezier, start);
+
             if (distance < 0f)
             {
+                // Negative (reverse) direction.
                 distance = 0f - distance;
-                num = 0f;
-                num2 = start;
+                float t1 = 0f;
+                float t2 = start;
+                float f1 = Vector3.SqrMagnitude(_thisBezier.a - (float3)startPos);
+                float f2 = 0f;
 
-                f = Vector3.SqrMagnitude(_thisBezier.a - (float3)vector);
-
-                f2 = 0f;
-                for (int i = 0; i < 8; i++)
+                // Eight steps max.
+                for (int i = 0; i < 8; ++i)
                 {
-                    float num3 = (num + num2) * 0.5f;
-                    Vector3 vector2 = MathUtils.Position(_thisBezier, num3);
+                    // Calculate current position.
+                    float tMid = (t1 + t2) * 0.5f;
+                    Vector3 midpoint = MathUtils.Position(_thisBezier, tMid);
+                    float midDistance = Vector3.SqrMagnitude(midpoint - startPos);
 
-                    float num4 = Vector3.SqrMagnitude(vector2 - vector);
-
-                    if (num4 < distance * distance)
+                    // Check for nearer match.
+                    if (midDistance < distance * distance)
                     {
-                        num2 = num3;
-                        f2 = num4;
+                        t2 = tMid;
+                        f2 = midDistance;
                     }
                     else
                     {
-                        num = num3;
-                        f = num4;
+                        t1 = tMid;
+                        f1 = midDistance;
                     }
                 }
 
-                f = Mathf.Sqrt(f);
+                // We've been using square magnitudes for comparison, so rest to true value.
+                f1 = Mathf.Sqrt(f1);
                 f2 = Mathf.Sqrt(f2);
-                float num5 = f - f2;
-                if (num5 == 0f)
+
+                // Check for exact match.
+                float fDiff = f1 - f2;
+                if (fDiff == 0f)
                 {
-                    return num2;
+                    // Exact match found - return that.
+                    return t2;
                 }
 
-                return Mathf.Lerp(num2, num, Mathf.Clamp01((distance - f2) / num5));
+                // Not an exact match - use an interpolation.
+                return Mathf.Lerp(t2, t1, Mathf.Clamp01((distance - f2) / fDiff));
             }
-
-            num = start;
-            num2 = 1f;
-            f = 0f;
-            f2 = Vector3.SqrMagnitude(_thisBezier.d - (float3)vector);
-            for (int j = 0; j < 8; j++)
+            else
             {
-                float num6 = (num + num2) * 0.5f;
+                // Positive (forward) direction.
+                float t1 = start;
+                float t2 = 1f;
+                float f1 = 0f;
+                float f2 = Vector3.SqrMagnitude(_thisBezier.d - (float3)startPos);
 
-                Vector3 vector3 = MathUtils.Position(_thisBezier, num6);
-
-                float num7 = Vector3.SqrMagnitude(vector3 - vector);
-
-                if (num7 < distance * distance)
+                // Eight steps max.
+                for (int i = 0; i < 8; ++i)
                 {
-                    num = num6;
-                    f = num7;
+                    // Calculate current position.
+                    float tMid = (t1 + t2) * 0.5f;
+                    Vector3 midPoint = MathUtils.Position(_thisBezier, tMid);
+                    float midDistance = Vector3.SqrMagnitude(midPoint - startPos);
+
+                    // Check for nearer match.
+                    if (midDistance < distance * distance)
+                    {
+                        t1 = tMid;
+                        f1 = midDistance;
+                    }
+                    else
+                    {
+                        t2 = tMid;
+                        f2 = midDistance;
+                    }
                 }
-                else
+
+                // We've been using square magnitudes for comparison, so rest to true value.
+                f1 = Mathf.Sqrt(f1);
+                f2 = Mathf.Sqrt(f2);
+
+                // Check for exact match.
+                float fDiff = f2 - f1;
+                if (fDiff == 0f)
                 {
-                    num2 = num6;
-                    f2 = num7;
+                    // Exact match found - return that.
+                    return t1;
                 }
-            }
 
-            f = Mathf.Sqrt(f);
-            f2 = Mathf.Sqrt(f2);
-            float num8 = f2 - f;
-            if (num8 == 0f)
-            {
-                return num;
+                // Not an exact match - use an interpolation.
+                return Mathf.Lerp(t1, t2, Mathf.Clamp01((distance - f1) / fDiff));
             }
-
-            return Mathf.Lerp(num, num2, Mathf.Clamp01((distance - f) / num8));
         }
 
         /// <summary>
