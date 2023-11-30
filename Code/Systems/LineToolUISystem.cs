@@ -50,7 +50,7 @@ namespace LineTool
             _lineToolSystem = World.GetOrCreateSystemManaged<LineToolSystem>();
 
             // Read injection data.
-            _injectedHTML = ReadHTML(Path.Combine("LineTool.UI.ui.html"), "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-panel\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
+            _injectedHTML = ReadHTML("LineTool.UI.ui.html", "div.className = \"tool-options-panel_Se6\"; div.id = \"line-tool-panel\"; document.getElementsByClassName(\"tool-side-column_l9i\")[0].appendChild(div);");
             _injectedJS = ReadJS("LineTool.UI.ui.js");
 
             // Inject .css.

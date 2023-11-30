@@ -53,6 +53,11 @@ namespace LineTool
         public bool HasStart => m_validStart;
 
         /// <summary>
+        /// Gets a value indicating whether we're ready to place (we have enough control positions).
+        /// </summary>
+        public virtual bool HasAllPoints => m_validStart;
+
+        /// <summary>
         /// Handles a mouse click.
         /// </summary>
         /// <param name="position">Click world position.</param>

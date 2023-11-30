@@ -40,7 +40,7 @@ if (typeof lineToolAdjustRotation !== 'function') {
 
         // Bounds check rotation.
         lineToolRotation += finalAdjustment;
-        if (lineToolRotation > 360) {
+        if (lineToolRotation >= 360) {
             lineToolRotation -= 360;
         }
         if (lineToolRotation < 0) {

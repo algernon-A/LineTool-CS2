@@ -59,6 +59,7 @@ namespace LineTool
         private ProxyAction _applyAction;
         private ProxyAction _cancelAction;
         private InputAction _fixedPreviewAction;
+        private InputAction _keepBuildingAction;
 
         // Mode.
         private LineMode _currentMode;
@@ -275,8 +276,13 @@ namespace LineTool
 
             // Enable fixed preview control.
             _fixedPreviewAction = new ("LineTool-FixPreview");
-            _fixedPreviewAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
+            _fixedPreviewAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Mouse>/leftButton");
             _fixedPreviewAction.Enable();
+
+            // Enable keep building action.
+            _keepBuildingAction = new ("LineTool-KeepBuilding");
+            _keepBuildingAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
+            _keepBuildingAction.Enable();
 
             // Enable hotkey.
             InputAction hotKey = new ("LineTool-Hotkey");
@@ -346,15 +352,15 @@ namespace LineTool
                     return inputDeps;
                 }
 
-                // If no cancellation, handle any fixed preview action.
-                else if (_fixedPreviewAction.WasPressedThisFrame())
+                // If no cancellation, handle any fixed preview action if we're ready to place.
+                else if (_fixedPreviewAction.WasPressedThisFrame() && _mode.HasAllPoints)
                 {
                     _fixedPreview = true;
                     _fixedPos = position;
                 }
 
                 // Handle apply action if no other actions.
-                else if (_applyAction.WasPressedThisFrame())
+                else if (_applyAction.WasPressedThisFrame() || _keepBuildingAction.WasPressedThisFrame())
                 {
                     // Were we in fixed state?
                     if (_fixedPreview)
@@ -376,8 +382,14 @@ namespace LineTool
                         // Clear preview.
                         _previewEntities.Clear();
 
-                        // Reset tool mode.
+                        // Perform post-placement.
                         _mode.ItemsPlaced(position);
+
+                        // Reset tool mode if we're not building continuously.
+                        if (!_keepBuildingAction.WasPressedThisFrame())
+                        {
+                            _mode.Reset();
+                        }
 
                         return inputDeps;
                     }
