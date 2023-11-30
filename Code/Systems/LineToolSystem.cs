@@ -285,7 +285,7 @@ namespace LineTool
             hotKey.Enable();
 
             // Try to get tree controller tool.
-            if (World.GetExistingSystemManaged<ToolSystem>().tools.Find(x => x.toolID.Equals("Tree Controller Tool")) is ToolBaseSystem treeControllerTool)
+            if (World.GetOrCreateSystemManaged<ToolSystem>().tools.Find(x => x.toolID.Equals("Tree Controller Tool")) is ToolBaseSystem treeControllerTool)
             {
                 // Found it - attempt to reflect NextTreeState property getter.
                 _log.Info("found tree controller");

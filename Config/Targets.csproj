@@ -1,12 +1,12 @@
 <Project>
 	
-	<Target Name="ChechManagedDLLPath" BeforeTargets="PreBuildEvent">
+	<Target Name="CheckManagedDLLPath" BeforeTargets="PreBuildEvent">
 		<Message Text="$(CommonLocation)\General.targets" Importance="high"/>
 		<Error Condition="!Exists('$(ManagedDLLPath)')" Text="The Managed DLL path is wrong: $(ManagedDLLPath)" />
 		<OnError ExecuteTargets="CheckInstallationPath" />
 	</Target>
 	
-	<Target Name="CheckInstallationPath" AfterTargets="ChechManagedDLLPath">
+	<Target Name="CheckInstallationPath" AfterTargets="CheckManagedDLLPath">
 		<Error Condition="'$(Configuration)'=='Steam' AND !Exists('$(InstallationPath)\Cities2.exe')" Text="The Game Installation path is wrong: $(InstallationPath)" />
 		<OnError ExecuteTargets="CheckDataPath" />
 	</Target>
@@ -32,6 +32,12 @@
 	
 	<Target Name="BeforeBuildAction" BeforeTargets="BeforeBuild">
 		<RemoveDir Directories="$(OutDir)" />
+	</Target>
+
+	<Target Name="DeployToModDirectory" AfterTargets="Build">
+		<PropertyGroup>
+			<DeployDir>$(USERPROFILE)/AppData/LocalLow/Colossal Order/Cities Skylines II/Mods/WorkInProgress/$(SolutionName)</DeployDir>
+		</PropertyGroup>
 	</Target>
 	
 	<Target Name="AfterBuildAction" AfterTargets="AfterBuild">

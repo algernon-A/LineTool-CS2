@@ -33,7 +33,7 @@ if (typeof lineToolAdjustRotation !== 'function') {
         var finalAdjustment = adjustment;
         if (event) {
             if (event.shiftKey)
-                finalAdjustment *= 100;
+                finalAdjustment *= 90;
             else if (!event.ctrlKey)
                 finalAdjustment *= 10;
         }

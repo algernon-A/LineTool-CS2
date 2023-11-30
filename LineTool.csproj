@@ -35,10 +35,4 @@
 	  <EmbeddedResource Include="UI\ui.html" />
 	  <EmbeddedResource Include="UI\ui.js" />
 	</ItemGroup>
-	
-	<Target Name="DeployToModDirectory" AfterTargets="Build">
-		<PropertyGroup>
-			<DeployDir>$(USERPROFILE)/AppData/LocalLow/Colossal Order/Cities Skylines II/Mods/WorkInProgress/$(SolutionName)</DeployDir>
-		</PropertyGroup>
-	</Target>
 </Project>

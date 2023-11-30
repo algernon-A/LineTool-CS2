@@ -98,6 +98,7 @@ namespace LineTool
         public void OnDispose()
         {
             Log.Info("disposing");
+            Instance = null;
         }
     }
 }
