@@ -48,7 +48,9 @@
 		<Message Condition="!Exists('$(ModPostProcessorPath)')" Text="Post processor was not found, please check the path: @(ModPostProcessorPath)" Importance="high" />
 		<Exec Condition="Exists('$(ModPostProcessorPath)')" Command="$(ModPostProcessorArgs)"></Exec>
 		<ItemGroup>
-			<FilesToCopy Include="$(OutDir)\**\*.*" />
+			<FilesToCopy Include="$(OutDir)\**\*.dll" />
+			<FilesToCopy Include="$(OutDir)\**\*.so" />
+			<FilesToCopy Include="$(OutDir)\**\*.bundle" />
 			<DeployDir Include="$(DataPath)\Mods\WorkInProgress\$(ProjectName)" />
 		</ItemGroup>
 		<Message Text="Copy output to deploy dir @(DeployDir)" Importance="high" />
