@@ -14,6 +14,9 @@
 	<Import Project="Config/Postbuild.csproj" />
 	<Import Project="Config/Targets.csproj" />
 	<Import Project="Config/References.csproj" />
+	<ItemGroup>
+	  <None Remove="l10n.csv" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<AdditionalFiles Include="stylecop.json" />
@@ -31,6 +34,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <EmbeddedResource Include="l10n.csv" />
 	  <EmbeddedResource Include="UI\ui.css" />
 	  <EmbeddedResource Include="UI\ui.html" />
 	  <EmbeddedResource Include="UI\ui.js" />

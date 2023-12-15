@@ -13,6 +13,7 @@ namespace LineTool
     using Unity.Mathematics;
     using UnityEngine;
     using static Game.Rendering.GuideLinesSystem;
+    using static LineToolSystem;
 
     /// <summary>
     /// Line placement mode.
@@ -20,6 +21,11 @@ namespace LineTool
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Protected fields")]
     public abstract class LineBase
     {
+        /// <summary>
+        /// Selection radius of points.
+        /// </summary>
+        protected const float PointRadius = 8f;
+
         /// <summary>
         /// Indicates whether a valid starting position has been recorded.
         /// </summary>
@@ -29,6 +35,11 @@ namespace LineTool
         /// Records the current selection start position.
         /// </summary>
         protected float3 m_startPos;
+
+        /// <summary>
+        /// Records the current selection end position.
+        /// </summary>
+        protected float3 m_endPos;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LineBase"/> class.
@@ -94,13 +105,15 @@ namespace LineTool
         /// Calculates the points to use based on this mode.
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
-        /// <param name="fenceMode">Set to <c>true</c> if fence mode is active.</param>
-        /// <param name="spacing">Spacing setting.</param>
+        /// <param name="spacingMode">Active spacing mode.</param>
+        /// <param name="spacing">Spacing distance.</param>
+        /// <param name="randomSpacing">Random spacing offset maximum.</param>
+        /// <param name="randomOffset">Random lateral offset maximum.</param>
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public virtual void CalculatePoints(float3 currentPos, bool fenceMode, float spacing, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -109,47 +122,94 @@ namespace LineTool
             }
 
             // Calculate length.
-            float length = math.length(currentPos - m_startPos);
+            float3 difference = currentPos - m_startPos;
+            float length = math.length(difference);
+            System.Random random = new ((int)length * 1000);
 
             // Calculate applied rotation (in radians).
             float appliedRotation = math.radians(rotation);
-            if (fenceMode)
+            if (spacingMode == SpacingMode.FenceMode)
             {
-                float3 difference = currentPos - m_startPos;
                 appliedRotation = math.atan2(difference.x, difference.z);
             }
 
             // Rotation quaternion.
-            quaternion rotationQuaternion = quaternion.Euler(0f, appliedRotation, 0f);
+            quaternion qRotation = quaternion.Euler(0f, appliedRotation, 0f);
+
+            // Calculate even full-length spacing if needed.
+            float adjustedSpacing = spacing;
+            if (spacingMode == SpacingMode.FullLength)
+            {
+                adjustedSpacing = length / math.round(length / spacing);
+            }
 
             // Create points.
-            float currentDistance = fenceMode ? -zBounds.min : 0f;
-            float endLength = fenceMode ? length - zBounds.max : length;
+            float currentDistance = spacingMode == SpacingMode.FenceMode ? -zBounds.min : 0f;
+            float endLength = spacingMode == SpacingMode.FenceMode ? length - zBounds.max : length;
             while (currentDistance < endLength)
             {
                 // Calculate interpolated point.
-                float3 thisPoint = math.lerp(m_startPos, currentPos, currentDistance / length);
+                float spacingAdjustment = 0f;
+                if (randomSpacing > 0f && spacingMode != SpacingMode.FenceMode)
+                {
+                    spacingAdjustment = (float)(random.NextDouble() * randomSpacing * 2f) - randomSpacing;
+                }
+
+                float3 thisPoint = math.lerp(m_startPos, currentPos, (currentDistance + spacingAdjustment) / length);
+
+                // Apply offset adjustment.
+                if (randomOffset > 0f && spacingMode != SpacingMode.FenceMode)
+                {
+                    float3 left = math.normalize(new float3(-difference.z, 0f, difference.x));
+                    thisPoint += left * ((float)(randomOffset * random.NextDouble() * 2f) - randomOffset);
+                }
+
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = rotationQuaternion, });
-                currentDistance += spacing;
+                pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
+                currentDistance += adjustedSpacing;
             }
+
+            // Final item for full-length mode if required (if there was a distance overshoot).
+            if (spacingMode == SpacingMode.FullLength && currentDistance < length + adjustedSpacing)
+            {
+                float3 thisPoint = currentPos;
+                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+
+                // Add point to list.
+                pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
+            }
+
+            // Record end position for overlays.
+            m_endPos = currentPos;
         }
 
         /// <summary>
         /// Draws any applicable overlay.
         /// </summary>
-        /// <param name="currentPos">Current cursor world position.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public virtual void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
         {
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
             {
-                DrawDashedLine(m_startPos, currentPos, new Line3.Segment(m_startPos, currentPos), overlayBuffer, tooltips);
+                DrawDashedLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips);
             }
+        }
+
+        /// <summary>
+        /// Draws point overlays.
+        /// </summary>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        public virtual void DrawPointOverlays(OverlayRenderSystem.Buffer overlayBuffer)
+        {
+            Color softCyan = Color.cyan;
+            softCyan.a *= 0.1f;
+
+            overlayBuffer.DrawCircle(Color.cyan, softCyan, 0.3f, 0, new float2(0f, 1f), m_startPos, PointRadius * 2f);
+            overlayBuffer.DrawCircle(Color.cyan, softCyan, 0.3f, 0, new float2(0f, 1f), m_endPos, PointRadius * 2f);
         }
 
         /// <summary>
@@ -158,6 +218,42 @@ namespace LineTool
         public virtual void Reset()
         {
             m_validStart = false;
+        }
+
+        /// <summary>
+        /// Checks to see if a click should initiate point dragging.
+        /// </summary>
+        /// <param name="position">Click position in world space.</param>
+        /// <returns>Drag mode.</returns>
+        internal virtual DragMode CheckDragHit(float3 position)
+        {
+            if (math.distancesq(position, m_startPos) < (PointRadius * PointRadius))
+            {
+                // Start point.
+                return DragMode.StartPos;
+            }
+            else if (math.distancesq(position, m_endPos) < (PointRadius * PointRadius))
+            {
+                // End point.
+                return DragMode.EndPos;
+            }
+
+            // No hit.
+            return DragMode.None;
+        }
+
+        /// <summary>
+        /// Handles dragging action.
+        /// </summary>
+        /// <param name="dragMode">Dragging mode.</param>
+        /// <param name="position">New position.</param>
+        internal virtual void HandleDrag(DragMode dragMode, float3 position)
+        {
+            // Drag start point.
+            if (dragMode == DragMode.StartPos)
+            {
+                m_startPos = position;
+            }
         }
 
         /// <summary>

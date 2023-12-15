@@ -11,6 +11,8 @@ namespace LineTool
     using Colossal.Entities;
     using Colossal.Logging;
     using Colossal.Mathematics;
+    using Colossal.Serialization.Entities;
+    using Game;
     using Game.Common;
     using Game.Input;
     using Game.Objects;
@@ -39,7 +41,6 @@ namespace LineTool
 
         // Line calculations.
         private readonly NativeList<PointData> _points = new (Allocator.Persistent);
-        private bool _fenceMode = false;
         private bool _fixedPreview = false;
         private float3 _fixedPos;
         private Random _random = new ();
@@ -68,13 +69,17 @@ namespace LineTool
         private InputAction _keepBuildingAction;
 
         // Mode.
-        private LineMode _currentMode;
         private LineBase _mode;
+        private LineMode _currentMode;
+        private DragMode _dragMode = DragMode.None;
 
         // Tool settings.
+        private SpacingMode _spacingMode = SpacingMode.Manual;
         private float _spacing = 20f;
         private bool _randomRotation = false;
         private int _rotation = 0;
+        private float _randomSpacing = 0f;
+        private float _randomOffset = 0f;
         private bool _dirty = false;
 
         // Tree Controller integration.
@@ -82,31 +87,42 @@ namespace LineTool
         private PropertyInfo _nextTreeState = null;
 
         /// <summary>
+        /// Point dragging mode.
+        /// </summary>
+        internal enum DragMode
+        {
+            /// <summary>
+            /// No dragging.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Dragging the line's start position.
+            /// </summary>
+            StartPos,
+
+            /// <summary>
+            /// Dragging the line's end position.
+            /// </summary>
+            EndPos,
+
+            /// <summary>
+            /// Dragging the line's elbow position.
+            /// </summary>
+            ElbowPos,
+        }
+
+        /// <summary>
         /// Gets the tool's ID string.
         /// </summary>
         public override string toolID => "Line Tool";
-
-        /// <summary>
-        /// Gets the raw spacing setting.
-        /// </summary>
-        internal float RawSpacing => _spacing;
 
         /// <summary>
         /// Gets or sets the effective line spacing.
         /// </summary>
         internal float Spacing
         {
-            get
-            {
-                // Use calculated spacing for fence mode.
-                if (_fenceMode)
-                {
-                    return _zBounds.max - _zBounds.min;
-                }
-
-                // Not fence mode - use manual spacing.
-                return _spacing;
-            }
+            get => _spacing;
 
             set
             {
@@ -118,14 +134,19 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether fence mode is active.
+        /// Gets the effective spacing value, taking into account fence mode.
         /// </summary>
-        internal bool FenceMode
+        internal float EffectiveSpacing => _spacingMode == SpacingMode.FenceMode ? _zBounds.max - _zBounds.min : _spacing;
+
+        /// <summary>
+        /// Gets or sets the current spacing mode.
+        /// </summary>
+        internal SpacingMode CurrentSpacingMode
         {
-            get => _fenceMode;
+            get => _spacingMode;
             set
             {
-                _fenceMode = value;
+                _spacingMode = value;
                 _dirty = true;
             }
         }
@@ -139,6 +160,32 @@ namespace LineTool
             set
             {
                 _randomRotation = value;
+                _dirty = true;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the random spacing offset maximum.
+        /// </summary>
+        internal float RandomSpacing
+        {
+            get => _randomSpacing;
+            set
+            {
+                _randomSpacing = value;
+                _dirty = true;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the random lateral offset maximum.
+        /// </summary>
+        internal float RandomOffset
+        {
+            get => _randomOffset;
+            set
+            {
+                _randomOffset = value;
                 _dirty = true;
             }
         }
@@ -270,19 +317,17 @@ namespace LineTool
         /// </summary>
         /// <param name="prefab">Prefab to set.</param>
         /// <returns><c>true</c> if a prefab is currently selected, otherwise <c>false</c>.</returns>
-        public override bool TrySetPrefab(PrefabBase prefab)
-        {
-            // Check for eligible prefab.
-            if (prefab is ObjectPrefab objectPrefab)
-            {
-                // Eligible - set it.
-                SelectedPrefab = objectPrefab;
-                return true;
-            }
+        public override bool TrySetPrefab(PrefabBase prefab) => false;
 
-            // If we got here this isn't an eligible prefab.
-            return false;
-        }
+        /// <summary>
+        /// Elevation-up key handler; used to increment spacing.
+        /// </summary>
+        public override void ElevationUp() => Spacing = _spacing + 1;
+
+        /// <summary>
+        /// Elevation-down key handler; used to decrement spacing.
+        /// </summary>
+        public override void ElevationDown() => Spacing = _spacing - 1;
 
         /// <summary>
         /// Refreshes all displayed prefabs to align with current Tree Control settings.
@@ -385,6 +430,32 @@ namespace LineTool
                 _terrainHeightData = _terrainSystem.GetHeightData();
                 position.y = TerrainUtils.SampleHeight(ref _terrainHeightData, position);
 
+                // Handle any dragging.
+                if (_dragMode != DragMode.None)
+                {
+                    if (_applyAction.WasReleasedThisFrame() || _fixedPreviewAction.WasReleasedThisFrame())
+                    {
+                        // Cancel dragging.
+                        _dragMode = DragMode.None;
+                    }
+                    else
+                    {
+                        // Drag end point.
+                        if (_dragMode == DragMode.EndPos)
+                        {
+                            position = _raycastPoint.m_HitPosition;
+                            _fixedPos = position;
+                        }
+                        else
+                        {
+                            // Handle dragging for other points via line mode instance.
+                            _mode.HandleDrag(_dragMode, _raycastPoint.m_HitPosition);
+                        }
+
+                        _dirty = true;
+                    }
+                }
+
                 // Check for and perform any cancellation.
                 if (_cancelAction.WasPressedThisFrame())
                 {
@@ -398,6 +469,7 @@ namespace LineTool
                     }
 
                     _previewEntities.Clear();
+                    _dragMode = DragMode.None;
 
                     return inputDeps;
                 }
@@ -405,8 +477,23 @@ namespace LineTool
                 // If no cancellation, handle any fixed preview action if we're ready to place.
                 else if (_fixedPreviewAction.WasPressedThisFrame() && _mode.HasAllPoints)
                 {
-                    _fixedPreview = true;
-                    _fixedPos = position;
+                    // Are we already in fixed preview mode?
+                    if (_fixedPreview)
+                    {
+                        // Already in fixed preview mode - check for dragging hits.
+                        _dragMode = _mode.CheckDragHit(_raycastPoint.m_HitPosition);
+                        if (_dragMode != DragMode.None)
+                        {
+                            // If dragging, has started, then we're done here.
+                            return inputDeps;
+                        }
+                    }
+                    else
+                    {
+                        // Activate fixed preview mode and fix current position.
+                        _fixedPreview = true;
+                        _fixedPos = position;
+                    }
                 }
 
                 // Handle apply action if no other actions.
@@ -415,6 +502,14 @@ namespace LineTool
                     // Were we in fixed state?
                     if (_fixedPreview)
                     {
+                        // Check for dragging hits.
+                        _dragMode = _mode.CheckDragHit(_raycastPoint.m_HitPosition);
+                        if (_dragMode != DragMode.None)
+                        {
+                            // If dragging, has started, then we're done here.
+                            return inputDeps;
+                        }
+
                         // Yes - cancel fixed preview.
                         _fixedPreview = false;
                     }
@@ -425,8 +520,15 @@ namespace LineTool
                         // We're placing items - remove highlighting.
                         foreach (Entity previewEntity in _previewEntities)
                         {
-                            EntityManager.RemoveComponent<Highlighted>(previewEntity);
-                            EntityManager.AddComponent<Updated>(previewEntity);
+                            if (EntityManager.HasComponent<Overridden>(previewEntity))
+                            {
+                                EntityManager.AddComponent<Deleted>(previewEntity);
+                            }
+                            else
+                            {
+                                EntityManager.RemoveComponent<Highlighted>(previewEntity);
+                                EntityManager.AddComponent<Updated>(previewEntity);
+                            }
                         }
 
                         // Clear preview.
@@ -448,21 +550,30 @@ namespace LineTool
                 // Update cursor entity if we haven't got an initial position set.
                 if (!_mode.HasStart)
                 {
-                    // Create cursor entity if none yet exists.
-                    if (_cursorEntity == Entity.Null)
+                    // Don't update if the cursor hasn't moved.
+                    if (position.x != _previousPos.x || position.z != _previousPos.z)
                     {
+                        // Delete any existing cursor entity and create a new one.
+                        if (_cursorEntity != Entity.Null)
+                        {
+                            EntityManager.AddComponent<Deleted>(_cursorEntity);
+                        }
+
                         _cursorEntity = CreateEntity();
 
                         // Highlight cursor entity.
                         EntityManager.AddComponent<Highlighted>(_cursorEntity);
+
+                        // Update cursor entity position.
+                        EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = GetEffectiveRotation(position) });
+                        EntityManager.AddComponent<BatchesUpdated>(_cursorEntity);
+
+                        // Ensure cursor entity tree state.
+                        EnsureTreeState(_cursorEntity);
+
+                        // Update previous position.
+                        _previousPos = position;
                     }
-
-                    // Update cursor entity position.
-                    EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = GetEffectiveRotation(position) });
-                    EntityManager.AddComponent<BatchesUpdated>(_cursorEntity);
-
-                    // Ensure cursor entity tree state.
-                    EnsureTreeState(_cursorEntity);
 
                     return inputDeps;
                 }
@@ -473,9 +584,23 @@ namespace LineTool
                     _cursorEntity = Entity.Null;
                 }
             }
+            else
+            {
+                // No valid raycast - hide cursor.
+                if (_cursorEntity != Entity.Null)
+                {
+                    EntityManager.AddComponent<Deleted>(_cursorEntity);
+                }
+            }
 
             // Render any overlay.
-            _mode.DrawOverlay(position, _overlayBuffer, _tooltips);
+            _mode.DrawOverlay(_overlayBuffer, _tooltips);
+
+            // Overlay control points.
+            if (_fixedPreview)
+            {
+                _mode.DrawPointOverlays(_overlayBuffer);
+            }
 
             // Check for position change or update needed.
             if (!_dirty && position.x == _previousPos.x && position.z == _previousPos.y)
@@ -490,10 +615,17 @@ namespace LineTool
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, _fenceMode, Spacing, _rotation, _zBounds, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
-            // Step along length and place objects.
-            int count = 0;
+            // Clear all preview entities.
+            foreach (Entity entity in _previewEntities)
+            {
+                EntityManager.AddComponent<Deleted>(entity);
+            }
+
+            _previewEntities.Clear();
+
+            // Step along length and place preview objects.
             foreach (PointData thisPoint in _points)
             {
                 UnityEngine.Random.InitState((int)(thisPoint.Position.x + thisPoint.Position.y + thisPoint.Position.z));
@@ -505,42 +637,12 @@ namespace LineTool
                     m_Rotation = _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                 };
 
-                // Create new entity if required.
-                if (count >= _previewEntities.Length)
-                {
-                    // Create new entity.
-                    Entity newEntity = CreateEntity();
-
-                    // Set entity location.
-                    EntityManager.SetComponentData(newEntity, transformData);
-                    EntityManager.AddComponent<Highlighted>(newEntity);
-                    _previewEntities.Add(newEntity);
-                }
-                else
-                {
-                    // Otherwise, use existing entity.
-                    EntityManager.SetComponentData(_previewEntities[count], transformData);
-                    EntityManager.AddComponent<BatchesUpdated>(_previewEntities[count]);
-
-                    // Ensure any trees are still adults.
-                    EnsureTreeState(_previewEntities[count]);
-                }
-
-                // Increment distance.
-                ++count;
-            }
-
-            // Clear any excess entities.
-            if (count < _previewEntities.Length)
-            {
-                int startCount = count;
-                while (count < _previewEntities.Length)
-                {
-                    EntityManager.AddComponent<Deleted>(_previewEntities[count++]);
-                }
-
-                // Remove excess range from list
-                _previewEntities.RemoveRange(startCount, count - startCount);
+                // Create new entity.
+                Entity newEntity = CreateEntity();
+                EntityManager.SetComponentData(newEntity, transformData);
+                EntityManager.AddComponent<Highlighted>(newEntity);
+                EntityManager.AddComponent<Updated>(newEntity);
+                _previewEntities.Add(newEntity);
             }
 
             return inputDeps;
@@ -577,6 +679,7 @@ namespace LineTool
 
             // Clear tooltips.
             _tooltips.Clear();
+            World.GetExistingSystemManaged<LineToolUISystem>().ClearTooltip();
 
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;

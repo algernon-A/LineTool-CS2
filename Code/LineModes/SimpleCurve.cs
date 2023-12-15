@@ -14,6 +14,7 @@ namespace LineTool
     using Unity.Mathematics;
     using UnityEngine;
     using static Game.Rendering.GuideLinesSystem;
+    using static LineToolSystem;
 
     /// <summary>
     /// Simple curve placement mode.
@@ -21,8 +22,10 @@ namespace LineTool
     public class SimpleCurve : LineBase
     {
         // Current elbow point.
-        private bool m_validElbow = false;
-        private float3 m_elbowPoint;
+        private bool _validElbow = false;
+        private bool _validPreviousElbow = false;
+        private float3 _elbowPoint;
+        private float3 _previousElbowPoint;
 
         // Calculated Bezier.
         private Bezier4x3 _thisBezier;
@@ -39,7 +42,7 @@ namespace LineTool
         /// <summary>
         /// Gets a value indicating whether we're ready to place (we have enough control positions).
         /// </summary>
-        public override bool HasAllPoints => m_validStart & m_validElbow;
+        public override bool HasAllPoints => m_validStart & _validElbow;
 
         /// <summary>
         /// Handles a mouse click.
@@ -57,10 +60,10 @@ namespace LineTool
             }
 
             // Otherwise, if no valid elbow point, record this as the elbow point.
-            if (!m_validElbow)
+            if (!_validElbow)
             {
-                m_elbowPoint = position;
-                m_validElbow = true;
+                _elbowPoint = ConstrainPos(position);
+                _validElbow = true;
                 return false;
             }
 
@@ -76,20 +79,24 @@ namespace LineTool
         {
             // Update new starting location to the previous end point and clear elbow.
             m_startPos = position;
-            m_validElbow = false;
+            _validElbow = false;
+            _previousElbowPoint = _elbowPoint;
+            _validPreviousElbow = true;
         }
 
         /// <summary>
         /// Calculates the points to use based on this mode.
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
-        /// <param name="fenceMode">Set to <c>true</c> if fence mode is active.</param>
-        /// <param name="spacing">Spacing setting.</param>
+        /// <param name="spacingMode">Active spacing mode.</param>
+        /// <param name="spacing">Spacing distance.</param>
+        /// <param name="randomSpacing">Random spacing offset maximum.</param>
+        /// <param name="randomOffset">Random lateral offset maximum.</param>
         /// <param name="rotation">Rotation setting.</param>
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, bool fenceMode, float spacing, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -98,29 +105,60 @@ namespace LineTool
             }
 
             // If we have a valid start but no valid elbow, just draw a straight line.
-            if (!m_validElbow)
+            if (!_validElbow)
             {
-                base.CalculatePoints(currentPos, fenceMode, spacing, rotation, zBounds, pointList, ref heightData);
+                // Constrain as required.
+                m_endPos = ConstrainPos(currentPos);
+                base.CalculatePoints(m_endPos, spacingMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
                 return;
             }
 
             // Calculate Bezier.
-            _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, m_elbowPoint), new Line3.Segment(currentPos, m_elbowPoint));
+            _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, _elbowPoint), new Line3.Segment(currentPos, _elbowPoint));
+
+            // Calculate even full-length spacing if needed.
+            float adjustedSpacing = spacing;
+            float length = MathUtils.Length(_thisBezier);
+            if (spacingMode == SpacingMode.FullLength)
+            {
+                adjustedSpacing = length / math.round(length / spacing);
+            }
 
             // Default rotation quaternion.
             quaternion qRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
 
+            // Randomizer.
+            System.Random random = new ((int)(currentPos.x + currentPos.z) * 1000);
+
             float tFactor = 0f;
+            float distanceTravelled = 0f;
             while (tFactor < 1.0f)
             {
+                // Apply spacing randomization.
+                float adjustedT = tFactor;
+                if (randomSpacing > 0f && spacingMode != SpacingMode.FenceMode)
+                {
+                    float spacingAdjustment = (float)(random.NextDouble() * randomSpacing * 2f) - randomSpacing;
+                    adjustedT = spacingAdjustment < 0f ? BezierStepReverse(tFactor, spacingAdjustment) : BezierStep(tFactor, spacingAdjustment);
+                }
+
                 // Calculate point.
-                float3 thisPoint = MathUtils.Position(_thisBezier, tFactor);
+                float3 thisPoint = MathUtils.Position(_thisBezier, adjustedT);
+
+                // Apply offset randomization.
+                if (randomOffset > 0f && spacingMode != SpacingMode.FenceMode)
+                {
+                    float3 tangent = MathUtils.Tangent(_thisBezier, adjustedT);
+                    float3 left = math.normalize(new float3(-tangent.z, 0f, tangent.x));
+                    thisPoint += left * ((float)(randomOffset * random.NextDouble() * 2f) - randomOffset);
+                }
 
                 // Get next t factor.
-                tFactor = BezierStep(tFactor, spacing);
+                tFactor = BezierStep(tFactor, adjustedSpacing);
+                distanceTravelled += adjustedSpacing;
 
                 // Calculate applied rotation for fence mode.
-                if (fenceMode)
+                if (spacingMode == SpacingMode.FenceMode)
                 {
                     float3 difference = MathUtils.Position(_thisBezier, tFactor) - thisPoint;
                     qRotation = quaternion.Euler(0f, math.atan2(difference.x, difference.z), 0f);
@@ -132,37 +170,66 @@ namespace LineTool
                 // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
             }
+
+            // Final item for full-length mode if required (if there was a distance overshoot).
+            if (spacingMode == SpacingMode.FullLength && distanceTravelled < length + adjustedSpacing)
+            {
+                float3 thisPoint = currentPos;
+                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+
+                // Add point to list.
+                pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
+            }
+
+            // Record end position for overlays.
+            m_endPos = currentPos;
         }
 
         /// <summary>
         /// Draws any applicable overlay.
         /// </summary>
-        /// <param name="currentPos">Current cursor world position.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(float3 currentPos, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
         {
             if (m_validStart)
             {
                 // Draw an elbow overlay if we've got valid starting and elbow positions.
-                if (m_validElbow)
+                if (_validElbow)
                 {
                     // Calculate lines.
-                    Line3.Segment line1 = new (m_startPos, m_elbowPoint);
-                    Line3.Segment line2 = new (m_elbowPoint, currentPos);
+                    Line3.Segment line1 = new (m_startPos, _elbowPoint);
+                    Line3.Segment line2 = new (_elbowPoint, m_endPos);
 
                     // Draw lines.
-                    DrawDashedLine(m_startPos, m_elbowPoint, line1, overlayBuffer, tooltips);
-                    DrawDashedLine(m_elbowPoint, currentPos, line2, overlayBuffer, tooltips);
+                    DrawDashedLine(m_startPos, _elbowPoint, line1, overlayBuffer, tooltips);
+                    DrawDashedLine(_elbowPoint, m_endPos, line2, overlayBuffer, tooltips);
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
                 }
                 else
                 {
-                    // Initial position only; just draw a straight line.
-                    base.DrawOverlay(currentPos, overlayBuffer, tooltips);
+                    // Initial position only; just draw a straight line (constrained if required).
+                    base.DrawOverlay(overlayBuffer, tooltips);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Draws point overlays.
+        /// </summary>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        public override void DrawPointOverlays(OverlayRenderSystem.Buffer overlayBuffer)
+        {
+            base.DrawPointOverlays(overlayBuffer);
+
+            // Draw elbow point.
+            if (_validElbow)
+            {
+                Color softCyan = Color.cyan;
+                softCyan.a *= 0.1f;
+                overlayBuffer.DrawCircle(Color.cyan, softCyan, 0.3f, 0, new float2(0f, 1f), _elbowPoint, PointRadius * 2f);
             }
         }
 
@@ -171,15 +238,72 @@ namespace LineTool
         /// </summary>
         public override void Reset()
         {
-            // Only clear elbow if we have one.
-            if (m_validElbow)
+            // Only clear elbow, if we have one.
+            if (_validElbow)
             {
-                m_validElbow = false;
+                _validElbow = false;
             }
             else
             {
+                // Otherwise, reset entire state.
+                _validPreviousElbow = false;
                 base.Reset();
             }
+        }
+
+        /// <summary>
+        /// Checks to see if a click should initiate point dragging.
+        /// </summary>
+        /// <param name="position">Click position in world space.</param>
+        /// <returns>Drag mode.</returns>
+        internal override DragMode CheckDragHit(float3 position)
+        {
+            // Start and end points.
+            DragMode mode = base.CheckDragHit(position);
+
+            // If no hit from base (start and end points), check for elbow point hit.
+            if (mode == DragMode.None && _validElbow && math.distancesq(position, _elbowPoint) < (PointRadius * PointRadius))
+            {
+                return DragMode.ElbowPos;
+            }
+
+            return mode;
+        }
+
+        /// <summary>
+        /// Handles dragging action.
+        /// </summary>
+        /// <param name="dragMode">Dragging mode.</param>
+        /// <param name="position">New position.</param>
+        internal override void HandleDrag(DragMode dragMode, float3 position)
+        {
+            if (dragMode == DragMode.ElbowPos)
+            {
+                // Update elbow point.
+                _elbowPoint = position;
+            }
+            else
+            {
+                // Other points.
+                base.HandleDrag(dragMode, position);
+            }
+        }
+
+        /// <summary>
+        /// Applies any active constraints the given current cursor world position.
+        /// </summary>
+        /// <param name="currentPos">Current cursor world position.</param>
+        /// <returns>Constrained cursor world position.</returns>
+        private float3 ConstrainPos(float3 currentPos)
+        {
+            // Constrain to continuous curve.
+            if (m_validStart && !_validElbow && _validPreviousElbow)
+            {
+                // Use closest point on infinite line projected from previous curve end tangent.
+                return math.project(currentPos - _previousElbowPoint, m_startPos - _previousElbowPoint) + _previousElbowPoint;
+            }
+
+            return currentPos;
         }
 
         /// <summary>
@@ -215,18 +339,19 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Steps along a Bezier BACKWARDS from the end point, calculating the target t factor for the given spacing distance.
+        /// Steps along a Bezier BACKWARDS from the given t factor, calculating the target t factor for the given spacing distance.
         /// Code based on Alterran's PropLineTool (StepDistanceCurve, Utilities/PLTMath.cs).
         /// </summary>
+        /// <param name="tStart">Starting t factor.</param>
         /// <param name="distance">Distance to travel.</param>
         /// <returns>Target t factor.</returns>
-        private float BezierStepReverse(float distance)
+        private float BezierStepReverse(float tStart, float distance)
         {
             const float Tolerance = 0.001f;
             const float ToleranceSquared = Tolerance * Tolerance;
 
-            float tEnd = Travel(1, -distance);
-            float usedDistance = CubicBezierArcLengthXZGauss04(tEnd, 1.0f);
+            float tEnd = Travel(tStart, -distance);
+            float usedDistance = CubicBezierArcLengthXZGauss04(tEnd, tStart);
 
             // Twelve iteration maximum for performance and to prevent infinite loops.
             for (int i = 0; i < 12; ++i)
@@ -238,7 +363,7 @@ namespace LineTool
                     break;
                 }
 
-                usedDistance = CubicBezierArcLengthXZGauss04(tEnd, 1.0f);
+                usedDistance = CubicBezierArcLengthXZGauss04(tEnd, tStart);
                 tEnd -= (distance - usedDistance) / CubicSpeedXZ(tEnd);
             }
 
