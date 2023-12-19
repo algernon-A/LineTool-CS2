@@ -74,9 +74,9 @@ namespace LineTool
             _lineToolSystem = World.GetOrCreateSystemManaged<LineToolSystem>();
 
             // Read injection data.
-            _injectedHTML = ReadHTML("LineToolLite.UI.ui.html", "lineTool.div.className = \"tool-options-panel_Se6\"; lineTool.div.id = \"line-tool-panel\"; lineTool.targetParent = document.getElementsByClassName(\"tool-side-column_l9i\"); if (lineTool.targetParent.length == 0) lineTool.targetParent = document.getElementsByClassName(\"editor-toolbar_i1J\"); if (lineTool.targetParent.length != 0) lineTool.targetParent[0].appendChild(lineTool.div);");
-            _injectedJS = ReadJS("LineToolLite.UI.ui.js");
-            _injectedCSS = ReadCSS("LineToolLite.UI.ui.css");
+            _injectedHTML = ReadHTML("LineTool.UI.ui.html", "lineTool.div.className = \"tool-options-panel_Se6\"; lineTool.div.id = \"line-tool-panel\"; lineTool.targetParent = document.getElementsByClassName(\"tool-side-column_l9i\"); if (lineTool.targetParent.length == 0) lineTool.targetParent = document.getElementsByClassName(\"editor-toolbar_i1J\"); if (lineTool.targetParent.length != 0) lineTool.targetParent[0].appendChild(lineTool.div);");
+            _injectedJS = ReadJS("LineTool.UI.ui.js");
+            _injectedCSS = ReadCSS("LineTool.UI.ui.css");
 
             // Initialize event handle list.
             _eventHandles = new ();

@@ -29,7 +29,7 @@ namespace LineTool
             try
             {
                 // Read embedded file.
-                using StreamReader reader = new (Assembly.GetExecutingAssembly().GetManifestResourceStream("LineToolLite.l10n.csv"));
+                using StreamReader reader = new (Assembly.GetExecutingAssembly().GetManifestResourceStream("LineTool.l10n.csv"));
                 {
                     List<string> lines = new ();
                     while (!reader.EndOfStream)
