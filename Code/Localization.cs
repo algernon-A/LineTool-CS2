@@ -64,7 +64,7 @@ namespace LineTool
                         catch (Exception e)
                         {
                             // Don't let a single failure stop us.
-                            log.Error(e, "exception reading localization for locale " + localeID);
+                            log.Error(e, $"exception reading localization for locale {localeID}");
                         }
                     }
                 }

@@ -220,11 +220,11 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                _log.Error(e, "exception reading CSS file " + fileName);
+                _log.Error(e, $"exception reading CSS file {fileName}");
             }
 
             // If we got here, something went wrong.; return null.
-            _log.Error("failed to read embedded CSS file " + fileName);
+            _log.Error($"failed to read embedded CSS file {fileName}");
             return null;
         }
 
@@ -250,11 +250,11 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                _log.Error(e, "exception reading embedded HTML file " + fileName);
+                _log.Error(e, $"exception reading embedded HTML file {fileName}");
             }
 
             // If we got here, something went wrong.; return null.
-            _log.Error("failed to read embedded HTML file " + fileName);
+            _log.Error($"failed to read embedded HTML file {fileName}");
             return null;
         }
 
@@ -279,11 +279,11 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                _log.Error(e, "exception reading embedded JavaScript file " + fileName);
+                _log.Error(e, $"exception reading embedded JavaScript file {fileName}");
             }
 
             // If we got here, something went wrong; return null.
-            _log.Error("failed to read embedded JavaScript file " + fileName);
+            _log.Error($"failed to read embedded JavaScript file {fileName}");
             return null;
         }
 
@@ -305,7 +305,7 @@ namespace LineTool
             }
             catch (Exception e)
             {
-                _log.Error(e, "exception reading embedded UI file " + fileName);
+                _log.Error(e, $"exception reading embedded UI file {fileName}");
             }
 
             return null;

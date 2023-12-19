@@ -79,7 +79,7 @@ namespace LineTool
             Log.effectivenessLevel = Level.Debug;
 #endif
 
-            Log.Info("loading");
+            Log.Info($"loading {ModName} version {Assembly.GetExecutingAssembly().GetName().Version}");
         }
 
         /// <summary>
