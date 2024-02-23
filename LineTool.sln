@@ -1,22 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.7.34202.233
+VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LineTool", "LineTool.csproj", "{A18AD7D6-1789-4176-8224-81AA2143A6CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LineTool", "LineTool.csproj", "{AF5E5B57-E67B-40EC-8C36-0C90D2535E3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Steam|Any CPU = Steam|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
-		{A18AD7D6-1789-4176-8224-81AA2143A6CB}.Steam|Any CPU.Build.0 = Steam|Any CPU
+		{AF5E5B57-E67B-40EC-8C36-0C90D2535E3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF5E5B57-E67B-40EC-8C36-0C90D2535E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF5E5B57-E67B-40EC-8C36-0C90D2535E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF5E5B57-E67B-40EC-8C36-0C90D2535E3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {40BFDCF7-CAF4-4150-8999-5E1096775326}
+		SolutionGuid = {4FF0C867-4759-41FE-8E80-149F294DB4BF}
 	EndGlobalSection
 EndGlobal
