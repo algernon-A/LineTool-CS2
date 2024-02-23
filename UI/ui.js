@@ -169,7 +169,7 @@ if (typeof lineTool.randomRotation !== 'function') {
 
 // Function to adjust rotation.
 if (typeof lineTool.adjustRotation !== 'function') {
-    lineTool.adjustRotation = function(event, adjustment) {
+    lineTool.adjustRotation = function (event, adjustment) {
         // Adjust for modifier keys.
         let finalAdjustment = adjustment;
         if (event) {
@@ -255,7 +255,7 @@ if (typeof lineTool.addTreeControl !== 'function') {
 
 // Function to set rotation selection control visibility
 if (typeof lineTool.setRotationVisibility !== 'function') {
-    lineTool.setRotationVisibility = function(isVisible) {
+    lineTool.setRotationVisibility = function (isVisible) {
         lineTool.setButtonVisibility(document.getElementById("line-tool-rotation-up"), isVisible);
         lineTool.setButtonVisibility(document.getElementById("line-tool-rotation-down"), isVisible);
         if (isVisible) {
@@ -298,6 +298,11 @@ lineTool.setTooltip("line-tool-spacing-field", "Spacing");
 lineTool.setTooltip("line-tool-rotation-field", "Rotation");
 lineTool.setTooltip("line-tool-xOffset-field", "SpacingVariation");
 lineTool.setTooltip("line-tool-zOffset-field", "OffsetVariation");
+
+lineTool.setupWheel("line-tool-spacing-field", (event) => { lineTool.adjustSpacing(event, event.deltaY / 30); });
+lineTool.setupWheel("line-tool-rotation-field", (event) => { lineTool.adjustRotation(event, event.deltaY / 30); });
+lineTool.setupWheel("line-tool-xOffset-field", (event) => { lineTool.adjustRandomSpacing(event, event.deltaY / 30); });
+lineTool.setupWheel("line-tool-zOffset-field", (event) => { lineTool.adjustRandomOffset(event, event.deltaY / 30); });
 
 // Apply translations.
 lineTool.applyLocalization(lineTool.div);
