@@ -12,6 +12,11 @@ namespace LineTool
     public enum LineMode
     {
         /// <summary>
+        /// Single point.
+        /// </summary>
+        Point,
+
+        /// <summary>
         /// Straight line.
         /// </summary>
         Straight,

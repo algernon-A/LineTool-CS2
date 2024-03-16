@@ -71,7 +71,7 @@ namespace LineTool
 
         // Mode.
         private LineBase _mode;
-        private LineMode _currentMode;
+        private LineMode _currentMode = LineMode.Point;
         private DragMode _dragMode = DragMode.None;
 
         // Tool settings.
@@ -129,7 +129,6 @@ namespace LineTool
             {
                 // Don't allow spacing to be set smaller than the smallest side of zBounds.
                 _spacing = (float)Math.Round(math.max(value, math.max(math.abs(_zBounds.max), math.abs(_zBounds.min) + 0.1f)), 1);
-                World.GetOrCreateSystemManaged<LineToolUISystem>().UpdateSpacing();
                 _dirty = true;
             }
         }
@@ -200,6 +199,18 @@ namespace LineTool
             set
             {
                 _rotation = value;
+
+                // Bounds checks.
+                if (_rotation >= 360)
+                {
+                   _rotation -= 360;
+                }
+
+                if (_rotation < 0)
+                {
+                    _rotation += 360;
+                }
+
                 _dirty = true;
             }
         }
@@ -308,8 +319,8 @@ namespace LineTool
         /// Sets the prefab selected by this tool.
         /// </summary>
         /// <param name="prefab">Prefab to set.</param>
-        /// <returns><c>true</c> uf the previously-used tool (if any) can use this prefab, otherwise <c>false</c>.</returns>
-        public override bool TrySetPrefab(PrefabBase prefab) => _previousTool?.TrySetPrefab(prefab) ?? false;
+        /// <returns><c>false</c>.</returns>
+        public override bool TrySetPrefab(PrefabBase prefab) => false;
 
         /// <summary>
         /// Elevation-up key handler; used to increment spacing.
@@ -350,6 +361,7 @@ namespace LineTool
             if (_previousTool is not null)
             {
                 m_ToolSystem.activeTool = _previousTool;
+                _currentMode = LineMode.Point;
             }
             else
             {
@@ -390,7 +402,6 @@ namespace LineTool
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
 
             // Set default mode.
-            _currentMode = LineMode.Straight;
             _mode = new StraightLine();
 
             // Set actions.
@@ -445,8 +456,8 @@ namespace LineTool
             // Clear tooltips.
             _tooltips.Clear();
 
-            // Don't do anything if no selected prefab.
-            if (_selectedPrefab is null)
+            // Don't do anything if no selected prefab or we're in point mode.
+            if (_selectedPrefab is null || _currentMode == LineMode.Point)
             {
                 return inputDeps;
             }
@@ -685,11 +696,8 @@ namespace LineTool
         /// </summary>
         protected override void OnStartRunning()
         {
-            _log.Debug("OnStartRunning");
+            _log.Info("OnStartRunning");
             base.OnStartRunning();
-
-            // Clear any existing tooltips.
-            World.GetExistingSystemManaged<LineToolUISystem>().ClearTooltip();
 
             // Ensure apply action is enabled.
             _applyAction.shouldBeEnabled = true;
@@ -710,11 +718,10 @@ namespace LineTool
         /// </summary>
         protected override void OnStopRunning()
         {
-            _log.Debug("OnStopRunning");
+            _log.Info("OnStopRunning");
 
             // Clear tooltips.
             _tooltips.Clear();
-            World.GetExistingSystemManaged<LineToolUISystem>().ClearTooltip();
 
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;

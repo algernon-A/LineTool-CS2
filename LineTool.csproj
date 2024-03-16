@@ -4,9 +4,9 @@
 		<AssemblyTitle>$(Title)</AssemblyTitle>
 		<Description>A Cities: Skylines 2 mod.</Description>
 		<Authors>algernon</Authors>
-		<Copyright>Copyright © 2023 algernon (github.com/algernon-A). All rights reserved.</Copyright>
+		<Copyright>Copyright © 2023-24 algernon (github.com/algernon-A). All rights reserved.</Copyright>
 		<Product>$(Title)</Product>
-		<Version>0.3</Version>
+		<Version>0.4</Version>
 		<LangVersion>9.0</LangVersion>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -20,11 +20,6 @@
 	<Import Project="Config/References.csproj" />
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
-	<ItemGroup>
-	  <None Remove="UI\common.js" />
-	  <None Remove="UI\modes.html" />
-	  <None Remove="UI\modes.js" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="$(ModPropsFile)" Link="Properties/Mod.props" />
@@ -47,12 +42,6 @@
 	
 	<ItemGroup>
 	  <EmbeddedResource Include="l10n.csv" />
-	  <EmbeddedResource Include="UI\common.js" />
-	  <EmbeddedResource Include="UI\modes.html" />
-	  <EmbeddedResource Include="UI\modes.js" />
-	  <EmbeddedResource Include="UI\ui.css" />
-	  <EmbeddedResource Include="UI\ui.html" />
-	  <EmbeddedResource Include="UI\ui.js" />
 	</ItemGroup>
 
 	<Target Name="SetDescription" BeforeTargets="BeforeBuild">
