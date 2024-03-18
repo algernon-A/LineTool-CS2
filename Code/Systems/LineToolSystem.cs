@@ -333,6 +333,18 @@ namespace LineTool
         public override void ElevationDown() => Spacing = _spacing - 1;
 
         /// <summary>
+        /// Gets the snap mask for this tool.
+        /// </summary>
+        /// <param name="onMask">Snap on mask.</param>
+        /// <param name="offMask">Snap off mask.</param>
+        public override void GetAvailableSnapMask(out Snap onMask, out Snap offMask)
+        {
+            base.GetAvailableSnapMask(out onMask, out offMask);
+            onMask |= Snap.ContourLines;
+            offMask |= Snap.ContourLines;
+        }
+
+        /// <summary>
         /// Enables the tool (called by hotkey action).
         /// </summary>
         internal void EnableTool()
