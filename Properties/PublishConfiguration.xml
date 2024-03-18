@@ -10,6 +10,7 @@
   <ModVersion Value="0.4" />
   <GameVersion Value="1.0.*" />
   <Dependency Id="" DisplayName="" Version="" />
-  <ChangeLog></ChangeLog>
+  <ChangeLog>
+  </ChangeLog>
   <ExternalLink Type="" Url="" />
 </Publish>
