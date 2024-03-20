@@ -13,8 +13,12 @@ namespace LineTool
     using Colossal.Mathematics;
     using Colossal.Serialization.Entities;
     using Game;
+    using Game.Areas;
+    using Game.Buildings;
+    using Game.City;
     using Game.Common;
     using Game.Input;
+    using Game.Net;
     using Game.Objects;
     using Game.Prefabs;
     using Game.Rendering;
@@ -35,12 +39,11 @@ namespace LineTool
     /// </summary>
     public sealed partial class LineToolSystem : ObjectToolBaseSystem
     {
-        // Previewing.
-        private readonly NativeList<Entity> _previewEntities = new (Allocator.Persistent);
-        private readonly NativeList<TooltipInfo> _tooltips = new (8, Allocator.Persistent);
+        // Native buffers.
+        private NativeList<TooltipInfo> _tooltips;
+        private NativeList<PointData> _points;
 
         // Line calculations.
-        private readonly NativeList<PointData> _points = new (Allocator.Persistent);
         private bool _fixedPreview = false;
         private float3 _fixedPos;
         private Random _random = new ();
@@ -62,6 +65,7 @@ namespace LineTool
         private TerrainSystem _terrainSystem;
         private TerrainHeightData _terrainHeightData;
         private OverlayRenderSystem.Buffer _overlayBuffer;
+        private CityConfigurationSystem _cityConfigurationSystem;
 
         // Input actions.
         private ProxyAction _applyAction;
@@ -203,7 +207,7 @@ namespace LineTool
                 // Bounds checks.
                 if (_rotation >= 360)
                 {
-                   _rotation -= 360;
+                    _rotation -= 360;
                 }
 
                 if (_rotation < 0)
@@ -382,24 +386,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Refreshes all displayed prefabs to align with current Tree Control settings.
-        /// </summary>
-        internal void RefreshTreeControl()
-        {
-            // Update cursor entity.
-            ResetTreeState(_cursorEntity);
-
-            // Update all previewed trees.
-            for (int i = 0; i < _previewEntities.Length; ++i)
-            {
-                ResetTreeState(_previewEntities[i]);
-            }
-
-            // Set dirty flag.
-            _dirty = true;
-        }
-
-        /// <summary>
         /// Called when the system is created.
         /// </summary>
         protected override void OnCreate()
@@ -412,6 +398,11 @@ namespace LineTool
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
+            _cityConfigurationSystem = World.GetOrCreateSystemManaged<CityConfigurationSystem>();
+
+            // Create buffers.
+            _tooltips = new (8, Allocator.Persistent);
+            _points = new (Allocator.Persistent);
 
             // Set default mode.
             _mode = new StraightLine();
@@ -465,7 +456,8 @@ namespace LineTool
         /// <returns>Job handle.</returns>
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            // Clear tooltips.
+            // Clear state.
+            applyMode = ApplyMode.Clear;
             _tooltips.Clear();
 
             // Don't do anything if no selected prefab or we're in point mode.
@@ -516,14 +508,6 @@ namespace LineTool
                 {
                     // Reset current mode settings.
                     _mode.Reset();
-
-                    // Revert previewing.
-                    foreach (Entity previewEntity in _previewEntities)
-                    {
-                        EntityManager.AddComponent<Deleted>(previewEntity);
-                    }
-
-                    _previewEntities.Clear();
                     _dragMode = DragMode.None;
 
                     return inputDeps;
@@ -572,22 +556,8 @@ namespace LineTool
                     // Handle click.
                     if (_mode.HandleClick(position))
                     {
-                        // We're placing items - remove highlighting.
-                        foreach (Entity previewEntity in _previewEntities)
-                        {
-                            if (EntityManager.HasComponent<Overridden>(previewEntity))
-                            {
-                                EntityManager.AddComponent<Deleted>(previewEntity);
-                            }
-                            else
-                            {
-                                EntityManager.RemoveComponent<Highlighted>(previewEntity);
-                                EntityManager.AddComponent<Updated>(previewEntity);
-                            }
-                        }
-
-                        // Clear preview.
-                        _previewEntities.Clear();
+                        // We're placing items.
+                        applyMode = ApplyMode.Apply;
 
                         // Perform post-placement.
                         _mode.ItemsPlaced(position);
@@ -672,13 +642,6 @@ namespace LineTool
             _points.Clear();
             _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
-            // Clear all preview entities.
-            foreach (Entity entity in _previewEntities)
-            {
-                EntityManager.AddComponent<Deleted>(entity);
-            }
-
-            _previewEntities.Clear();
 
             // Step along length and place preview objects.
             foreach (PointData thisPoint in _points)
@@ -692,12 +655,11 @@ namespace LineTool
                     m_Rotation = _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                 };
 
-                // Create new entity.
-                Entity newEntity = CreateEntity();
-                EntityManager.SetComponentData(newEntity, transformData);
-                EntityManager.AddComponent<Highlighted>(newEntity);
-                EntityManager.AddComponent<Updated>(newEntity);
-                _previewEntities.Add(newEntity);
+                // Create entity.
+                CreateDefinitions(
+                    _selectedEntity,
+                    thisPoint.Position,
+                    _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation);
             }
 
             return inputDeps;
@@ -746,15 +708,6 @@ namespace LineTool
                 _cursorEntity = Entity.Null;
             }
 
-            // Revert previewing.
-            foreach (Entity previewEntity in _previewEntities)
-            {
-                EntityManager.AddComponent<Deleted>(previewEntity);
-            }
-
-            // Clear previewed entity buffer.
-            _previewEntities.Clear();
-
             // Restore prefab XP.
             RestoreXP();
 
@@ -770,9 +723,8 @@ namespace LineTool
         protected override void OnDestroy()
         {
             // Dispose of unmanaged lists.
-            _previewEntities.Dispose();
-            _points.Dispose();
             _tooltips.Dispose();
+            _points.Dispose();
 
             base.OnDestroy();
         }
@@ -907,6 +859,76 @@ namespace LineTool
                     EntityManager.SetComponentData(entity, tree);
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates temporary object definitions for previewing.
+        /// </summary>
+        /// <param name="objectPrefab">Object prefab entity.</param>
+        /// <param name="position">Entity position.</param>
+        /// <param name="rotation">Entity rotation.</param>
+        private void CreateDefinitions(Entity objectPrefab, float3 position, quaternion rotation)
+        {
+            CreateDefinitions definitions = default;
+            definitions.m_EditorMode = m_ToolSystem.actionMode.IsEditor();
+            definitions.m_LefthandTraffic = _cityConfigurationSystem.leftHandTraffic;
+            definitions.m_ObjectPrefab = objectPrefab;
+            definitions.m_Theme = _cityConfigurationSystem.defaultTheme;
+            definitions.m_RandomSeed = RandomSeed.Next();
+            definitions.m_ControlPoint = new () { m_Position = position, m_Rotation = rotation };
+            definitions.m_AttachmentPrefab = default;
+            definitions.m_OwnerData = SystemAPI.GetComponentLookup<Owner>(true);
+            definitions.m_TransformData = SystemAPI.GetComponentLookup<Transform>(true);
+            definitions.m_AttachedData = SystemAPI.GetComponentLookup<Attached>(true);
+            definitions.m_LocalTransformCacheData = SystemAPI.GetComponentLookup<LocalTransformCache>(true);
+            definitions.m_ElevationData = SystemAPI.GetComponentLookup<Game.Objects.Elevation>(true);
+            definitions.m_BuildingData = SystemAPI.GetComponentLookup<Building>(true);
+            definitions.m_LotData = SystemAPI.GetComponentLookup<Game.Buildings.Lot>(true);
+            definitions.m_EdgeData = SystemAPI.GetComponentLookup<Edge>(true);
+            definitions.m_NodeData = SystemAPI.GetComponentLookup<Game.Net.Node>(true);
+            definitions.m_CurveData = SystemAPI.GetComponentLookup<Curve>(true);
+            definitions.m_NetElevationData = SystemAPI.GetComponentLookup<Game.Net.Elevation>(true);
+            definitions.m_OrphanData = SystemAPI.GetComponentLookup<Orphan>(true);
+            definitions.m_UpgradedData = SystemAPI.GetComponentLookup<Upgraded>(true);
+            definitions.m_CompositionData = SystemAPI.GetComponentLookup<Composition>(true);
+            definitions.m_AreaClearData = SystemAPI.GetComponentLookup<Clear>(true);
+            definitions.m_AreaSpaceData = SystemAPI.GetComponentLookup<Space>(true);
+            definitions.m_AreaLotData = SystemAPI.GetComponentLookup<Game.Areas.Lot>(true);
+            definitions.m_EditorContainerData = SystemAPI.GetComponentLookup<Game.Tools.EditorContainer>(true);
+            definitions.m_PrefabRefData = SystemAPI.GetComponentLookup<PrefabRef>(true);
+            definitions.m_PrefabNetObjectData = SystemAPI.GetComponentLookup<NetObjectData>(true);
+            definitions.m_PrefabBuildingData = SystemAPI.GetComponentLookup<BuildingData>(true);
+            definitions.m_PrefabAssetStampData = SystemAPI.GetComponentLookup<AssetStampData>(true);
+            definitions.m_PrefabBuildingExtensionData = SystemAPI.GetComponentLookup<BuildingExtensionData>(true);
+            definitions.m_PrefabSpawnableObjectData = SystemAPI.GetComponentLookup<SpawnableObjectData>(true);
+            definitions.m_PrefabObjectGeometryData = SystemAPI.GetComponentLookup<ObjectGeometryData>(true);
+            definitions.m_PrefabPlaceableObjectData = SystemAPI.GetComponentLookup<PlaceableObjectData>(true);
+            definitions.m_PrefabAreaGeometryData = SystemAPI.GetComponentLookup<AreaGeometryData>(true);
+            definitions.m_PrefabBuildingTerraformData = SystemAPI.GetComponentLookup<BuildingTerraformData>(true);
+            definitions.m_PrefabCreatureSpawnData = SystemAPI.GetComponentLookup<CreatureSpawnData>(true);
+            definitions.m_PlaceholderBuildingData = SystemAPI.GetComponentLookup<PlaceholderBuildingData>(true);
+            definitions.m_PrefabNetGeometryData = SystemAPI.GetComponentLookup<NetGeometryData>(true);
+            definitions.m_PrefabCompositionData = SystemAPI.GetComponentLookup<NetCompositionData>(true);
+            definitions.m_SubObjects = SystemAPI.GetBufferLookup<Game.Objects.SubObject>(true);
+            definitions.m_CachedNodes = SystemAPI.GetBufferLookup<LocalNodeCache>(true);
+            definitions.m_InstalledUpgrades = SystemAPI.GetBufferLookup<InstalledUpgrade>(true);
+            definitions.m_SubNets = SystemAPI.GetBufferLookup<Game.Net.SubNet>(true);
+            definitions.m_ConnectedEdges = SystemAPI.GetBufferLookup<ConnectedEdge>(true);
+            definitions.m_SubAreas = SystemAPI.GetBufferLookup<Game.Areas.SubArea>(true);
+            definitions.m_AreaNodes = SystemAPI.GetBufferLookup<Game.Areas.Node>(true);
+            definitions.m_AreaTriangles = SystemAPI.GetBufferLookup<Triangle>(true);
+            definitions.m_PrefabSubObjects = SystemAPI.GetBufferLookup<Game.Prefabs.SubObject>(true);
+            definitions.m_PrefabSubNets = SystemAPI.GetBufferLookup<Game.Prefabs.SubNet>(true);
+            definitions.m_PrefabSubLanes = SystemAPI.GetBufferLookup<Game.Prefabs.SubLane>(true);
+            definitions.m_PrefabSubAreas = SystemAPI.GetBufferLookup<Game.Prefabs.SubArea>(true);
+            definitions.m_PrefabSubAreaNodes = SystemAPI.GetBufferLookup<SubAreaNode>(true);
+            definitions.m_PrefabPlaceholderElements = SystemAPI.GetBufferLookup<PlaceholderObjectElement>(true);
+            definitions.m_PrefabRequirementElements = SystemAPI.GetBufferLookup<ObjectRequirementElement>(true);
+            definitions.m_PrefabServiceUpgradeBuilding = SystemAPI.GetBufferLookup<ServiceUpgradeBuilding>(true);
+            definitions.m_WaterSurfaceData = m_WaterSystem.GetSurfaceData(out var deps);
+            definitions.m_TerrainHeightData = m_TerrainSystem.GetHeightData();
+            definitions.m_CommandBuffer = m_ToolOutputBarrier.CreateCommandBuffer();
+            definitions.Execute();
         }
     }
 }

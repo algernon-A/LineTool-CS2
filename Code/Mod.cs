@@ -88,6 +88,7 @@ namespace LineTool
             // Activate systems.
             updateSystem.UpdateAt<LineToolSystem>(SystemUpdatePhase.ToolUpdate);
             updateSystem.UpdateAt<LineToolUISystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<LineToolTooltipSystem>(SystemUpdatePhase.UITooltip);
         }
 
         /// <summary>

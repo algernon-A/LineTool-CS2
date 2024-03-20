@@ -38,11 +38,11 @@ To remove variable spacing and/or offset, set the field(s) back to zero. **Shift
 
 ## Limitations
 
-Sub-objects aren't yet supported, so if you use this to place buildings they won't have any of their sub-components (such as props, embedded networks, or sub-buildings). The full version of this mod rectifies this.
+Sub-objects aren't yet supported, so if you use this to place buildings they won't have any of their sub-components (such as props, embedded networks, or sub-buildings).
 
 Some specialized buildings can cause issues/and crashes, such as carparks.
 
-Vehicles *can* be placed, but will get confused and likely do strange things, which does have its amusement value at least. The full version will allow you to place vehicles as 'props' (so they just sit there and look pretty, and not e.g. rise up nose-first into the sky in various geometric patterns).
+Vehicles *can* be placed, but will get confused and likely do strange things, which does have its amusement value at least.
 
 ## Translations
 
