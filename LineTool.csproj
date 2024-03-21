@@ -62,5 +62,4 @@
 		<Delete Files="@(CleanTargets)" />
 	</Target>
 
-
 </Project>

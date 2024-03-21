@@ -13,6 +13,7 @@ namespace LineTool
     using Game.Prefabs;
     using Game.Simulation;
     using Game.Tools;
+    using Unity.Burst;
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Mathematics;
@@ -23,6 +24,7 @@ namespace LineTool
     /// Struct to mirror game code's temporary entity definitions creation.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:Elements should be documented", Justification = "Decompiled game code.")]
+    [BurstCompile]
     internal struct CreateDefinitions
     {
         public bool m_EditorMode;
