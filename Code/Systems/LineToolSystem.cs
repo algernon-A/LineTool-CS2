@@ -642,7 +642,6 @@ namespace LineTool
             _points.Clear();
             _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
-
             // Step along length and place preview objects.
             foreach (PointData thisPoint in _points)
             {

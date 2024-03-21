@@ -46,12 +46,12 @@
 
 	<Target Name="SetDescription" BeforeTargets="BeforeBuild">
 		<XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/Properties/LongDescription.md))" Query="//LongDescription" />
-		<XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/CHANGELOG.md))" Query="//ChangeLog" />
+		<XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/Properties/LatestChangelog.md))" Query="//ChangeLog" />
 		<XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(Version)" Query="//ModVersion/@Value" />
 	</Target>
 
 	<Target Name="InstallUI" AfterTargets="AfterBuild">
-		<Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/LineToolUI" />
+		<Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI" />
 	</Target>
-	
+
 </Project>
