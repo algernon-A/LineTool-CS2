@@ -51,13 +51,11 @@ namespace LineTool
         // Cursor.
         private ControlPoint _raycastPoint;
         private float3 _previousPos;
-        private Entity _cursorEntity = Entity.Null;
 
         // Prefab selection.
         private ToolBaseSystem _previousTool = null;
         private ObjectGeometryPrefab _selectedPrefab;
         private Entity _selectedEntity = Entity.Null;
-        private int _originalXP;
         private Bounds1 _zBounds;
 
         // References.
@@ -295,9 +293,6 @@ namespace LineTool
                             _zBounds.max = math.max(_zBounds.max, renderPrefab.bounds.z.max);
                         }
                     }
-
-                    // Reduce any XP to zero while we're using the tool.
-                    SaveXP();
                 }
             }
         }
@@ -578,43 +573,22 @@ namespace LineTool
                     // Don't update if the cursor hasn't moved.
                     if (position.x != _previousPos.x || position.z != _previousPos.z)
                     {
-                        // Delete any existing cursor entity and create a new one.
-                        if (_cursorEntity != Entity.Null)
-                        {
-                            EntityManager.AddComponent<Deleted>(_cursorEntity);
-                        }
-
-                        _cursorEntity = CreateEntity();
-
-                        // Highlight cursor entity.
-                        EntityManager.AddComponent<Highlighted>(_cursorEntity);
-
-                        // Update cursor entity position.
-                        EntityManager.SetComponentData(_cursorEntity, new Transform { m_Position = position, m_Rotation = GetEffectiveRotation(position) });
-                        EntityManager.AddComponent<BatchesUpdated>(_cursorEntity);
-
-                        // Ensure cursor entity tree state.
-                        EnsureTreeState(_cursorEntity);
+                        // Create cursor entity.
+                        CreateDefinitions(
+                            _selectedEntity,
+                            position,
+                            GetEffectiveRotation(position));
 
                         // Update previous position.
                         _previousPos = position;
                     }
+                    else
+                    {
+                        // Cursor hasn't moved - just keep what we've got.
+                        applyMode = ApplyMode.None;
+                    }
 
                     return inputDeps;
-                }
-                else if (_cursorEntity != Entity.Null)
-                {
-                    // Cancel cursor entity.
-                    EntityManager.AddComponent<Deleted>(_cursorEntity);
-                    _cursorEntity = Entity.Null;
-                }
-            }
-            else
-            {
-                // No valid raycast - hide cursor.
-                if (_cursorEntity != Entity.Null)
-                {
-                    EntityManager.AddComponent<Deleted>(_cursorEntity);
                 }
             }
 
@@ -631,6 +605,7 @@ namespace LineTool
             if (!_dirty && position.x == _previousPos.x && position.z == _previousPos.y)
             {
                 // No update needed.
+                applyMode = ApplyMode.None;
                 return inputDeps;
             }
 
@@ -669,7 +644,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStartRunning()
         {
-            _log.Info("OnStartRunning");
+            _log.Debug("OnStartRunning");
             base.OnStartRunning();
 
             // Ensure apply action is enabled.
@@ -691,7 +666,7 @@ namespace LineTool
         /// </summary>
         protected override void OnStopRunning()
         {
-            _log.Info("OnStopRunning");
+            _log.Debug("OnStopRunning");
 
             // Clear tooltips.
             _tooltips.Clear();
@@ -699,16 +674,6 @@ namespace LineTool
             // Disable apply action.
             _applyAction.shouldBeEnabled = false;
             _cancelAction.shouldBeEnabled = false;
-
-            // Cancel cursor entity.
-            if (_cursorEntity != Entity.Null)
-            {
-                EntityManager.AddComponent<Deleted>(_cursorEntity);
-                _cursorEntity = Entity.Null;
-            }
-
-            // Restore prefab XP.
-            RestoreXP();
 
             // Reset state.
             _mode.Reset();
@@ -754,38 +719,6 @@ namespace LineTool
             }
 
             return newEntity;
-        }
-
-        /// <summary>
-        /// Reduces XP gain for the current object to zero and records the original value.
-        /// </summary>
-        private void SaveXP()
-        {
-            // Reduce any XP to zero while we're using the tool.
-            if (EntityManager.TryGetComponent(_selectedEntity, out PlaceableObjectData placeableData))
-            {
-                _originalXP = placeableData.m_XPReward;
-                placeableData.m_XPReward = 0;
-                EntityManager.SetComponentData(_selectedEntity, placeableData);
-            }
-            else
-            {
-                _originalXP = 0;
-            }
-        }
-
-        /// <summary>
-        /// Restores the selected prefab's original XP gain.
-        /// </summary>
-        private void RestoreXP()
-        {
-            // Restore original prefab XP, if we changed it.
-            if (_originalXP != 0 && _selectedEntity != Entity.Null && EntityManager.TryGetComponent(_selectedEntity, out PlaceableObjectData placeableData))
-            {
-                placeableData.m_XPReward = _originalXP;
-                EntityManager.SetComponentData(_selectedEntity, placeableData);
-                _originalXP = 0;
-            }
         }
 
         /// <summary>
