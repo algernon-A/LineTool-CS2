@@ -1,5 +1,5 @@
 <Publish>
-  <ModId Value="" />
+  <ModId Value="75816" />
   <DisplayName Value="Line Tool" />
   <ShortDescription Value="Place objects in lines" />
   <LongDescription>This mod enhances existing tools so you can precisely and quickly place objects such as trees, shrubs, and props in lines, curves, and circles with varying parameters.
@@ -43,10 +43,11 @@ To remove variable spacing and/or offset, set the field(s) back to zero. **Shift
   <Screenshot Value="" />
   <Tag Value="Code Mod" />
   <ForumLink Value="" />
-  <ModVersion Value="0.4" />
+  <ModVersion Value="0.5" />
   <GameVersion Value="1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0" />
-  <ChangeLog>- Update localization framework</ChangeLog>
+  <ChangeLog>- Update tooltips
+- Update localization framework</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/7rTsfUdfTf" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />

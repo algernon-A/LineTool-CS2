@@ -1,3 +1,7 @@
 Line Tool for Cities: Skylines II
 github.com/Algernon-A/LineTool-CS2
 Copyright (c) 2023-24 algernon (K. Algernon A. Sheppard).  All rights reserved.
+
+Portions of this code are derived from the source code for the game.
+Such portions are Copyright (c) Colossal Order and Paradox Interactive.
+Not for reuse or distribution except in accordance with the Paradox Interactive End User License Agreement.
