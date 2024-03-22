@@ -1,1 +1,2 @@
+- Update tooltips
 - Update localization framework

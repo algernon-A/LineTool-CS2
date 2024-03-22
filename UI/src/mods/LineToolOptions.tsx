@@ -1,6 +1,7 @@
 import { useLocalization } from "cs2/l10n";
 import { ModuleRegistry } from "cs2/modding";
 import { bindValue, trigger, useValue } from "cs2/api";
+import {tool} from "cs2/bindings";
 
 // Boolean update bindings.
 export const showModeRow$ = bindValue<boolean>('LineTool', 'ShowModeRow');
@@ -38,17 +39,23 @@ export function offsetVariationDownClick() { trigger("LineTool", "DecreaseOffset
 export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Component: any) => {
     return (props: any) => {
         // Component paths.
-        const theme = moduleRegistry.registry.get("game-ui/game/components/tool-options/tool-button/tool-button.module.scss")?.classes;
+        const toolButtonModule = moduleRegistry.registry.get("game-ui/game/components/tool-options/tool-button/tool-button.tsx");
+        const toolButtonTheme = moduleRegistry.registry.get("game-ui/game/components/tool-options/tool-button/tool-button.module.scss")?.classes;
         const toolMouseModule = moduleRegistry.registry.get("game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.tsx");
         const mouseToolTheme = moduleRegistry.registry.get("game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.module.scss")?.classes;
-        const toolButtonModule = moduleRegistry.registry.get("game-ui/game/components/tool-options/tool-button/tool-button.tsx")!!;
         const focusKey = moduleRegistry.registry.get("game-ui/common/focus/focus-key.ts");
-
+        const descriptionToolTip = moduleRegistry.registry.get("game-ui/common/tooltip/description-tooltip/description-tooltip.tsx");
+        const descriptionTooltipTheme = moduleRegistry.registry.get("game-ui/common/tooltip/description-tooltip/description-tooltip.module.scss")?.classes;
+        
+        // Components.
         const Section: any = toolMouseModule?.Section;
         const ToolButton: any = toolButtonModule?.ToolButton;
+        const DescriptionTooltip: any = descriptionToolTip?.DescriptionTooltip;
+        const FocusDisabled: any = focusKey?.FOCUS_DISABLED;
+        
+        // General.
         const { translate } = useLocalization();
         const { children, ...otherProps } = props || {};
-        const FocusDisabled: any = focusKey?.FOCUS_DISABLED;
 
         // Boolean update bindings.
         const showModeRow: boolean = useValue(showModeRow$);
@@ -71,6 +78,28 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const renderedRotation: string = Rotation.toFixed(0).toString() + "°";
         const renderedSpacingVariation: string = SpacingVariation.toFixed(0).toString() + " m";
         const renderedOffsetVariation: string = OffsetVariation.toFixed(0).toString() + " m";
+        
+        // Titled tooltip generator.
+        function  TitledTooltip (titleKey: string, contentKey: string): JSX.Element {
+            return (<DescriptionTooltip>
+            <>
+                <div className={descriptionTooltipTheme.title}>{translate(titleKey)}</div>
+                <div className={descriptionTooltipTheme.content}>{translate(contentKey)}</div>
+            </>
+            </DescriptionTooltip>)
+        }
+        
+        // Two-paragraph titled tooltip generator.
+        function  TitledParaTooltip (titleKey: string, firstParaKey: string, secondParaKey: string): JSX.Element {
+            return (<DescriptionTooltip>
+                <>
+                    <div className={descriptionTooltipTheme.title}>{translate(titleKey)}</div>
+                    <div className={descriptionTooltipTheme.content}>{translate(firstParaKey)}</div>
+                    <div className={descriptionTooltipTheme.content}> </div>
+                    <div className={descriptionTooltipTheme.content}>{translate(secondParaKey)}</div>
+                </>
+            </DescriptionTooltip>)
+        }
 
         // Show mode row if set.
         let result: JSX.Element = Component();
@@ -78,9 +107,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
             result.props.children?.push(
                 <Section title={translate("LINETOOL.LineMode")}>
                     <ToolButton
-                        className={theme.button}
+                        className={toolButtonTheme.button}
                         src={"Media/Tools/Net Tool/Point.svg"}
-                        tooltip={translate("LINETOOL.PointMode") + ": " + "\r\n" + translate("LINETOOL_DESCRIPTION.PointMode")}
+                        tooltip={TitledTooltip("LINETOOL.PointMode","LINETOOL_DESCRIPTION.PointMode")}
                         onSelect={pointModeClick}
                         selected={pointModeEnabled}
                         multiSelect={false}
@@ -88,9 +117,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         focusKey={FocusDisabled}
                     />
                     <ToolButton
-                        className={theme.button}
+                        className={toolButtonTheme.button}
                         src={"Media/Tools/Net Tool/Straight.svg"}
-                        tooltip={translate("LINETOOL.StraightLine") + ": " + translate("LINETOOL_DESCRIPTION.StraightLine")}
+                        tooltip={TitledTooltip("LINETOOL.StraightLine","LINETOOL_DESCRIPTION.PointMode")}
                         onSelect={straightLineModeClick}
                         selected={straightLineModeEnabled}
                         multiSelect={false}
@@ -98,9 +127,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         focusKey={FocusDisabled}
                     />
                     <ToolButton
-                        className={theme.button}
+                        className={toolButtonTheme.button}
                         src={"Media/Tools/Net Tool/SimpleCurve.svg"}
-                        tooltip={translate("LINETOOL.SimpleCurve") + ": " + translate("LINETOOL_DESCRIPTION.SimpleCurve")}
+                        tooltip={TitledTooltip("LINETOOL.SimpleCurve", "LINETOOL_DESCRIPTION.SimpleCurve")}
                         onSelect={simpleCurveModeClick}
                         selected={simpleCurveModeEnabled}
                         multiSelect={false}
@@ -108,9 +137,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         focusKey={FocusDisabled}
                     />
                     <ToolButton
-                        className={theme.button}
+                        className={toolButtonTheme.button}
                         src={"coui://uil/Standard/Circle.svg"}
-                        tooltip={translate("LINETOOL.Circle") + ": " + translate("LINETOOL_DESCRIPTION.Circle")}
+                        tooltip={TitledTooltip("LINETOOL.Circle", "LINETOOL_DESCRIPTION.Circle")}
                         onSelect={circleModeClick}
                         selected={circleModeEnabled}
                         multiSelect={false}
@@ -126,9 +155,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                     <>
                         <Section title={translate("LINETOOL.Options")}>
                             <ToolButton
-                                className={theme.button}
+                                className={toolButtonTheme.button}
                                 src={"coui://uil/Standard/Fence.svg"}
-                                tooltip={translate("LINETOOL.FenceMode") + ": " + translate("LINETOOL_DESCRIPTION.FenceMode")}
+                                tooltip={TitledTooltip("LINETOOL.FenceMode", "LINETOOL_DESCRIPTION.FenceMode")}
                                 onSelect={fenceModeClick}
                                 selected={fenceModeEnabled}
                                 multiSelect={false}
@@ -138,9 +167,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         </Section>
                         <Section title={translate("LINETOOL.Spacing")} tooltip={translate("LINETOOL_DESCRIPTION.Spacing")}>
                             <ToolButton
-                                className={theme.button}
+                                className={toolButtonTheme.button}
                                 src={"coui://uil/Standard/MeasureEven.svg"}
-                                tooltip={translate("LINETOOL.FixedLength") + ": " + translate("LINETOOL_DESCRIPTION.FixedLength")}
+                                tooltip={TitledTooltip("LINETOOL.FixedLength", "LINETOOL_DESCRIPTION.FixedLength")}
                                 onSelect={fullLengthClick}
                                 selected={fullLengthEnabled}
                                 multiSelect={false}
@@ -150,7 +179,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             <ToolButton
                                 className={mouseToolTheme.startButton}
                                 src="coui://uil/Standard/ArrowDownThickStroke.svg"
-                                tooltip={translate("LINETOOL.SpacingDown") + ": " + translate("LINETOOL_DESCRIPTION.SpacingDown")}
+                                tooltip={TitledParaTooltip("LINETOOL.SpacingDown", "LINETOOL_DESCRIPTION.Spacing", "LINETOOL_DESCRIPTION.SpacingDown")}
                                 onSelect={spacingDownClick}
                                 selected={false}
                                 multiSelect={false}
@@ -161,7 +190,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             <ToolButton
                                 className={mouseToolTheme.endButton}
                                 src="coui://uil/Standard/ArrowUpThickStroke.svg"
-                                tooltip={translate("LINETOOL.SpacingUp") + ": " + translate("LINETOOL_DESCRIPTION.SpacingUp") + translate("LINETOOL_DESCRIPTION.Spacing")}
+                                tooltip={TitledParaTooltip("LINETOOL.SpacingUp", "LINETOOL_DESCRIPTION.Spacing", "LINETOOL_DESCRIPTION.SpacingUp")}
                                 onSelect={spacingUpClick}
                                 selected={false}
                                 multiSelect={false}
@@ -171,9 +200,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         </Section>
                         <Section title={translate("LINETOOL.Rotation")} tooltip={translate("LINETOOL_DESCRIPTION.Rotation")}>
                             <ToolButton
-                                className={theme.button}
+                                className={toolButtonTheme.button}
                                 src={"coui://uil/Standard/Dice.svg"}
-                                tooltip={translate("LINETOOL.RandomRotation") + ": " + translate("LINETOOL_DESCRIPTION.RandomRotation")}
+                                tooltip={TitledTooltip("LINETOOL.RandomRotation", "LINETOOL_DESCRIPTION.RandomRotation")}
                                 onSelect={randomRotationClick}
                                 selected={randomRotationEnabled}
                                 multiSelect={false}
@@ -183,7 +212,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             <ToolButton
                                 className={mouseToolTheme.startButton}
                                 src="coui://uil/Standard/ArrowDownThickStroke.svg"
-                                tooltip={translate("LINETOOL.AntiClockwise") + ": " + translate("LINETOOL_DESCRIPTION.AntiClockwise") + translate("LINETOOL_DESCRIPTION.Rotation")}
+                                tooltip={TitledParaTooltip("LINETOOL.AntiClockwise", "LINETOOL_DESCRIPTION.Rotation", "LINETOOL_DESCRIPTION.AntiClockwise")}
                                 onSelect={rotationDownClick}
                                 selected={false}
                                 multiSelect={false}
@@ -194,7 +223,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             <ToolButton
                                 className={mouseToolTheme.endButton}
                                 src="coui://uil/Standard/ArrowUpThickStroke.svg"
-                                tooltip={translate("LINETOOL.Clockwise") + ": " + translate("LINETOOL_DESCRIPTION.Clockwise") + translate("LINETOOL_DESCRIPTION.Rotation")}
+                                tooltip={TitledParaTooltip("LINETOOL.Clockwise", "LINETOOL_DESCRIPTION.Rotation", "LINETOOL_DESCRIPTION.Clockwise")}
                                 onSelect={rotationUpClick}
                                 selected={false}
                                 multiSelect={false}
@@ -206,30 +235,33 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             <ToolButton
                                 className={mouseToolTheme.startButton}
                                 src="coui://uil/Standard/ArrowDownThickStroke.svg"
-                                tooltip={translate("LINETOOL.RandomSpacingDown") + ": " + translate("LINETOOL_DESCRIPTION.RandomSpacingDown")}
+                                tooltip={TitledParaTooltip("LINETOOL.RandomSpacingDown", "LINETOOL_DESCRIPTION.SpacingVariation", "LINETOOL_DESCRIPTION.RandomSpacingDown")}
                                 onSelect={spacingVariationDownClick}
                                 selected={false}
                                 multiSelect={false}
                                 disabled={false}
                                 focusKey={FocusDisabled}
                             />
-                            <div className={mouseToolTheme.numberField}>{renderedSpacingVariation}</div>
+                            <div className={mouseToolTheme.numberField}>
+                                {renderedSpacingVariation}
+                            </div>
                             <ToolButton
                                 className={mouseToolTheme.endButton}
                                 src="coui://uil/Standard/ArrowUpThickStroke.svg"
-                                tooltip={translate("LINETOOL.RandomSpacingUp") + ": " + translate("LINETOOL_DESCRIPTION.RandomSpacingUp")}
+                                tooltip={TitledParaTooltip("LINETOOL.RandomSpacingUp", "LINETOOL_DESCRIPTION.SpacingVariation", "LINETOOL_DESCRIPTION.RandomSpacingUp")}
                                 onSelect={spacingVariationUpClick}
                                 selected={false}
                                 multiSelect={false}
                                 disabled={false}
                                 focusKey={FocusDisabled}
+                                useTooltipParagraph="true"
                             />
                         </Section>
                         <Section title={translate("LINETOOL.OffsetVariation")}>
                             <ToolButton
                                 className={mouseToolTheme.startButton}
                                 src="coui://uil/Standard/ArrowDownThickStroke.svg"
-                                tooltip={translate("LINETOOL.RandomOffsetUp") + ": " + translate("LINETOOL_DESCRIPTION.RandomOffsetUp")}
+                                tooltip={TitledParaTooltip("LINETOOL.RandomOffsetUp", "LINETOOL_DESCRIPTION.OffsetVariation", "LINETOOL_DESCRIPTION.RandomOffsetUp")}
                                 onSelect={offsetVariationDownClick}
                                 selected={false}
                                 multiSelect={false}
@@ -240,7 +272,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             <ToolButton
                                 className={mouseToolTheme.endButton}
                                 src="coui://uil/Standard/ArrowUpThickStroke.svg"
-                                tooltip={translate("LINETOOL.RandomOffsetDown") + ": " + translate("LINETOOL_DESCRIPTION.RandomOffsetDown") + translate("LINETOOL_DESCRIPTION.OffsetVariation")}
+                                tooltip={TitledParaTooltip("LINETOOL.RandomOffsetDown", "LINETOOL_DESCRIPTION.OffsetVariation", "LINETOOL_DESCRIPTION.RandomOffsetDown")}
                                 onSelect={offsetVariationUpClick}
                                 selected={false}
                                 multiSelect={false}

@@ -21,7 +21,7 @@
 "LINETOOL.SpacingUp","增加间距"
 "LINETOOL_DESCRIPTION.SpacingUp","调整参数时，按住 Shift 键 ×10，按住 Ctrl 键 ×0.1。"
 "LINETOOL.AntiClockwise","逆时针旋转"
-"LINETOOL_DESCRIPTION.AntiClockwise","调整角度时，按住 Shift 键一次可调整90&deg;，按住 Ctrl 键一次可调整1&deg;。"
+"LINETOOL_DESCRIPTION.AntiClockwise","调整角度时，按住 Shift 键一次可调整90°，按住 Ctrl 键一次可调整1°。"
 "LINETOOL.Clockwise","顺时针旋转90°"
 "LINETOOL_DESCRIPTION.Clockwise","调整角度时，按住 Shift 键一次可调整90°，按住 Ctrl 键一次可调整1°。"
 "LINETOOL.RandomSpacingDown","减少随机间距变化范围"
