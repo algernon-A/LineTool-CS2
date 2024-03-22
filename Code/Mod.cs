@@ -83,7 +83,7 @@ namespace LineTool
             Log.Info($"loading {ModName} version {Assembly.GetExecutingAssembly().GetName().Version}");
 
             // Load translations.
-            Localization.LoadTranslations(Log);
+            Localization.LoadTranslations(null, Log);
 
             // Activate systems.
             updateSystem.UpdateAt<LineToolSystem>(SystemUpdatePhase.ToolUpdate);
