@@ -1,1 +1,2 @@
 - Add wall-to-wall mode.
+- Use consistent random seed in fence mode.

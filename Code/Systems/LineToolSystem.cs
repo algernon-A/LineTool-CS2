@@ -596,7 +596,8 @@ namespace LineTool
                         CreateDefinitions(
                             _selectedEntity,
                             position,
-                            GetEffectiveRotation(position));
+                            GetEffectiveRotation(position),
+                            RandomSeed.Next());
 
                         // Update previous position.
                         _previousPos = position;
@@ -637,6 +638,7 @@ namespace LineTool
             _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
             // Step along length and place preview objects.
+            RandomSeed randomSeed = RandomSeed.Next();
             foreach (PointData thisPoint in _points)
             {
                 UnityEngine.Random.InitState((int)(thisPoint.Position.x + thisPoint.Position.y + thisPoint.Position.z));
@@ -652,7 +654,8 @@ namespace LineTool
                 CreateDefinitions(
                     _selectedEntity,
                     thisPoint.Position,
-                    _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation);
+                    _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
+                    _spacingMode == SpacingMode.FenceMode ? randomSeed : RandomSeed.Next());
             }
 
             return inputDeps;
@@ -818,14 +821,15 @@ namespace LineTool
         /// <param name="objectPrefab">Object prefab entity.</param>
         /// <param name="position">Entity position.</param>
         /// <param name="rotation">Entity rotation.</param>
-        private void CreateDefinitions(Entity objectPrefab, float3 position, quaternion rotation)
+        /// <param name="randomSeed">Random seed to use.</param>
+        private void CreateDefinitions(Entity objectPrefab, float3 position, quaternion rotation, RandomSeed randomSeed)
         {
             CreateDefinitions definitions = default;
             definitions.m_EditorMode = m_ToolSystem.actionMode.IsEditor();
             definitions.m_LefthandTraffic = _cityConfigurationSystem.leftHandTraffic;
             definitions.m_ObjectPrefab = objectPrefab;
             definitions.m_Theme = _cityConfigurationSystem.defaultTheme;
-            definitions.m_RandomSeed = RandomSeed.Next();
+            definitions.m_RandomSeed = randomSeed;
             definitions.m_ControlPoint = new () { m_Position = position, m_Rotation = rotation };
             definitions.m_AttachmentPrefab = default;
             definitions.m_OwnerData = SystemAPI.GetComponentLookup<Owner>(true);
