@@ -56,6 +56,7 @@ namespace LineTool
         private ToolBaseSystem _previousTool = null;
         private ObjectGeometryPrefab _selectedPrefab;
         private Entity _selectedEntity = Entity.Null;
+        private Bounds1 _xBounds;
         private Bounds1 _zBounds;
 
         // References.
@@ -138,7 +139,21 @@ namespace LineTool
         /// <summary>
         /// Gets the effective spacing value, taking into account fence mode.
         /// </summary>
-        internal float EffectiveSpacing => _spacingMode == SpacingMode.FenceMode ? _zBounds.max - _zBounds.min : _spacing;
+        internal float EffectiveSpacing
+        {
+            get
+            {
+                switch (_spacingMode)
+                {
+                    case SpacingMode.FenceMode:
+                        return _zBounds.max - _zBounds.min;
+                    case SpacingMode.W2WMode:
+                        return _xBounds.max - _xBounds.min;
+                    default:
+                        return _spacing;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the current spacing mode.
@@ -282,13 +297,17 @@ namespace LineTool
                     _selectedEntity = m_PrefabSystem.GetEntity(_selectedPrefab);
 
                     // Check bounds.
-                    _zBounds.min = 0;
-                    _zBounds.max = 0;
+                    _zBounds.min = 0f;
+                    _zBounds.max = 0f;
+                    _xBounds.min = 0f;
+                    _xBounds.max = 0f;
                     foreach (ObjectMeshInfo mesh in _selectedPrefab.m_Meshes)
                     {
                         if (mesh.m_Mesh is RenderPrefab renderPrefab)
                         {
-                            // Update bounds if either of the z extents of this mesh exceed the previous extent.
+                            // Update bounds if either of the relevant extents of this mesh exceed the previous extent.
+                            _xBounds.min = math.min(_xBounds.min, renderPrefab.bounds.x.min);
+                            _xBounds.max = math.max(_xBounds.max, renderPrefab.bounds.x.max);
                             _zBounds.min = math.min(_zBounds.min, renderPrefab.bounds.z.min);
                             _zBounds.max = math.max(_zBounds.max, renderPrefab.bounds.z.max);
                         }

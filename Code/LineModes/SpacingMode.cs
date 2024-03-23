@@ -22,6 +22,11 @@ namespace LineTool
         FenceMode,
 
         /// <summary>
+        /// Wall-to-wall mode.
+        /// </summary>
+        W2WMode,
+
+        /// <summary>
         /// Evenly spaced along entire length of line.
         /// </summary>
         FullLength,

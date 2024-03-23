@@ -67,7 +67,9 @@ namespace LineTool
 
             // Options UI bindings.
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FenceModeEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.FenceMode));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "W2WModeEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.W2WMode));
             AddBinding(new TriggerBinding("LineTool", "ToggleFenceMode", ToggleFenceMode));
+            AddBinding(new TriggerBinding("LineTool", "ToggleW2WMode", ToggleW2WMode));
 
             // Spacing UI bindings.
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FullLengthEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.FullLength));
@@ -221,6 +223,21 @@ namespace LineTool
             if (_lineToolSystem.CurrentSpacingMode != SpacingMode.FenceMode)
             {
                 _lineToolSystem.CurrentSpacingMode = SpacingMode.FenceMode;
+            }
+            else
+            {
+                _lineToolSystem.CurrentSpacingMode = SpacingMode.Manual;
+            }
+        }
+
+        /// <summary>
+        /// Event callback to toggle wall-to-wall mode.
+        /// </summary>
+        private void ToggleW2WMode()
+        {
+            if (_lineToolSystem.CurrentSpacingMode != SpacingMode.W2WMode)
+            {
+                _lineToolSystem.CurrentSpacingMode = SpacingMode.W2WMode;
             }
             else
             {

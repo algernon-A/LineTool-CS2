@@ -1,2 +1,1 @@
-- Update tooltips
-- Update localization framework
+- Add wall-to-wall mode.

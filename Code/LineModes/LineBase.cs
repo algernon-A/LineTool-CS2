@@ -128,10 +128,18 @@ namespace LineTool
             System.Random random = new ((int)length * 1000);
 
             // Calculate applied rotation (in radians).
-            float appliedRotation = math.radians(rotation);
-            if (spacingMode == SpacingMode.FenceMode)
+            float appliedRotation;
+            switch (spacingMode)
             {
-                appliedRotation = math.atan2(difference.x, difference.z);
+                case SpacingMode.FenceMode:
+                    appliedRotation = math.atan2(difference.x, difference.z);
+                    break;
+                case SpacingMode.W2WMode:
+                    appliedRotation = math.atan2(difference.x, difference.z) + (Mathf.PI / 2f);
+                    break;
+                default:
+                    appliedRotation = math.radians(rotation);
+                    break;
             }
 
             // Rotation quaternion.
