@@ -131,8 +131,8 @@ namespace LineTool
             // Randomizer.
             System.Random random = new ((int)(currentPos.x + currentPos.z) * 1000);
 
-            // For fence mode offset initial spacing by object half-length (so start of item aligns with the line start point).
-            float tFactor = spacingMode == SpacingMode.FenceMode ? BezierStep(0, spacing / 2f) : 0f;
+            // Traverse Bezier and place objects.
+            float tFactor = 0f;
             float distanceTravelled = 0f;
             while (tFactor < 1.0f)
             {
@@ -159,11 +159,13 @@ namespace LineTool
                 tFactor = BezierStep(tFactor, adjustedSpacing);
                 distanceTravelled += adjustedSpacing;
 
-                // Calculate applied rotation for fence mode.
+                // Calculate position and rotation for fence mode.
                 if (spacingMode == SpacingMode.FenceMode)
                 {
-                    float3 difference = MathUtils.Position(_thisBezier, tFactor) - thisPoint;
+                    float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
+                    float3 difference = nextPoint - thisPoint;
                     qRotation = quaternion.Euler(0f, math.atan2(difference.x, difference.z), 0f);
+                    thisPoint = (nextPoint + thisPoint) / 2f;
                 }
 
                 // Calculate terrain height.
