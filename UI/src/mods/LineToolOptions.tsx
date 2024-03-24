@@ -84,24 +84,24 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         
         // Titled tooltip generator.
         function  TitledTooltip (titleKey: string, contentKey: string): JSX.Element {
-            return (<DescriptionTooltip>
-            <>
-                <div className={descriptionTooltipTheme.title}>{translate(titleKey)}</div>
-                <div className={descriptionTooltipTheme.content}>{translate(contentKey)}</div>
-            </>
-            </DescriptionTooltip>)
+            return (
+                <>
+                    <div className={descriptionTooltipTheme.title}>{translate(titleKey)}</div>
+                    <div className={descriptionTooltipTheme.content}>{translate(contentKey)}</div>
+                </>
+            )
         }
         
         // Two-paragraph titled tooltip generator.
         function  TitledParaTooltip (titleKey: string, firstParaKey: string, secondParaKey: string): JSX.Element {
-            return (<DescriptionTooltip>
+            return (
                 <>
                     <div className={descriptionTooltipTheme.title}>{translate(titleKey)}</div>
                     <div className={descriptionTooltipTheme.content}>{translate(firstParaKey)}</div>
                     <div className={descriptionTooltipTheme.content}> </div>
                     <div className={descriptionTooltipTheme.content}>{translate(secondParaKey)}</div>
                 </>
-            </DescriptionTooltip>)
+            )
         }
 
         // Show mode row if set.
@@ -169,7 +169,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             />
                             <ToolButton
                                 className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/Fence.svg"}
+                                src={"coui://uil/Standard/BoxesWallToWall.svg"}
                                 tooltip={TitledTooltip("LINETOOL.W2WMode", "LINETOOL_DESCRIPTION.W2WMode")}
                                 onSelect={w2wModeClick}
                                 selected={w2wModeEnabled}
