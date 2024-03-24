@@ -44,8 +44,8 @@ To remove variable spacing and/or offset, set the field(s) back to zero. **Shift
   <Tag Value="Code Mod" />
   <ForumLink Value="" />
   <ModVersion Value="0.6" />
-  <GameVersion Value="1.*" />
-  <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0" />
+  <GameVersion Value="1.1.*" />
+  <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
   <ChangeLog>- Add wall-to-wall mode.
 - Use consistent random seed in fence mode.
 - Adjust fence mode placement for smoother curves.</ChangeLog>
