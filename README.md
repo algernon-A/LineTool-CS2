@@ -1,4 +1,9 @@
 ## Line Tool
+A mod for Cities: Skylines 2.  Available for download only on [Paradox Mods](https://mods.paradoxplaza.com/mods/75816/Windows).
+
+The primary platform for support is the [Cities Skylines Modding Discord](https://discord.gg/HTav7ARPs2).
+
+## Description
 This mod supplements existing tools so you can precisely and quickly place objects such as trees, shrubs, and props in lines, curves, and circles with varying parameters.
 
 ## Features
@@ -34,3 +39,13 @@ This mod supplements existing tools so you can precisely and quickly place objec
 - Set **variable offset** greater than zero to apply a random sideways offset to each item, up to the maximum distance specified - click for 1m increments, **Shift-click** for 10m, **Control-click** for 0.1m.
 
 To remove variable spacing and/or offset, set the field(s) back to zero. **Shift-click** (10m increments) to make this faster.
+
+## Meta
+### Translations
+This mod supports localization via a [CrowdIn project](https://crowdin.com/project/line-tool-cs2).  Please help out if you can!
+
+### Modders
+Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods.  Come grab me on the [Cities Skylines Modding Discord](https://discord.gg/HTav7ARPs2)!
+
+Pull requests welcome! Note that translations should be submitted via CrowdIn (see link above), and not by PR.
+
