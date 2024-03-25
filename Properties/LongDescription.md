@@ -34,3 +34,10 @@ This mod supplements existing tools so you can precisely and quickly place objec
 - Set **variable offset** greater than zero to apply a random sideways offset to each item, up to the maximum distance specified - click for 1m increments, **Shift-click** for 10m, **Control-click** for 0.1m.
 
 To remove variable spacing and/or offset, set the field(s) back to zero. **Shift-click** (10m increments) to make this faster.
+
+## Meta
+### Translations
+This mod supports localization. Please help out with translating this mod into different languages via the CrowdIn site at crowdin.com/project/linetool-cs2.
+
+### Modders
+Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods. Come grab me on the Cities: Skylines Modding Discord!
