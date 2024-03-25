@@ -40,7 +40,12 @@
 
 To remove variable spacing and/or offset, set the field(s) back to zero. **Shift-click** (10m increments) to make this faster.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
-  <Screenshot Value="" />
+  <Screenshot Value="Properties/Thumbnail.png" />
+  <Screenshot Value="Properties/Screenshots/Trees.jpg" />
+  <Screenshot Value="Properties/Screenshots/WindTurbines.jpg" />
+  <Screenshot Value="Properties/Screenshots/FencesAndHedges.jpg" />
+  <Screenshot Value="Properties/Screenshots/BuildingRow.jpg" />
+  <Screenshot Value="Properties/Screenshots/PlacementVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="" />
   <ModVersion Value="0.6" />
@@ -50,6 +55,6 @@ To remove variable spacing and/or offset, set the field(s) back to zero. **Shift
 - Use consistent random seed in fence mode.
 - Adjust fence mode placement for smoother curves.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
-  <ExternalLink Type="discord" Url="https://discord.gg/7rTsfUdfTf" />
+  <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />
 </Publish>
