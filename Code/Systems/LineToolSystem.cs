@@ -340,7 +340,7 @@ namespace LineTool
         /// <returns><c>true</c> if Line Tool supports this prefab, <c>false</c> otherwise.</returns>
         public override bool TrySetPrefab(PrefabBase prefab)
         {
-            if (prefab is ObjectGeometryPrefab objectGeometryPrefab)
+            if (m_ToolSystem.activeTool == this && prefab is ObjectGeometryPrefab objectGeometryPrefab)
             {
                 SelectedPrefab = objectGeometryPrefab;
                 return true;
