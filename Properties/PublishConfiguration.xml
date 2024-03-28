@@ -57,7 +57,8 @@ Modders (and aspiring modders!), as always I'm available and happy to chat about
   <ModVersion Value="0.6" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
-  <ChangeLog>- Remove tool change frame delay.</ChangeLog>
+  <ChangeLog>- Remove tool change frame delay.
+- Improve prefab change handling.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />

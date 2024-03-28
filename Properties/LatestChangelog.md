@@ -1,1 +1,2 @@
 - Remove tool change frame delay.
+- Improve prefab change handling.

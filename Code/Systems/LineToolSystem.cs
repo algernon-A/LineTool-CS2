@@ -337,8 +337,18 @@ namespace LineTool
         /// Sets the prefab selected by this tool.
         /// </summary>
         /// <param name="prefab">Prefab to set.</param>
-        /// <returns><c>false</c>.</returns>
-        public override bool TrySetPrefab(PrefabBase prefab) => false;
+        /// <returns><c>true</c> if Line Tool supports this prefab, <c>false</c> otherwise.</returns>
+        public override bool TrySetPrefab(PrefabBase prefab)
+        {
+            if (prefab is ObjectGeometryPrefab objectGeometryPrefab)
+            {
+                SelectedPrefab = objectGeometryPrefab;
+                return true;
+            }
+
+            // If we got here, the prefab isn't supported by Line Tool.
+            return false;
+        }
 
         /// <summary>
         /// Elevation-up key handler; used to increment spacing.

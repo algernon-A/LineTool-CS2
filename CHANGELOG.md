@@ -1,4 +1,5 @@
 - Remove tool change frame delay.
+- Improve prefab change handling.
 
 ### 0.6
 - Add wall-to-wall mode.

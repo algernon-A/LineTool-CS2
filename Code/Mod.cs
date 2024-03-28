@@ -82,6 +82,9 @@ namespace LineTool
 
             Log.Info($"loading {ModName} version {Assembly.GetExecutingAssembly().GetName().Version}");
 
+            // Apply harmony patches.
+            new Patcher("algernon-LineToolCS2", Log);
+
             // Load translations.
             Localization.LoadTranslations(null, Log);
 
@@ -98,6 +101,9 @@ namespace LineTool
         {
             Log.Info("disposing");
             Instance = null;
+
+            // Revert harmony patches.
+            Patcher.Instance?.UnPatchAll();
         }
     }
 }
