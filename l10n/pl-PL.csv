@@ -15,7 +15,7 @@
 "LINETOOL_DESCRIPTION.Circle","Określ środek koła, a następnie jego promień."
 "LINETOOL.FixedLength","Wybrana długość"
 "LINETOOL_DESCRIPTION.FixedLength","Umieszczaj elementy w odstępach wzdłuż linii przy zachowaniu wybranej odległości między nimi jedynie w przybliżeniu. Gdy opcja jest wyłączona, elementy są rozmieszczane w wybranej odległości nawet wtedy, gdy umieszczenie ich wzdłuż całej linii nie jest możliwe."
-"LINETOOL.RandomRotation","Obrót losowy"
+"LINETOOL.RandomRotation","Losowy obrót"
 "LINETOOL_DESCRIPTION.RandomRotation","Obracaj obiekty losowo, aby każdy był zwrócony w inną stronę."
 "LINETOOL.SpacingDown","Zmniejsz odstęp"
 "LINETOOL.SpacingUp","Zwiększ odstęp"
