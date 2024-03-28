@@ -44,7 +44,12 @@ To remove variable spacing and/or offset, set the field(s) back to zero. **Shift
 This mod supports localization. Please help out with translating this mod into different languages via the CrowdIn site at crowdin.com/project/linetool-cs2.
 
 ### Modders
-Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods. Come grab me on the Cities: Skylines Modding Discord!</LongDescription>
+Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods. Come grab me on the Cities: Skylines Modding Discord!
+
+### Credits
+Special thanks to yenyang for various tips and advice!
+
+This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
   <Screenshot Value="Properties/Thumbnail.png" />
   <Screenshot Value="Properties/Screenshots/Trees.jpg" />
