@@ -27,8 +27,6 @@ namespace LineTool
 
         // Internal status.
         private bool _toolIsActive = false;
-        private bool _activateTool = false;
-        private bool _restorePreviousTool = false;
         private ToolBaseSystem _previousSystem = null;
 
         /// <summary>
@@ -103,32 +101,6 @@ namespace LineTool
         {
             base.OnUpdate();
 
-            // Check for tool activation trigger.
-            if (_activateTool)
-            {
-                // Trigger set - clear it and activate tool.
-                _activateTool = false;
-                if (_toolSystem.activeTool != _lineToolSystem)
-                {
-                    _log.Info("enabling tool");
-                    _lineToolSystem.EnableTool();
-                    return;
-                }
-            }
-
-            // Check for previous tool restoration trigger.
-            if (_restorePreviousTool)
-            {
-                // Trigger set - clear it and restore previous tool.
-                _restorePreviousTool = false;
-                if (_toolSystem.activeTool == _lineToolSystem)
-                {
-                    _log.Info("restoring previous tool");
-                    _lineToolSystem.RestorePreviousTool();
-                    return;
-                }
-            }
-
             // Check for line tool activation.
             if (_toolSystem.activeTool == _lineToolSystem)
             {
@@ -171,7 +143,7 @@ namespace LineTool
             // If the line tool is currently activated and the new prefab is a placeable object, reactivate it (the game will reset the tool to the relevant object tool).
             if (_toolSystem.activeTool == _lineToolSystem && prefab is StaticObjectPrefab)
             {
-                _activateTool = true;
+                _lineToolSystem.EnableTool();
             }
         }
 
@@ -181,7 +153,7 @@ namespace LineTool
         private void SetPointMode()
         {
             // Restore previously-used tool.
-            _restorePreviousTool = true;
+            _lineToolSystem.RestorePreviousTool();
             _lineToolSystem.Mode = LineMode.Point;
         }
 
@@ -191,8 +163,8 @@ namespace LineTool
         private void SetStraightMode()
         {
             // Ensure tool is activated.
-            _activateTool = true;
             _lineToolSystem.Mode = LineMode.Straight;
+            _lineToolSystem.EnableTool();
         }
 
         /// <summary>
@@ -201,8 +173,8 @@ namespace LineTool
         private void SetSimpleCurveMode()
         {
             // Ensure tool is activated.
-            _activateTool = true;
             _lineToolSystem.Mode = LineMode.SimpleCurve;
+            _lineToolSystem.EnableTool();
         }
 
         /// <summary>
@@ -211,8 +183,8 @@ namespace LineTool
         private void SetCircleMode()
         {
             // Ensure tool is activated.
-            _activateTool = true;
             _lineToolSystem.Mode = LineMode.Circle;
+            _lineToolSystem.EnableTool();
         }
 
         /// <summary>

@@ -1,3 +1,5 @@
+- Remove tool change frame delay.
+
 ### 0.6
 - Add wall-to-wall mode.
 - Use consistent random seed in fence mode.

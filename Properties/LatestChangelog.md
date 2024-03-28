@@ -1,3 +1,1 @@
-- Add wall-to-wall mode.
-- Use consistent random seed in fence mode.
-- Adjust fence mode placement for smoother curves.
+- Remove tool change frame delay.
