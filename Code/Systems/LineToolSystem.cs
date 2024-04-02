@@ -8,7 +8,6 @@ namespace LineTool
 {
     using System;
     using System.Reflection;
-    using Colossal.Entities;
     using Colossal.Logging;
     using Colossal.Mathematics;
     using Colossal.Serialization.Entities;
@@ -32,7 +31,6 @@ namespace LineTool
     using static Game.Rendering.GuideLinesSystem;
     using Random = Unity.Mathematics.Random;
     using Transform = Game.Objects.Transform;
-    using Tree = Game.Objects.Tree;
 
     /// <summary>
     /// Line tool system.
@@ -648,7 +646,7 @@ namespace LineTool
             _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
             // Step along length and place preview objects.
-            RandomSeed randomSeed = RandomSeed.Next();
+            RandomSeed randomSeed = GetRandomSeed();
             foreach (PointData thisPoint in _points)
             {
                 UnityEngine.Random.InitState((int)(thisPoint.Position.x + thisPoint.Position.y + thisPoint.Position.z));
@@ -665,7 +663,7 @@ namespace LineTool
                     _selectedEntity,
                     thisPoint.Position,
                     _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
-                    _spacingMode == SpacingMode.FenceMode ? randomSeed : RandomSeed.Next());
+                    _spacingMode == SpacingMode.FenceMode ? randomSeed : GetRandomSeed());
             }
 
             return inputDeps;
@@ -726,34 +724,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Creates a new copy of the currently selected entity.
-        /// </summary>
-        /// <returns>New entity.</returns>
-        private Entity CreateEntity()
-        {
-            // Create new entity.
-            ObjectData componentData = EntityManager.GetComponentData<ObjectData>(_selectedEntity);
-            Entity newEntity = EntityManager.CreateEntity(componentData.m_Archetype);
-
-            // Set prefab and transform.
-            EntityManager.SetComponentData(newEntity, new PrefabRef(_selectedEntity));
-
-            // Set tree growth to adult if this is a tree.
-            if (EntityManager.HasComponent<Tree>(newEntity))
-            {
-                Tree treeData = new ()
-                {
-                    m_State = GetTreeState(),
-                    m_Growth = 0,
-                };
-
-                EntityManager.SetComponentData(newEntity, treeData);
-            }
-
-            return newEntity;
-        }
-
-        /// <summary>
         /// Gets the effective object rotation depending on current settings.
         /// </summary>
         /// <param name="position">Object position (to seed random number generator).</param>
@@ -775,22 +745,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Ensures any previewed trees have the correct age group.
-        /// This resolves an issue where previewed trees will have their age group reset if they ever get blocked while previewing.
-        /// </summary>
-        /// <param name="entity">Entity to check.</param>
-        private void EnsureTreeState(Entity entity)
-        {
-            // Ensure any trees have been assigned the correct age.
-            if (EntityManager.TryGetComponent<Tree>(entity, out Tree tree))
-            {
-                tree.m_State = GetTreeState();
-                tree.m_Growth = 0;
-                EntityManager.SetComponentData(entity, tree);
-            }
-        }
-
-        /// <summary>
         /// Gets the tree state to apply to the next created tree.
         /// Uses Tree Controller to determine this if available, otherwise returns <see cref="TreeState.Adult"/>.
         /// </summary>
@@ -806,22 +760,6 @@ namespace LineTool
             {
                 // Tree controller state.
                 return (TreeState)_nextTreeState.GetValue(_treeControllerTool);
-            }
-        }
-
-        /// <summary>
-        /// Resets a tree to current tree state settings.
-        /// </summary>
-        /// <param name="entity">Tree entity.</param>
-        private void ResetTreeState(Entity entity)
-        {
-            if (entity != Entity.Null)
-            {
-                if (EntityManager.TryGetComponent<Tree>(entity, out Tree tree))
-                {
-                    tree.m_State = GetTreeState();
-                    EntityManager.SetComponentData(entity, tree);
-                }
             }
         }
 
