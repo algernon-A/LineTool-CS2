@@ -1,2 +1,1 @@
-- Remove tool change frame delay.
-- Improve prefab change handling.
+- Add object appearance randomization controls.

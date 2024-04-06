@@ -1,3 +1,5 @@
+- Add object appearance randomization controls.
+
 ### 0.7
 - Remove tool change frame delay.
 - Improve prefab change handling.

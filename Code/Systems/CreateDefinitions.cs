@@ -27,62 +27,123 @@ namespace LineTool
     [BurstCompile]
     internal struct CreateDefinitions
     {
+        [ReadOnly]
+        public bool m_RandomizationEnabled;
+        [ReadOnly]
+        public int m_FixedRandomSeed;
+        [ReadOnly]
         public bool m_EditorMode;
+        [ReadOnly]
         public bool m_LefthandTraffic;
+        [ReadOnly]
         public Entity m_ObjectPrefab;
+        [ReadOnly]
         public Entity m_Theme;
+        [ReadOnly]
         public RandomSeed m_RandomSeed;
+        [ReadOnly]
         public ControlPoint m_ControlPoint;
+        [ReadOnly]
         public NativeReference<AttachmentData> m_AttachmentPrefab;
+        [ReadOnly]
         public ComponentLookup<Owner> m_OwnerData;
+        [ReadOnly]
         public ComponentLookup<Transform> m_TransformData;
+        [ReadOnly]
         public ComponentLookup<Attached> m_AttachedData;
+        [ReadOnly]
         public ComponentLookup<LocalTransformCache> m_LocalTransformCacheData;
+        [ReadOnly]
         public ComponentLookup<Game.Objects.Elevation> m_ElevationData;
+        [ReadOnly]
         public ComponentLookup<Building> m_BuildingData;
+        [ReadOnly]
         public ComponentLookup<Game.Buildings.Lot> m_LotData;
+        [ReadOnly]
         public ComponentLookup<Edge> m_EdgeData;
+        [ReadOnly]
         public ComponentLookup<Game.Net.Node> m_NodeData;
+        [ReadOnly]
         public ComponentLookup<Curve> m_CurveData;
+        [ReadOnly]
         public ComponentLookup<Game.Net.Elevation> m_NetElevationData;
+        [ReadOnly]
         public ComponentLookup<Orphan> m_OrphanData;
+        [ReadOnly]
         public ComponentLookup<Upgraded> m_UpgradedData;
+        [ReadOnly]
         public ComponentLookup<Clear> m_AreaClearData;
+        [ReadOnly]
         public ComponentLookup<Composition> m_CompositionData;
+        [ReadOnly]
         public ComponentLookup<Space> m_AreaSpaceData;
+        [ReadOnly]
         public ComponentLookup<Game.Areas.Lot> m_AreaLotData;
+        [ReadOnly]
         public ComponentLookup<EditorContainer> m_EditorContainerData;
+        [ReadOnly]
         public ComponentLookup<PrefabRef> m_PrefabRefData;
+        [ReadOnly]
         public ComponentLookup<NetObjectData> m_PrefabNetObjectData;
+        [ReadOnly]
         public ComponentLookup<BuildingData> m_PrefabBuildingData;
+        [ReadOnly]
         public ComponentLookup<AssetStampData> m_PrefabAssetStampData;
+        [ReadOnly]
         public ComponentLookup<BuildingExtensionData> m_PrefabBuildingExtensionData;
+        [ReadOnly]
         public ComponentLookup<SpawnableObjectData> m_PrefabSpawnableObjectData;
+        [ReadOnly]
         public ComponentLookup<ObjectGeometryData> m_PrefabObjectGeometryData;
+        [ReadOnly]
         public ComponentLookup<PlaceableObjectData> m_PrefabPlaceableObjectData;
+        [ReadOnly]
         public ComponentLookup<AreaGeometryData> m_PrefabAreaGeometryData;
+        [ReadOnly]
         public ComponentLookup<PlaceholderBuildingData> m_PlaceholderBuildingData;
+        [ReadOnly]
         public ComponentLookup<BuildingTerraformData> m_PrefabBuildingTerraformData;
+        [ReadOnly]
         public ComponentLookup<CreatureSpawnData> m_PrefabCreatureSpawnData;
+        [ReadOnly]
         public BufferLookup<Game.Objects.SubObject> m_SubObjects;
+        [ReadOnly]
         public ComponentLookup<NetGeometryData> m_PrefabNetGeometryData;
+        [ReadOnly]
         public ComponentLookup<NetCompositionData> m_PrefabCompositionData;
+        [ReadOnly]
         public BufferLookup<LocalNodeCache> m_CachedNodes;
+        [ReadOnly]
         public BufferLookup<InstalledUpgrade> m_InstalledUpgrades;
+        [ReadOnly]
         public BufferLookup<Game.Net.SubNet> m_SubNets;
+        [ReadOnly]
         public BufferLookup<ConnectedEdge> m_ConnectedEdges;
+        [ReadOnly]
         public BufferLookup<Game.Areas.SubArea> m_SubAreas;
+        [ReadOnly]
         public BufferLookup<Game.Areas.Node> m_AreaNodes;
+        [ReadOnly]
         public BufferLookup<Triangle> m_AreaTriangles;
+        [ReadOnly]
         public BufferLookup<Game.Prefabs.SubObject> m_PrefabSubObjects;
+        [ReadOnly]
         public BufferLookup<Game.Prefabs.SubNet> m_PrefabSubNets;
+        [ReadOnly]
         public BufferLookup<Game.Prefabs.SubLane> m_PrefabSubLanes;
+        [ReadOnly]
         public BufferLookup<Game.Prefabs.SubArea> m_PrefabSubAreas;
+        [ReadOnly]
         public BufferLookup<SubAreaNode> m_PrefabSubAreaNodes;
+        [ReadOnly]
         public BufferLookup<PlaceholderObjectElement> m_PrefabPlaceholderElements;
+        [ReadOnly]
         public BufferLookup<ObjectRequirementElement> m_PrefabRequirementElements;
+        [ReadOnly]
         public BufferLookup<ServiceUpgradeBuilding> m_PrefabServiceUpgradeBuilding;
+        [ReadOnly]
         public WaterSurfaceData m_WaterSurfaceData;
+        [ReadOnly]
         public TerrainHeightData m_TerrainHeightData;
         public EntityCommandBuffer m_CommandBuffer;
 
@@ -341,7 +402,17 @@ namespace LineTool
                 component.m_SubPrefab = Entity.Null;
                 component.m_Owner = owner;
                 component.m_Original = original;
-                component.m_RandomSeed = random.NextInt();
+
+                // Set random seed.
+                if (m_FixedRandomSeed == 0)
+                {
+                    component.m_RandomSeed = random.NextInt();
+                }
+                else
+                {
+                    component.m_RandomSeed = m_FixedRandomSeed;
+                }
+
                 if (optional)
                 {
                     component.m_Flags |= CreationFlags.Optional;

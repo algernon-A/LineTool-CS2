@@ -66,8 +66,11 @@ namespace LineTool
             // Options UI bindings.
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FenceModeEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.FenceMode));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "W2WModeEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.W2WMode));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "RandomizationEnabled", () => _lineToolSystem.RandomizationEnabled));
             AddBinding(new TriggerBinding("LineTool", "ToggleFenceMode", ToggleFenceMode));
             AddBinding(new TriggerBinding("LineTool", "ToggleW2WMode", ToggleW2WMode));
+            AddBinding(new TriggerBinding("LineTool", "UpdateRandomSeed", UpdateRandomSeed));
+            AddBinding(new TriggerBinding("LineTool", "ToggleRandomization", ToggleRandomization));
 
             // Spacing UI bindings.
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FullLengthEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.FullLength));
@@ -231,6 +234,16 @@ namespace LineTool
                 _lineToolSystem.CurrentSpacingMode = SpacingMode.Manual;
             }
         }
+
+        /// <summary>
+        /// Event callback to toggle randomization.
+        /// </summary>
+        private void ToggleRandomization() => _lineToolSystem.RandomizationEnabled = !_lineToolSystem.RandomizationEnabled;
+
+        /// <summary>
+        /// Event callback to update the fixed random seed.
+        /// </summary>
+        private void UpdateRandomSeed() => _lineToolSystem.UpdateRandomSeed();
 
         /// <summary>
         /// Event callback to increase spacing by one step.

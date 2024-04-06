@@ -1,7 +1,6 @@
 import { useLocalization } from "cs2/l10n";
 import { ModuleRegistry } from "cs2/modding";
 import { bindValue, trigger, useValue } from "cs2/api";
-import {tool} from "cs2/bindings";
 
 // Boolean update bindings.
 export const showModeRow$ = bindValue<boolean>('LineTool', 'ShowModeRow');
@@ -11,6 +10,7 @@ export const simpleCurveModeEnabled$ = bindValue<boolean>('LineTool', 'SimpleCur
 export const circleModeEnabled$ = bindValue<boolean>('LineTool', 'CircleEnabled');
 export const fenceModeEnabled$ = bindValue<boolean>('LineTool', 'FenceModeEnabled');
 export const w2wModeEnabled$ = bindValue<boolean>('LineTool', 'W2WModeEnabled');
+export const randomizationEnabled$ = bindValue<boolean>('LineTool', 'RandomizationEnabled');
 export const fullLengthEnabled$ = bindValue<boolean>('LineTool', 'FullLengthEnabled');
 export const randomRotationEnabled$ = bindValue<boolean>('LineTool', 'RandomRotationEnabled');
 
@@ -27,6 +27,8 @@ export function simpleCurveModeClick() { trigger("LineTool", "SetSimpleCurveMode
 export function circleModeClick() { trigger("LineTool", "SetCircleMode"); }
 export function fenceModeClick() { trigger("LineTool", "ToggleFenceMode"); }
 export function w2wModeClick() { trigger("LineTool", "ToggleW2WMode"); }
+export function randomizationClick() { trigger("LineTool", "ToggleRandomization"); }
+export function changeRandomClick() { trigger("LineTool", "UpdateRandomSeed"); }
 export function fullLengthClick() { trigger("LineTool", "ToggleFullLength"); }
 export function spacingUpClick() { trigger("LineTool", "IncreaseSpacing"); }
 export function spacingDownClick() { trigger("LineTool", "DecreaseSpacing"); }
@@ -46,13 +48,11 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const toolMouseModule = moduleRegistry.registry.get("game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.tsx");
         const mouseToolTheme = moduleRegistry.registry.get("game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.module.scss")?.classes;
         const focusKey = moduleRegistry.registry.get("game-ui/common/focus/focus-key.ts");
-        const descriptionToolTip = moduleRegistry.registry.get("game-ui/common/tooltip/description-tooltip/description-tooltip.tsx");
         const descriptionTooltipTheme = moduleRegistry.registry.get("game-ui/common/tooltip/description-tooltip/description-tooltip.module.scss")?.classes;
         
         // Components.
         const Section: any = toolMouseModule?.Section;
         const ToolButton: any = toolButtonModule?.ToolButton;
-        const DescriptionTooltip: any = descriptionToolTip?.DescriptionTooltip;
         const FocusDisabled: any = focusKey?.FOCUS_DISABLED;
         
         // General.
@@ -67,6 +67,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const circleModeEnabled: boolean = useValue(circleModeEnabled$);
         const fenceModeEnabled: boolean = useValue(fenceModeEnabled$);
         const w2wModeEnabled: boolean = useValue(w2wModeEnabled$);
+        const randomizationEnabled: boolean = useValue(randomizationEnabled$);
         const fullLengthEnabled: boolean = useValue(fullLengthEnabled$);
         const randomRotationEnabled: boolean = useValue(randomRotationEnabled$);
 
@@ -173,6 +174,26 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                 tooltip={TitledTooltip("LINETOOL.W2WMode", "LINETOOL_DESCRIPTION.W2WMode")}
                                 onSelect={w2wModeClick}
                                 selected={w2wModeEnabled}
+                                multiSelect={false}
+                                disabled={false}
+                                focusKey={FocusDisabled}
+                            />
+                            <ToolButton
+                                className={toolButtonTheme.button}
+                                src={"coui://uil/Standard/Dice.svg"}
+                                tooltip={TitledTooltip("LINETOOL.RandomizationEnabled", "LINETOOL_DESCRIPTION.RandomizationEnabled")}
+                                onSelect={randomizationClick}
+                                selected={randomizationEnabled}
+                                multiSelect={false}
+                                disabled={false}
+                                focusKey={FocusDisabled}
+                            />
+                            <ToolButton
+                                className={toolButtonTheme.button}
+                                src={"coui://uil/Standard/Reset.svg"}
+                                tooltip={TitledTooltip("LINETOOL.ChangeRandom", "LINETOOL_DESCRIPTION.ChangeRandom")}
+                                onSelect={changeRandomClick}
+                                selected={false}
                                 multiSelect={false}
                                 disabled={false}
                                 focusKey={FocusDisabled}

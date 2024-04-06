@@ -7,10 +7,9 @@
 namespace LineTool
 {
     using System;
-    using System.Reflection;
+    using System.Collections.Generic;
     using Colossal.Logging;
     using Colossal.Mathematics;
-    using Colossal.Serialization.Entities;
     using Game;
     using Game.Areas;
     using Game.Buildings;
@@ -44,7 +43,6 @@ namespace LineTool
         // Line calculations.
         private bool _fixedPreview = false;
         private float3 _fixedPos;
-        private Random _random = new ();
 
         // Cursor.
         private ControlPoint _raycastPoint;
@@ -56,6 +54,12 @@ namespace LineTool
         private Entity _selectedEntity = Entity.Null;
         private Bounds1 _xBounds;
         private Bounds1 _zBounds;
+
+        // Randomization.
+        private Random _random = new ();
+        private List<RandomSeed> _randomSeeds = new () { default };
+        private float _previousSeedTime = 0f;
+        private int _fixedRandomSeed = 0;
 
         // References.
         private ILog _log;
@@ -83,10 +87,6 @@ namespace LineTool
         private float _randomSpacing = 0f;
         private float _randomOffset = 0f;
         private bool _dirty = false;
-
-        // Tree Controller integration.
-        private ToolBaseSystem _treeControllerTool;
-        private PropertyInfo _nextTreeState = null;
 
         /// <summary>
         /// Point dragging mode.
@@ -118,6 +118,11 @@ namespace LineTool
         /// Gets the tool's ID string.
         /// </summary>
         public override string toolID => "Line Tool";
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the random seed should be randomised <c>true</c> or kept constant <c>false</c>.
+        /// </summary>
+        internal bool RandomizationEnabled { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the effective line spacing.
@@ -408,6 +413,17 @@ namespace LineTool
         }
 
         /// <summary>
+        /// Updates the internal random seed.
+        /// </summary>
+        internal void UpdateRandomSeed()
+        {
+            ++_fixedRandomSeed;
+
+            // Reset seed timer to force update.
+            _previousSeedTime = 0f;
+        }
+
+        /// <summary>
         /// Called when the system is created.
         /// </summary>
         protected override void OnCreate()
@@ -442,33 +458,6 @@ namespace LineTool
             _keepBuildingAction = new ("LineTool-KeepBuilding");
             _keepBuildingAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
             _keepBuildingAction.Enable();
-        }
-
-        /// <summary>
-        /// Called by the game when loading is complete.
-        /// </summary>
-        /// <param name="purpose">Loading purpose.</param>
-        /// <param name="mode">Current game mode.</param>
-        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
-        {
-            base.OnGameLoadingComplete(purpose, mode);
-
-            // Try to get tree controller tool.
-            if (World.GetOrCreateSystemManaged<ToolSystem>().tools.Find(x => x.toolID.Equals("Tree Controller Tool")) is ToolBaseSystem treeControllerTool)
-            {
-                // Found it - attempt to reflect NextTreeState property getter.
-                _log.Info("found tree controller");
-                _nextTreeState = treeControllerTool.GetType().GetProperty("NextTreeState");
-                if (_nextTreeState is not null)
-                {
-                    _treeControllerTool = treeControllerTool;
-                    _log.Info("reflected NextTreeState");
-                }
-            }
-            else
-            {
-                _log.Info("tree controller tool not found");
-            }
         }
 
         /// <summary>
@@ -605,7 +594,7 @@ namespace LineTool
                             _selectedEntity,
                             position,
                             GetEffectiveRotation(position),
-                            RandomSeed.Next());
+                            GetRandomSeed(0));
 
                         // Update previous position.
                         _previousPos = position;
@@ -645,8 +634,15 @@ namespace LineTool
             _points.Clear();
             _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
+            // Initialize randomization for this run.
+            RandomSeed randomSeed = GetRandomSeed(0);
+            int seedIndex = 0;
+            while (_randomSeeds.Count < _points.Length)
+            {
+                _randomSeeds.Add(RandomSeed.Next());
+            }
+
             // Step along length and place preview objects.
-            RandomSeed randomSeed = GetRandomSeed();
             foreach (PointData thisPoint in _points)
             {
                 UnityEngine.Random.InitState((int)(thisPoint.Position.x + thisPoint.Position.y + thisPoint.Position.z));
@@ -663,7 +659,7 @@ namespace LineTool
                     _selectedEntity,
                     thisPoint.Position,
                     _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
-                    _spacingMode == SpacingMode.FenceMode ? randomSeed : GetRandomSeed());
+                    _spacingMode == SpacingMode.FenceMode ? randomSeed : RandomizationEnabled ? GetRandomSeed(seedIndex++) : GetRandomSeed(0));
             }
 
             return inputDeps;
@@ -745,22 +741,32 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Gets the tree state to apply to the next created tree.
-        /// Uses Tree Controller to determine this if available, otherwise returns <see cref="TreeState.Adult"/>.
+        /// Gets a current random seed in a sequence with seed updates limited to one every two seconds.
         /// </summary>
-        /// <returns>Tree state to apply.</returns>
-        private TreeState GetTreeState()
+        /// <param name="seedIndex">Index of seed to use.</param>
+        /// <returns>Current random seed for the given index.</returns>
+        private RandomSeed GetRandomSeed(int seedIndex)
         {
-            if (_treeControllerTool is null)
+            int listMax = _randomSeeds.Count - 1;
+            if (RandomizationEnabled)
             {
-                // Use this if Tree Controller is unavailable.
-                return TreeState.Adult;
+                // Update the stored random seeds if at least two seconds have passed since the last update.
+                float currentTime = UnityEngine.Time.time;
+                if (currentTime - _previousSeedTime > 2f)
+                {
+                    // Update seeds.
+                    for (int i = 0; i <= listMax; ++i)
+                    {
+                        _randomSeeds[i] = RandomSeed.Next();
+                    }
+
+                    // Store new 'last updated' time.
+                    _previousSeedTime = currentTime;
+                }
             }
-            else
-            {
-                // Tree controller state.
-                return (TreeState)_nextTreeState.GetValue(_treeControllerTool);
-            }
+
+            // Bounds check index before returning the seed index.
+            return _randomSeeds[UnityEngine.Mathf.Clamp(seedIndex, 0, listMax)];
         }
 
         /// <summary>
@@ -773,6 +779,8 @@ namespace LineTool
         private void CreateDefinitions(Entity objectPrefab, float3 position, quaternion rotation, RandomSeed randomSeed)
         {
             CreateDefinitions definitions = default;
+            definitions.m_RandomizationEnabled = RandomizationEnabled;
+            definitions.m_FixedRandomSeed = RandomizationEnabled ? 0 : _fixedRandomSeed;
             definitions.m_EditorMode = m_ToolSystem.actionMode.IsEditor();
             definitions.m_LefthandTraffic = _cityConfigurationSystem.leftHandTraffic;
             definitions.m_ObjectPrefab = objectPrefab;
