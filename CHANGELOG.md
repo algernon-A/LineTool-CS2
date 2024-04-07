@@ -1,3 +1,4 @@
+### 0.8
 - Add object appearance randomization controls.
 
 ### 0.7
