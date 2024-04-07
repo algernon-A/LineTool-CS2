@@ -12,6 +12,7 @@ This mod supplements existing tools so you can precisely and quickly place objec
 - Works both *in-game* and *in the editor*.
 - **Fence mode**: Automatically align and place objects end-to-end.
 - **Wall-to-wall mode**: Automatically align and place objects side-to-side.
+- **Appearance randomization controls**: Settings to control object appearance randomization.
 - **Accurate placement**: No worrying about imprecision.
 - **Adjust spacing and rotation**: Use the in-game tool UI for more control, including random rotation for a more natural look.
 - **Random position variation** (optional): Provides natural irregularity.
@@ -32,6 +33,8 @@ This mod supplements existing tools so you can precisely and quickly place objec
 - Toggle between **single object** (default game tool), **straight line**, **curved**, and **circle** modes.
 - Toggle **fence mode** to align objects with the line direction, and place them continuously end-to-end (like a fence).
 - Toggle **wall-to-wall mode** to align objects with the line direction, and place them continuously side-to-side (like a row of buildings).
+- Enable **randomization** to randomize the appearance of objects to be placed (within the normal range for that object), or **disable** randomization to have all objects take their default appearance.
+- Use the **change fixed random seed** to change the appearance of objects to place to the next random option.
 - Adjust **distances** using the arrow buttons - click for 1m increments, **Shift-click** for 10m, and **Control-click** for 0.1m. For circle mode, spacing is rounded *up* to the nearest distance that ensures an even placement around the circle.
 - Select **fixed-length even spacing mode** to space out objects evenly over the entire length of the line, with spacing *as close as possible* to the spacing distance you set.  For circle mode, this causes spacing to be rounded to the *nearest number* (up or down) that ensures an even placement around the circle (default circle rounding is always *up*).
 - Select **random rotation** to have each object in the line have a different randomly-chosen rotation, or manually adjust the rotation for all items using the arrow buttons - click for 10-degree increments, **Shift-click** for 90 degrees, **Control-click** for 1 degree.
