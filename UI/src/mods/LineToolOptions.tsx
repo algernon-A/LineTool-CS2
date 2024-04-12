@@ -237,7 +237,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                     disabled={false}
                                     focusKey={FocusDisabled}
                                 />
-                                <div className={mouseToolTheme.numberField}>{renderedSpacing}</div>
+                                <Tooltip tooltip={translate("LINETOOL_DESCRIPTION.Spacing")}>
+                                    <div className={mouseToolTheme.numberField}>{renderedSpacing}</div>
+                                </Tooltip>
                                 <ToolButton
                                     className={mouseToolTheme.endButton}
                                     src="coui://uil/Standard/ArrowUpThickStroke.svg"
@@ -291,7 +293,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                     disabled={randomRotationEnabled}
                                     focusKey={FocusDisabled}
                                 />
-                                <div className={mouseToolTheme.numberField}>{renderedRotation}</div>
+                                <Tooltip tooltip={translate("LINETOOL_DESCRIPTION.Rotation")}>
+                                    <div className={mouseToolTheme.numberField}>{renderedRotation}</div>
+                                </Tooltip>
                                 <ToolButton
                                     className={mouseToolTheme.endButton}
                                     src="coui://uil/Standard/ArrowUpThickStroke.svg"
@@ -321,9 +325,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                 disabled={false}
                                 focusKey={FocusDisabled}
                             />
-                            <div className={mouseToolTheme.numberField}>
-                                {renderedSpacingVariation}
-                            </div>
+                            <Tooltip tooltip={translate("LINETOOL_DESCRIPTION.SpacingVariation")}>
+                                <div className={mouseToolTheme.numberField}>{renderedSpacingVariation}</div>
+                            </Tooltip>
                             <ToolButton
                                 className={mouseToolTheme.endButton}
                                 src="coui://uil/Standard/ArrowUpThickStroke.svg"
@@ -347,7 +351,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                 disabled={false}
                                 focusKey={FocusDisabled}
                             />
-                            <div className={mouseToolTheme.numberField}>{renderedOffsetVariation}</div>
+                            <Tooltip tooltip={translate("LINETOOL_DESCRIPTION.OffsetVariation")}>
+                                <div className={mouseToolTheme.numberField}>{renderedOffsetVariation}</div>
+                            </Tooltip>
                             <ToolButton
                                 className={mouseToolTheme.endButton}
                                 src="coui://uil/Standard/ArrowUpThickStroke.svg"
