@@ -1,3 +1,5 @@
+- Add absolute/relative rotation selection.
+
 ### 0.8
 - Add object appearance randomization controls.
 

@@ -57,7 +57,7 @@ namespace LineTool
 
         // Randomization.
         private Random _random = new ();
-        private List<RandomSeed> _randomSeeds = new () { default };
+        private List<RandomSeed> _randomSeeds;
         private float _previousSeedTime = 0f;
         private int _fixedRandomSeed = 0;
 
@@ -81,8 +81,8 @@ namespace LineTool
 
         // Tool settings.
         private SpacingMode _spacingMode = SpacingMode.Manual;
+        private RotationMode _rotationMode = RotationMode.Relative;
         private float _spacing = 20f;
-        private bool _randomRotation = false;
         private int _rotation = 0;
         private float _randomSpacing = 0f;
         private float _randomOffset = 0f;
@@ -146,15 +146,12 @@ namespace LineTool
         {
             get
             {
-                switch (_spacingMode)
+                return _spacingMode switch
                 {
-                    case SpacingMode.FenceMode:
-                        return _zBounds.max - _zBounds.min;
-                    case SpacingMode.W2WMode:
-                        return _xBounds.max - _xBounds.min;
-                    default:
-                        return _spacing;
-                }
+                    SpacingMode.FenceMode => _zBounds.max - _zBounds.min,
+                    SpacingMode.W2WMode => _xBounds.max - _xBounds.min,
+                    _ => _spacing,
+                };
             }
         }
 
@@ -166,21 +163,29 @@ namespace LineTool
             get => _spacingMode;
             set
             {
-                _spacingMode = value;
-                _dirty = true;
+                // Don't do anything if no change.
+                if (_spacingMode != value)
+                {
+                    _spacingMode = value;
+                    _dirty = true;
+                }
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether random rotation is active.
+        /// Gets or sets the current rotation mode.
         /// </summary>
-        internal bool RandomRotation
+        internal RotationMode CurrentRotationMode
         {
-            get => _randomRotation;
+            get => _rotationMode;
             set
             {
-                _randomRotation = value;
-                _dirty = true;
+                // Don't do anything if no change.
+                if (_rotationMode != value)
+                {
+                    _rotationMode = value;
+                    _dirty = true;
+                }
             }
         }
 
@@ -192,8 +197,12 @@ namespace LineTool
             get => _randomSpacing;
             set
             {
-                _randomSpacing = value;
-                _dirty = true;
+                // Don't do anything if no change.
+                if (_randomSpacing != value)
+                {
+                    _randomSpacing = value;
+                    _dirty = true;
+                }
             }
         }
 
@@ -442,6 +451,9 @@ namespace LineTool
             _tooltips = new (8, Allocator.Persistent);
             _points = new (Allocator.Persistent);
 
+            // Create random seed list with one initial default starting randomizer.
+            _randomSeeds = new () { default };
+
             // Set default mode.
             _mode = new StraightLine();
 
@@ -632,7 +644,7 @@ namespace LineTool
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, _spacingMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, _spacingMode, _rotationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
             // Initialize randomization for this run.
             RandomSeed randomSeed = GetRandomSeed(0);
@@ -651,14 +663,14 @@ namespace LineTool
                 Transform transformData = new ()
                 {
                     m_Position = thisPoint.Position,
-                    m_Rotation = _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
+                    m_Rotation = _rotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                 };
 
                 // Create entity.
                 CreateDefinitions(
                     _selectedEntity,
                     thisPoint.Position,
-                    _randomRotation ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
+                    _rotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                     _spacingMode == SpacingMode.FenceMode ? randomSeed : RandomizationEnabled ? GetRandomSeed(seedIndex++) : GetRandomSeed(0));
             }
 
@@ -729,7 +741,7 @@ namespace LineTool
             int rotation = _rotation;
 
             // Override fixed rotation with a random value if we're using random rotation.
-            if (_randomRotation)
+            if (_rotationMode == RotationMode.Random)
             {
                 // Use position to init RNG.
                 _random.InitState((uint)(math.abs(position.x) + math.abs(position.y) + math.abs(position.z)) * 10000);
@@ -836,7 +848,7 @@ namespace LineTool
             definitions.m_PrefabPlaceholderElements = SystemAPI.GetBufferLookup<PlaceholderObjectElement>(true);
             definitions.m_PrefabRequirementElements = SystemAPI.GetBufferLookup<ObjectRequirementElement>(true);
             definitions.m_PrefabServiceUpgradeBuilding = SystemAPI.GetBufferLookup<ServiceUpgradeBuilding>(true);
-            definitions.m_WaterSurfaceData = m_WaterSystem.GetSurfaceData(out var deps);
+            definitions.m_WaterSurfaceData = m_WaterSystem.GetSurfaceData(out var _);
             definitions.m_TerrainHeightData = m_TerrainSystem.GetHeightData();
             definitions.m_CommandBuffer = m_ToolOutputBarrier.CreateCommandBuffer();
             definitions.Execute();

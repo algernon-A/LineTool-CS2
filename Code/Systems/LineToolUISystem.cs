@@ -80,9 +80,13 @@ namespace LineTool
             AddBinding(new TriggerBinding("LineTool", "DecreaseSpacing", DecreaseSpacing));
 
             // Rotation UI bindings.
-            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "RandomRotationEnabled", () => _lineToolSystem.RandomRotation));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "AbsoluteRotationEnabled", () => _lineToolSystem.CurrentRotationMode == RotationMode.Absolute));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "RelativeRotationEnabled", () => _lineToolSystem.CurrentRotationMode == RotationMode.Relative));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "RandomRotationEnabled", () => _lineToolSystem.CurrentRotationMode == RotationMode.Random));
             AddUpdateBinding(new GetterValueBinding<float>("LineTool", "Rotation", () => _lineToolSystem.Rotation));
-            AddBinding(new TriggerBinding("LineTool", "ToggleRandomRotation", ToggleRandomRotation));
+            AddBinding(new TriggerBinding("LineTool", "SetRelativeRotation", SetRelativeRotation));
+            AddBinding(new TriggerBinding("LineTool", "SetAbsoluteRotation", SetAbsoluteRotation));
+            AddBinding(new TriggerBinding("LineTool", "SetRandomRotation", SetRandomRotation));
             AddBinding(new TriggerBinding("LineTool", "IncreaseRotation", IncreaseRotation));
             AddBinding(new TriggerBinding("LineTool", "DecreaseRotation", DecreaseRotation));
 
@@ -256,9 +260,19 @@ namespace LineTool
         private void DecreaseSpacing() => _lineToolSystem.Spacing -= GetSpacingStep();
 
         /// <summary>
-        /// Event callback to toggle random rotation.
+        /// Event callback to set relative rotation.
         /// </summary>
-        private void ToggleRandomRotation() => _lineToolSystem.RandomRotation = !_lineToolSystem.RandomRotation;
+        private void SetRelativeRotation() => _lineToolSystem.CurrentRotationMode = RotationMode.Relative;
+
+        /// <summary>
+        /// Event callback to set absolute rotation.
+        /// </summary>
+        private void SetAbsoluteRotation() => _lineToolSystem.CurrentRotationMode = RotationMode.Absolute;
+
+        /// <summary>
+        /// Event callback to set random rotation.
+        /// </summary>
+        private void SetRandomRotation() => _lineToolSystem.CurrentRotationMode = RotationMode.Random;
 
         /// <summary>
         /// Event callback to increase rotation by one step.

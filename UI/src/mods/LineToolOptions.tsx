@@ -1,6 +1,7 @@
 import { useLocalization } from "cs2/l10n";
 import { ModuleRegistry } from "cs2/modding";
 import { bindValue, trigger, useValue } from "cs2/api";
+import {Tooltip} from "cs2/ui";
 
 // Boolean update bindings.
 export const showModeRow$ = bindValue<boolean>('LineTool', 'ShowModeRow');
@@ -12,6 +13,10 @@ export const fenceModeEnabled$ = bindValue<boolean>('LineTool', 'FenceModeEnable
 export const w2wModeEnabled$ = bindValue<boolean>('LineTool', 'W2WModeEnabled');
 export const randomizationEnabled$ = bindValue<boolean>('LineTool', 'RandomizationEnabled');
 export const fullLengthEnabled$ = bindValue<boolean>('LineTool', 'FullLengthEnabled');
+export const absoluteRotationEnabled$ = bindValue<boolean>('LineTool', 'AbsoluteRotationEnabled');
+
+export const relativeRotationEnabled$ = bindValue<boolean>('LineTool', 'RelativeRotationEnabled');
+
 export const randomRotationEnabled$ = bindValue<boolean>('LineTool', 'RandomRotationEnabled');
 
 // Number update bindings.
@@ -32,7 +37,9 @@ export function changeRandomClick() { trigger("LineTool", "UpdateRandomSeed"); }
 export function fullLengthClick() { trigger("LineTool", "ToggleFullLength"); }
 export function spacingUpClick() { trigger("LineTool", "IncreaseSpacing"); }
 export function spacingDownClick() { trigger("LineTool", "DecreaseSpacing"); }
-export function randomRotationClick() { trigger("LineTool", "ToggleRandomRotation"); }
+export function relativeRotationClick() { trigger("LineTool", "SetRelativeRotation"); }
+export function absoluteRotationClick() { trigger("LineTool", "SetAbsoluteRotation"); }
+export function randomRotationClick() { trigger("LineTool", "SetRandomRotation"); }
 export function rotationUpClick() { trigger("LineTool", "IncreaseRotation"); }
 export function rotationDownClick() { trigger("LineTool", "DecreaseRotation"); }
 export function spacingVariationUpClick() { trigger("LineTool", "IncreaseSpacingVariation"); }
@@ -69,6 +76,8 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const w2wModeEnabled: boolean = useValue(w2wModeEnabled$);
         const randomizationEnabled: boolean = useValue(randomizationEnabled$);
         const fullLengthEnabled: boolean = useValue(fullLengthEnabled$);
+        const relativeRotationEnabled: boolean = useValue(relativeRotationEnabled$);
+        const absoluteRotationEnabled: boolean = useValue(absoluteRotationEnabled$);
         const randomRotationEnabled: boolean = useValue(randomRotationEnabled$);
 
         // Number update bindings.
@@ -153,7 +162,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                 </Section>
             );
 
-            // Show options row if anything other than single point mode is selected.
+            // Show additional options if anything other than single point mode is selected.
             if (!pointModeEnabled) {
                 result.props.children?.push(
                     <>
@@ -199,72 +208,108 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                 focusKey={FocusDisabled}
                             />
                         </Section>
-                        <Section title={translate("LINETOOL.Spacing")} tooltip={translate("LINETOOL_DESCRIPTION.Spacing")}>
-                            <ToolButton
-                                className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/MeasureEven.svg"}
-                                tooltip={TitledTooltip("LINETOOL.FixedLength", "LINETOOL_DESCRIPTION.FixedLength")}
-                                onSelect={fullLengthClick}
-                                selected={fullLengthEnabled}
-                                multiSelect={false}
-                                disabled={false}
-                                focusKey={FocusDisabled}
-                            />
-                            <ToolButton
-                                className={mouseToolTheme.startButton}
-                                src="coui://uil/Standard/ArrowDownThickStroke.svg"
-                                tooltip={TitledParaTooltip("LINETOOL.SpacingDown", "LINETOOL_DESCRIPTION.Spacing", "LINETOOL_DESCRIPTION.SpacingModifiers")}
-                                onSelect={spacingDownClick}
-                                selected={false}
-                                multiSelect={false}
-                                disabled={false}
-                                focusKey={FocusDisabled}
-                            />
-                            <div className={mouseToolTheme.numberField}>{renderedSpacing}</div>
-                            <ToolButton
-                                className={mouseToolTheme.endButton}
-                                src="coui://uil/Standard/ArrowUpThickStroke.svg"
-                                tooltip={TitledParaTooltip("LINETOOL.SpacingUp", "LINETOOL_DESCRIPTION.Spacing", "LINETOOL_DESCRIPTION.SpacingModifiers")}
-                                onSelect={spacingUpClick}
-                                selected={false}
-                                multiSelect={false}
-                                disabled={false}
-                                focusKey={FocusDisabled}
-                            />
-                        </Section>
-                        <Section title={translate("LINETOOL.Rotation")} tooltip={translate("LINETOOL_DESCRIPTION.Rotation")}>
-                            <ToolButton
-                                className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/Dice.svg"}
-                                tooltip={TitledTooltip("LINETOOL.RandomRotation", "LINETOOL_DESCRIPTION.RandomRotation")}
-                                onSelect={randomRotationClick}
-                                selected={randomRotationEnabled}
-                                multiSelect={false}
-                                disabled={false}
-                                focusKey={FocusDisabled}
-                            />
-                            <ToolButton
-                                className={mouseToolTheme.startButton}
-                                src="coui://uil/Standard/ArrowDownThickStroke.svg"
-                                tooltip={TitledParaTooltip("LINETOOL.AntiClockwise", "LINETOOL_DESCRIPTION.Rotation", "LINETOOL_DESCRIPTION.RotationModifiers")}
-                                onSelect={rotationDownClick}
-                                selected={false}
-                                multiSelect={false}
-                                disabled={randomRotationEnabled}
-                                focusKey={FocusDisabled}
-                            />
-                            <div className={mouseToolTheme.numberField}>{renderedRotation}</div>
-                            <ToolButton
-                                className={mouseToolTheme.endButton}
-                                src="coui://uil/Standard/ArrowUpThickStroke.svg"
-                                tooltip={TitledParaTooltip("LINETOOL.Clockwise", "LINETOOL_DESCRIPTION.Rotation", "LINETOOL_DESCRIPTION.RotationModifiers")}
-                                onSelect={rotationUpClick}
-                                selected={false}
-                                multiSelect={false}
-                                disabled={randomRotationEnabled}
-                                focusKey={FocusDisabled}
-                            />
-                        </Section>
+                    </>
+                );
+                
+                // Show spacing and rotation if we're not in fence or wall-to-wall modes.
+                if (!fenceModeEnabled && !w2wModeEnabled) {
+                    result.props.children?.push(
+                        <>
+                            <Section title={translate("LINETOOL.Spacing")}
+                                     tooltip={translate("LINETOOL_DESCRIPTION.Spacing")}>
+                                <ToolButton
+                                    className={toolButtonTheme.button}
+                                    src={"coui://uil/Standard/MeasureEven.svg"}
+                                    tooltip={TitledTooltip("LINETOOL.FixedLength", "LINETOOL_DESCRIPTION.FixedLength")}
+                                    onSelect={fullLengthClick}
+                                    selected={fullLengthEnabled}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
+                                <ToolButton
+                                    className={mouseToolTheme.startButton}
+                                    src="coui://uil/Standard/ArrowDownThickStroke.svg"
+                                    tooltip={TitledParaTooltip("LINETOOL.SpacingDown", "LINETOOL_DESCRIPTION.Spacing", "LINETOOL_DESCRIPTION.SpacingModifiers")}
+                                    onSelect={spacingDownClick}
+                                    selected={false}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
+                                <div className={mouseToolTheme.numberField}>{renderedSpacing}</div>
+                                <ToolButton
+                                    className={mouseToolTheme.endButton}
+                                    src="coui://uil/Standard/ArrowUpThickStroke.svg"
+                                    tooltip={TitledParaTooltip("LINETOOL.SpacingUp", "LINETOOL_DESCRIPTION.Spacing", "LINETOOL_DESCRIPTION.SpacingModifiers")}
+                                    onSelect={spacingUpClick}
+                                    selected={false}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
+                            </Section>
+                            <Section title={translate("LINETOOL.Rotation")}
+                                     tooltip={translate("LINETOOL_DESCRIPTION.Rotation")}>
+                                <ToolButton
+                                    className={toolButtonTheme.button}
+                                    src={"coui://uil/Standard/RotateAngleRelative.svg"}
+                                    tooltip={TitledTooltip("LINETOOL.RelativeRotation", "LINETOOL_DESCRIPTION.RelativeRotation")}
+                                    onSelect={relativeRotationClick}
+                                    selected={relativeRotationEnabled}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
+                                <ToolButton
+                                    className={toolButtonTheme.button}
+                                    src={"coui://uil/Standard/RotateAngleAbsolute.svg"}
+                                    tooltip={TitledTooltip("LINETOOL.AbsoluteRotation", "LINETOOL_DESCRIPTION.AbsoluteRotation")}
+                                    onSelect={absoluteRotationClick}
+                                    selected={absoluteRotationEnabled}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
+                                <ToolButton
+                                    className={toolButtonTheme.button}
+                                    src={"coui://uil/Standard/Dice.svg"}
+                                    tooltip={TitledTooltip("LINETOOL.RandomRotation", "LINETOOL_DESCRIPTION.RandomRotation")}
+                                    onSelect={randomRotationClick}
+                                    selected={randomRotationEnabled}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
+                                <ToolButton
+                                    className={mouseToolTheme.startButton}
+                                    src="coui://uil/Standard/ArrowDownThickStroke.svg"
+                                    tooltip={TitledParaTooltip("LINETOOL.AntiClockwise", "LINETOOL_DESCRIPTION.Rotation", "LINETOOL_DESCRIPTION.RotationModifiers")}
+                                    onSelect={rotationDownClick}
+                                    selected={false}
+                                    multiSelect={false}
+                                    disabled={randomRotationEnabled}
+                                    focusKey={FocusDisabled}
+                                />
+                                <div className={mouseToolTheme.numberField}>{renderedRotation}</div>
+                                <ToolButton
+                                    className={mouseToolTheme.endButton}
+                                    src="coui://uil/Standard/ArrowUpThickStroke.svg"
+                                    tooltip={TitledParaTooltip("LINETOOL.Clockwise", "LINETOOL_DESCRIPTION.Rotation", "LINETOOL_DESCRIPTION.RotationModifiers")}
+                                    onSelect={rotationUpClick}
+                                    selected={false}
+                                    multiSelect={false}
+                                    disabled={randomRotationEnabled}
+                                    focusKey={FocusDisabled}
+                                />
+                            </Section>
+                        </>
+                    );
+                }
+                
+                // Variation rows.
+                result.props.children?.push(
+                    <>
                         <Section title={translate("LINETOOL.SpacingVariation")}>
                             <ToolButton
                                 className={mouseToolTheme.startButton}

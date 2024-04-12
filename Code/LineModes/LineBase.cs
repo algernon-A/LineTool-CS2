@@ -107,6 +107,7 @@ namespace LineTool
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
+        /// <param name="rotationMode">Active rotation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -114,7 +115,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -127,20 +128,16 @@ namespace LineTool
             float length = math.length(difference);
             System.Random random = new ((int)length * 1000);
 
+            // Calculate base line angle (for absolute/relative rotation).
+            float baseAngle = rotationMode == RotationMode.Absolute ? 0f : math.atan2(difference.x, difference.z);
+
             // Calculate applied rotation (in radians).
-            float appliedRotation;
-            switch (spacingMode)
+            var appliedRotation = spacingMode switch
             {
-                case SpacingMode.FenceMode:
-                    appliedRotation = math.atan2(difference.x, difference.z);
-                    break;
-                case SpacingMode.W2WMode:
-                    appliedRotation = math.atan2(difference.x, difference.z) + (Mathf.PI / 2f);
-                    break;
-                default:
-                    appliedRotation = math.radians(rotation);
-                    break;
-            }
+                SpacingMode.FenceMode => math.atan2(difference.x, difference.z),
+                SpacingMode.W2WMode => math.atan2(difference.x, difference.z) + (Mathf.PI / 2f),
+                _ => math.radians(rotation) + baseAngle,
+            };
 
             // Rotation quaternion.
             quaternion qRotation = quaternion.Euler(0f, appliedRotation, 0f);

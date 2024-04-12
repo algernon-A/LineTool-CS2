@@ -30,6 +30,7 @@ namespace LineTool
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
+        /// <param name="rotationMode">Active rotation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -37,7 +38,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -78,11 +79,13 @@ namespace LineTool
                     thisPoint += math.normalize(thisPoint - m_startPos) * ((float)(randomOffset * random.NextDouble() * 2f) - randomOffset);
                 }
 
-                // Calculate terrain height.
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
+                // Calculate effective rotation.
+                float effectiveRotation = rotationMode == RotationMode.Absolute ? rotation : math.radians(rotation) - i;
+
                 // Add point to list.
-                pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.Euler(0f, math.radians(rotation) - i, 0f), });
+                pointList.Add(new PointData { Position = thisPoint, Rotation = quaternion.Euler(0f, effectiveRotation, 0f), });
             }
 
             // Record end position for overlays.

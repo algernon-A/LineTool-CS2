@@ -90,6 +90,7 @@ namespace LineTool
         /// </summary>
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
+        /// <param name="rotationMode">Active rotation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -97,7 +98,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -110,7 +111,7 @@ namespace LineTool
             {
                 // Constrain as required.
                 m_endPos = ConstrainPos(currentPos);
-                base.CalculatePoints(m_endPos, spacingMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
+                base.CalculatePoints(m_endPos, spacingMode, rotationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
                 return;
             }
 
@@ -126,7 +127,8 @@ namespace LineTool
             }
 
             // Default rotation quaternion.
-            quaternion qRotation = quaternion.Euler(0f, math.radians(rotation), 0f);
+            float rotationRadians = math.radians(rotation);
+            quaternion qRotation = quaternion.Euler(0f, rotationRadians, 0f);
 
             // Randomizer.
             System.Random random = new ((int)(currentPos.x + currentPos.z) * 1000);
@@ -166,6 +168,13 @@ namespace LineTool
                     float3 difference = nextPoint - thisPoint;
                     qRotation = quaternion.Euler(0f, math.atan2(difference.x, difference.z), 0f);
                     thisPoint = (nextPoint + thisPoint) / 2f;
+                }
+                else if (rotationMode == RotationMode.Relative)
+                {
+                    // Calculate relative rotation.
+                    float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
+                    float3 difference = nextPoint - thisPoint;
+                    qRotation = quaternion.Euler(0f, math.atan2(difference.x, difference.z) + rotationRadians, 0f);
                 }
 
                 // Calculate terrain height.
