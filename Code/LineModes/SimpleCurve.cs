@@ -161,20 +161,40 @@ namespace LineTool
                 tFactor = BezierStep(tFactor, adjustedSpacing);
                 distanceTravelled += adjustedSpacing;
 
-                // Calculate position and rotation for fence mode.
+                // Calculate position and rotation.
                 if (spacingMode == SpacingMode.FenceMode)
                 {
+                    // Fence mode.
                     float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
-                    float3 difference = nextPoint - thisPoint;
-                    qRotation = quaternion.Euler(0f, math.atan2(difference.x, difference.z), 0f);
+                    qRotation = quaternion.Euler(0f, CalculateRelativeAngle(thisPoint, nextPoint), 0f);
+                    thisPoint = (nextPoint + thisPoint) / 2f;
+                }
+                else if (spacingMode == SpacingMode.W2WMode)
+                {
+                    // Wall-to-wall mode.
+                    float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
+                    qRotation = quaternion.Euler(0f, CalculateRelativeAngle(thisPoint, nextPoint) + (math.PI / 2f), 0f);
                     thisPoint = (nextPoint + thisPoint) / 2f;
                 }
                 else if (rotationMode == RotationMode.Relative)
                 {
                     // Calculate relative rotation.
-                    float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
-                    float3 difference = nextPoint - thisPoint;
-                    qRotation = quaternion.Euler(0f, math.atan2(difference.x, difference.z) + rotationRadians, 0f);
+                    float relativeAngle = CalculateRelativeAngle(thisPoint, MathUtils.Position(_thisBezier, tFactor)) + rotationRadians;
+
+                    // Minimum bounds check.
+                    while (relativeAngle < -math.PI)
+                    {
+                        relativeAngle += math.PI * 2f;
+                    }
+
+                    // Maximum bounds check.
+                    while (relativeAngle >= math.PI)
+                    {
+                        relativeAngle -= math.PI * 2f;
+                    }
+
+                    // Apply rotation.
+                    qRotation = quaternion.Euler(0f, relativeAngle, 0f);
                 }
 
                 // Calculate terrain height.

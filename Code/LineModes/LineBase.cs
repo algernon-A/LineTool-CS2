@@ -135,7 +135,7 @@ namespace LineTool
             var appliedRotation = spacingMode switch
             {
                 SpacingMode.FenceMode => math.atan2(difference.x, difference.z),
-                SpacingMode.W2WMode => math.atan2(difference.x, difference.z) + (Mathf.PI / 2f),
+                SpacingMode.W2WMode => math.atan2(difference.x, difference.z) + (math.PI / 2f),
                 _ => math.radians(rotation) + baseAngle,
             };
 
@@ -293,6 +293,27 @@ namespace LineTool
                     tooltips.Add(new TooltipInfo(TooltipType.Length, (startPos + endPos) * 0.5f, length));
                 }
             }
+        }
+
+        /// <summary>
+        /// Calculates the 2D XZ angle (in radians) between two points.
+        /// </summary>
+        /// <param name="point1">First point.</param>
+        /// <param name="point2">Second point.</param>
+        /// <returns>2D XZ angle from the first to the second point, in radians.</returns>
+        protected float CalculateRelativeAngle(float3 point1, float3 point2)
+        {
+            // Calculate angle from point 1 to point 2.
+            float3 difference = point2 - point1;
+            float relativeAngle = math.atan2(difference.x, difference.z);
+
+            // Error check.
+            if (float.IsNaN(relativeAngle))
+            {
+                relativeAngle = 0f;
+            }
+
+            return relativeAngle;
         }
     }
 }
