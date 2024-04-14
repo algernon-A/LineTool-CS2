@@ -24,7 +24,7 @@ namespace LineTool
     /// Struct to mirror game code's temporary entity definitions creation.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:Elements should be documented", Justification = "Decompiled game code.")]
-    //[BurstCompile]
+    [BurstCompile]
     internal struct CreateDefinitions
     {
         [ReadOnly]
@@ -293,40 +293,31 @@ namespace LineTool
 
             if (m_ObjectPrefab != Entity.Null)
             {
-                    Entity entity5 = m_ObjectPrefab;
-                    if (entity2 == Entity.Null && ownerDefinition.m_Prefab == Entity.Null && m_PrefabPlaceholderElements.TryGetBuffer(m_ObjectPrefab, out var bufferData4) && !m_PrefabCreatureSpawnData.HasComponent(m_ObjectPrefab))
+                Entity entity5 = m_ObjectPrefab;
+                if (entity2 == Entity.Null && ownerDefinition.m_Prefab == Entity.Null && m_PrefabPlaceholderElements.TryGetBuffer(m_ObjectPrefab, out var bufferData4) && !m_PrefabCreatureSpawnData.HasComponent(m_ObjectPrefab))
+                {
+                    Unity.Mathematics.Random random = m_RandomSeed.GetRandom(1000000);
+                    int num2 = 0;
+                    for (int j = 0; j < bufferData4.Length; j++)
                     {
-                        Unity.Mathematics.Random random = m_RandomSeed.GetRandom(1000000);
-                        int num2 = 0;
-                        for (int j = 0; j < bufferData4.Length; j++)
+                        if (GetVariationData(bufferData4[j], out var variation))
                         {
-                            if (GetVariationData(bufferData4[j], out var variation))
+                            num2 += variation.m_Probability;
+                            if (random.NextInt(num2) < variation.m_Probability)
                             {
-                                num2 += variation.m_Probability;
-                                if (random.NextInt(num2) < variation.m_Probability)
-                                {
-                                    entity5 = variation.m_Prefab;
-                                }
+                                entity5 = variation.m_Prefab;
                             }
                         }
                     }
+                }
 
-                    UpdateObject(entity5, Entity.Null, entity2, startPoint.m_OriginalEntity, updatedTopLevel, lotEntity, new Game.Objects.Transform(startPoint.m_Position, startPoint.m_Rotation), startPoint.m_Elevation, ownerDefinition, clearAreas, upgrade, flag, rebuild: false, topLevel, optional: false, parentMesh, 0);
-                    if (m_AttachmentPrefab.IsCreated && m_AttachmentPrefab.Value.m_Entity != Entity.Null)
-                    {
-                        Game.Objects.Transform transform3 = new Game.Objects.Transform(startPoint.m_Position, startPoint.m_Rotation);
-                        transform3.m_Position += math.rotate(transform3.m_Rotation, m_AttachmentPrefab.Value.m_Offset);
-                        UpdateObject(m_AttachmentPrefab.Value.m_Entity, Entity.Null, Entity.Null, entity5, updatedTopLevel, Entity.Null, transform3, startPoint.m_Elevation, ownerDefinition, clearAreas, upgrade: false, relocate: false, rebuild: false, topLevel, optional: false, parentMesh, 0);
-                    }
-
-
-                Mod.Instance.Log.Info("cat!");
-                m_CommandBuffer.AddComponent<CatData>(entity5);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.Car>(entity5);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.CarCurrentLane>(entity5);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.PersonalCar>(entity5);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.CarNavigation>(entity5);
-                m_CommandBuffer.RemoveComponent<Moving>(entity5);
+                UpdateObject(entity5, Entity.Null, entity2, startPoint.m_OriginalEntity, updatedTopLevel, lotEntity, new Game.Objects.Transform(startPoint.m_Position, startPoint.m_Rotation), startPoint.m_Elevation, ownerDefinition, clearAreas, upgrade, flag, rebuild: false, topLevel, optional: false, parentMesh, 0);
+                if (m_AttachmentPrefab.IsCreated && m_AttachmentPrefab.Value.m_Entity != Entity.Null)
+                {
+                    Game.Objects.Transform transform3 = new Game.Objects.Transform(startPoint.m_Position, startPoint.m_Rotation);
+                    transform3.m_Position += math.rotate(transform3.m_Rotation, m_AttachmentPrefab.Value.m_Offset);
+                    UpdateObject(m_AttachmentPrefab.Value.m_Entity, Entity.Null, Entity.Null, entity5, updatedTopLevel, Entity.Null, transform3, startPoint.m_Elevation, ownerDefinition, clearAreas, upgrade: false, relocate: false, rebuild: false, topLevel, optional: false, parentMesh, 0);
+                }
             }
 
             if (clearAreas.IsCreated)
@@ -559,12 +550,6 @@ namespace LineTool
                 m_CommandBuffer.AddComponent(e, component);
                 m_CommandBuffer.AddComponent(e, component2);
                 m_CommandBuffer.AddComponent(e, default(Updated));
-
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.Car>(e);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.CarCurrentLane>(e);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.PersonalCar>(e);
-                m_CommandBuffer.RemoveComponent<Game.Vehicles.CarNavigation>(e);
-                m_CommandBuffer.RemoveComponent<Moving>(e);
             }
             else
             {
@@ -1410,11 +1395,6 @@ namespace LineTool
             public Entity m_Prefab;
 
             public int m_Probability;
-        }
-
-        private struct CatData : IComponentData
-        {
-
         }
     }
 }
