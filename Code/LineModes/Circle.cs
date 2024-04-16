@@ -8,14 +8,20 @@ namespace LineTool
 {
     using System.Collections.Generic;
     using Colossal.Mathematics;
+    using Game.Net;
+    using Game.Rendering;
     using Game.Simulation;
     using Unity.Mathematics;
+    using static Game.Rendering.GuideLinesSystem;
 
     /// <summary>
     ///  Circle placement mode.
     /// </summary>
     public class Circle : LineBase
     {
+        // Calculated circle Bezier parts.
+        private Bezier4x3[] _thisCircleBeziers = new Bezier4x3[4];
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Circle"/> class.
         /// </summary>
@@ -49,6 +55,12 @@ namespace LineTool
             // Calculate length.
             float3 difference = currentPos - m_startPos;
             float radius = math.length(difference);
+
+            // Calculate circle bezier by combining 4 curved parts.
+            _thisCircleBeziers[0] = NetUtils.CircleCurve(m_startPos, radius, radius);
+            _thisCircleBeziers[1] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius);
+            _thisCircleBeziers[2] = NetUtils.CircleCurve(m_startPos, radius, radius * -1f);
+            _thisCircleBeziers[3] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius * -1f);
 
             // Calculate spacing.
             float circumference = radius * math.PI * 2f;
@@ -90,6 +102,29 @@ namespace LineTool
 
             // Record end position for overlays.
             m_endPos = currentPos;
+        }
+
+        /// <summary>
+        /// Draws any applicable overlay.
+        /// </summary>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        /// <param name="tooltips">Tooltip list.</param>
+        /// <param name="cameraController">Active camera controller instance.</param>
+        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
+        {
+            // If points haven't been calculated yet, fallback to straight line.
+            if (_thisCircleBeziers[0].a.x != 0f)
+            {
+                for (int i = 0; i < _thisCircleBeziers.Length; i++)
+                {
+                    DrawCurvedDashedLine(_thisCircleBeziers[i], overlayBuffer, cameraController);
+                }
+            }
+            else
+            {
+                // Initial position only; just draw a straight line (constrained if required).
+                base.DrawOverlay(overlayBuffer, tooltips, cameraController);
+            }
         }
 
         /// <summary>
