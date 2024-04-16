@@ -22,7 +22,6 @@ namespace LineTool
     using Game.Rendering;
     using Game.Simulation;
     using Game.Tools;
-    using Unity.Collections;
     using Unity.Entities;
     using Unity.Jobs;
     using Unity.Mathematics;
@@ -37,8 +36,8 @@ namespace LineTool
     public sealed partial class LineToolSystem : ObjectToolBaseSystem
     {
         // Native buffers.
-        private NativeList<TooltipInfo> _tooltips;
-        private NativeList<PointData> _points;
+        private List<TooltipInfo> _tooltips;
+        private List<PointData> _points;
 
         // Line calculations.
         private bool _fixedPreview = false;
@@ -248,7 +247,7 @@ namespace LineTool
         /// <summary>
         /// Gets the tooltip list.
         /// </summary>
-        internal NativeList<TooltipInfo> Tooltips => _tooltips;
+        internal List<TooltipInfo> Tooltips => _tooltips;
 
         /// <summary>
         /// Gets or sets the current line mode.
@@ -450,8 +449,8 @@ namespace LineTool
             _cameraController = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
 
             // Create buffers.
-            _tooltips = new (8, Allocator.Persistent);
-            _points = new (Allocator.Persistent);
+            _tooltips = new (8);
+            _points = new ();
 
             // Create random seed list with one initial default starting randomizer.
             _randomSeeds = new () { default };
@@ -651,7 +650,7 @@ namespace LineTool
             // Initialize randomization for this run.
             RandomSeed randomSeed = GetRandomSeed(0);
             int seedIndex = 0;
-            while (_randomSeeds.Count < _points.Length)
+            while (_randomSeeds.Count < _points.Count)
             {
                 _randomSeeds.Add(RandomSeed.Next());
             }
@@ -719,18 +718,6 @@ namespace LineTool
             _mode.Reset();
 
             base.OnStopRunning();
-        }
-
-        /// <summary>
-        /// Called when the system is destroyed.
-        /// </summary>
-        protected override void OnDestroy()
-        {
-            // Dispose of unmanaged lists.
-            _tooltips.Dispose();
-            _points.Dispose();
-
-            base.OnDestroy();
         }
 
         /// <summary>

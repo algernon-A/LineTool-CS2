@@ -6,9 +6,9 @@
 
 namespace LineTool
 {
+    using System.Collections.Generic;
     using Colossal.Mathematics;
     using Game.Simulation;
-    using Unity.Collections;
     using Unity.Mathematics;
 
     /// <summary>
@@ -38,7 +38,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)

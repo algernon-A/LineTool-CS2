@@ -9,7 +9,6 @@ namespace LineTool
     using System.Collections.Generic;
     using Game.UI.Tooltip;
     using Game.UI.Widgets;
-    using Unity.Collections;
     using Unity.Mathematics;
     using static Game.Rendering.GuideLinesSystem;
 
@@ -38,8 +37,9 @@ namespace LineTool
         protected override void OnUpdate()
         {
             // Iterate through all tooltips in buffer.
-            NativeList<TooltipInfo> tooltips = _lineToolSystem.Tooltips;
-            for (int i = 0; i < tooltips.Length; ++i)
+            List<TooltipInfo> tooltips = _lineToolSystem.Tooltips;
+
+            for (int i = 0; i < tooltips.Count; ++i)
             {
                 // Create new tooltip template and add to list if needed.
                 TooltipInfo tooltipInfo = tooltips[i];
@@ -79,7 +79,7 @@ namespace LineTool
                         break;
                 }
 
-                // Add tooltop group. to UI.
+                // Add tooltip group. to UI.
                 AddGroup(tooltipGroup);
             }
         }
