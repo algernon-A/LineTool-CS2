@@ -119,6 +119,9 @@ namespace LineTool
                 {
                     DrawCurvedDashedLine(_thisCircleBeziers[i], overlayBuffer, cameraController);
                 }
+
+                // Keep straight line with distance tooltip.
+                base.DrawOverlay(overlayBuffer, tooltips, cameraController);
             }
             else
             {
