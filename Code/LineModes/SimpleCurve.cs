@@ -6,11 +6,11 @@
 
 namespace LineTool
 {
+    using System.Collections.Generic;
     using Colossal.Mathematics;
     using Game.Net;
     using Game.Rendering;
     using Game.Simulation;
-    using Unity.Collections;
     using Unity.Mathematics;
     using UnityEngine;
     using static Game.Rendering.GuideLinesSystem;
@@ -98,7 +98,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -140,7 +140,7 @@ namespace LineTool
             {
                 // Apply spacing randomization.
                 float adjustedT = tFactor;
-                if (randomSpacing > 0f && spacingMode != SpacingMode.FenceMode)
+                if (randomSpacing > 0f && spacingMode != SpacingMode.FenceMode && spacingMode != SpacingMode.W2WMode)
                 {
                     float spacingAdjustment = (float)(random.NextDouble() * randomSpacing * 2f) - randomSpacing;
                     adjustedT = spacingAdjustment < 0f ? BezierStepReverse(tFactor, spacingAdjustment) : BezierStep(tFactor, spacingAdjustment);
@@ -166,34 +166,38 @@ namespace LineTool
                 {
                     // Fence mode.
                     float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
-                    qRotation = quaternion.Euler(0f, CalculateRelativeAngle(thisPoint, nextPoint), 0f);
+
+                    // Check validity of result.
+                    if (float.IsNaN(nextPoint.x) || float.IsNaN(nextPoint.y) || float.IsNaN(nextPoint.z))
+                    {
+                        continue;
+                    }
+
+                    // Apply rotation.
+                    float effectiveRotation = CalculateRelativeAngle(thisPoint, nextPoint, 0f);
+                    qRotation = quaternion.Euler(0f, effectiveRotation, 0f);
                     thisPoint = (nextPoint + thisPoint) / 2f;
                 }
                 else if (spacingMode == SpacingMode.W2WMode)
                 {
                     // Wall-to-wall mode.
                     float3 nextPoint = MathUtils.Position(_thisBezier, tFactor);
-                    qRotation = quaternion.Euler(0f, CalculateRelativeAngle(thisPoint, nextPoint) + (math.PI / 2f), 0f);
+
+                    // Check validity of result.
+                    if (float.IsNaN(nextPoint.x) || float.IsNaN(nextPoint.y) || float.IsNaN(nextPoint.z))
+                    {
+                        continue;
+                    }
+
+                    // Apply rotation.
+                    float relativeAngle = CalculateRelativeAngle(thisPoint, MathUtils.Position(_thisBezier, tFactor), math.PI / 2f);
+                    qRotation = quaternion.Euler(0f, relativeAngle, 0f);
                     thisPoint = (nextPoint + thisPoint) / 2f;
                 }
                 else if (rotationMode == RotationMode.Relative)
                 {
-                    // Calculate relative rotation.
-                    float relativeAngle = CalculateRelativeAngle(thisPoint, MathUtils.Position(_thisBezier, tFactor)) + rotationRadians;
-
-                    // Minimum bounds check.
-                    while (relativeAngle < -math.PI)
-                    {
-                        relativeAngle += math.PI * 2f;
-                    }
-
-                    // Maximum bounds check.
-                    while (relativeAngle >= math.PI)
-                    {
-                        relativeAngle -= math.PI * 2f;
-                    }
-
                     // Apply rotation.
+                    float relativeAngle = CalculateRelativeAngle(thisPoint, MathUtils.Position(_thisBezier, tFactor), rotationRadians);
                     qRotation = quaternion.Euler(0f, relativeAngle, 0f);
                 }
 
@@ -223,7 +227,7 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             if (m_validStart)
             {
@@ -565,7 +569,7 @@ namespace LineTool
         /// <param name="lineLength">Overlay line length.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float lineWidth, float lineLength, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float lineWidth, float lineLength, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             bool angleSide = false;
 
@@ -621,7 +625,7 @@ namespace LineTool
                     float3 tooltipPos = line1.b;
                     tooltipPos.xz += angle1Direction * (size * 1.5f);
                     TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(in value);
+                    tooltips.Add(value);
                 }
                 else if (angle > 90)
                 {
@@ -650,7 +654,7 @@ namespace LineTool
                     float3 tooltipPos = line1.b;
                     tooltipPos.xz -= angleDirection * (size * 1.5f);
                     TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(in value);
+                    tooltips.Add(value);
                 }
                 else if (angle == 90)
                 {
@@ -674,7 +678,7 @@ namespace LineTool
                     float3 tooltipPos = line1.b;
                     tooltipPos.xz -= math.normalizesafe(line1Direction + line2Direction) * (size * 1.5f);
                     TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(in value);
+                    tooltips.Add(value);
                 }
                 else if (angle > 0)
                 {
@@ -697,7 +701,7 @@ namespace LineTool
                     float3 tooltipPos = line1.b;
                     tooltipPos.xz -= math.normalizesafe(line1Direction + line2Direction) * (size * 1.5f);
                     TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(in value);
+                    tooltips.Add(value);
                 }
             }
         }

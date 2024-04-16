@@ -6,10 +6,10 @@
 
 namespace LineTool
 {
+    using System.Collections.Generic;
     using Colossal.Mathematics;
     using Game.Rendering;
     using Game.Simulation;
-    using Unity.Collections;
     using Unity.Mathematics;
     using UnityEngine;
     using static Game.Rendering.GuideLinesSystem;
@@ -115,7 +115,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, NativeList<PointData> pointList, ref TerrainHeightData heightData)
+        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
@@ -196,7 +196,7 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
@@ -270,7 +270,7 @@ namespace LineTool
         /// <param name="segment">Line segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             const float LineWidth = 1f;
 
@@ -296,21 +296,34 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Calculates the 2D XZ angle (in radians) between two points.
+        /// Calculates the 2D XZ angle (in radians) between two points, adding the provided adjustment.
         /// </summary>
         /// <param name="point1">First point.</param>
         /// <param name="point2">Second point.</param>
+        /// <param name="adjustment">Adjustment to apply (in radians).</param>
         /// <returns>2D XZ angle from the first to the second point, in radians.</returns>
-        protected float CalculateRelativeAngle(float3 point1, float3 point2)
+        protected float CalculateRelativeAngle(float3 point1, float3 point2, float adjustment)
         {
             // Calculate angle from point 1 to point 2.
             float3 difference = point2 - point1;
-            float relativeAngle = math.atan2(difference.x, difference.z);
+            float relativeAngle = math.atan2(difference.x, difference.z) + adjustment;
 
             // Error check.
             if (float.IsNaN(relativeAngle))
             {
                 relativeAngle = 0f;
+            }
+
+            // Minimum bounds check.
+            while (relativeAngle < -math.PI)
+            {
+                relativeAngle += math.PI * 2f;
+            }
+
+            // Maximum bounds check.
+            while (relativeAngle >= math.PI)
+            {
+                relativeAngle -= math.PI * 2f;
             }
 
             return relativeAngle;
