@@ -196,12 +196,13 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        /// <param name="cameraController">Current camera controller.</param>
+        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
             {
-                DrawDashedLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips);
+                DrawDashedLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips, cameraController);
             }
         }
 
@@ -270,24 +271,34 @@ namespace LineTool
         /// <param name="segment">Line segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        /// <param name="cameraController">Current camera controller</param>
+        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
-            const float LineWidth = 1f;
+
+            // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f
+            float currentZoom = cameraController.zoom;
+            float lineScaleModifier = (currentZoom * 0.0025f) + 0.1f;
 
             float distance = math.distance(startPos.xz, endPos.xz);
 
             // Don't draw lines for short distances.
-            if (distance > LineWidth * 8f)
+            if (distance > lineScaleModifier * 8f)
             {
                 // Offset segment, mimicking game simple curve overlay, to ensure dash spacing.
-                float3 offset = (segment.b - segment.a) * (LineWidth * 4f / distance);
+                float3 offset = (segment.b - segment.a) * (lineScaleModifier * 5f / distance);
                 Line3.Segment line = new (segment.a + offset, segment.b - offset);
 
+                // Measurements for dashed line: length of dash, gap between them, and drawn width
+                float lineDashLength = lineScaleModifier * 5f;
+                float lineGapWidth = lineScaleModifier * 3f;
+                float lineDashWidth = lineScaleModifier * 3f;
+
                 // Draw line - distance figures mimic game simple curve overlay.
-                overlayBuffer.DrawDashedLine(Color.white, line, LineWidth * 3f, LineWidth * 5f, LineWidth * 3f);
+                overlayBuffer.DrawDashedLine(Color.white, line, lineDashWidth, lineDashLength, lineGapWidth);
 
                 // Add length tooltip.
                 int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
+
                 if (length > 0)
                 {
                     tooltips.Add(new TooltipInfo(TooltipType.Length, (startPos + endPos) * 0.5f, length));

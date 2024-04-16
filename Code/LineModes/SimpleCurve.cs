@@ -223,7 +223,8 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips)
+        /// <param name="cameraController">Current camera controller.</param>
+        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, NativeList<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
             if (m_validStart)
             {
@@ -235,8 +236,8 @@ namespace LineTool
                     Line3.Segment line2 = new (_elbowPoint, m_endPos);
 
                     // Draw lines.
-                    DrawDashedLine(m_startPos, _elbowPoint, line1, overlayBuffer, tooltips);
-                    DrawDashedLine(_elbowPoint, m_endPos, line2, overlayBuffer, tooltips);
+                    DrawDashedLine(m_startPos, _elbowPoint, line1, overlayBuffer, tooltips, cameraController);
+                    DrawDashedLine(_elbowPoint, m_endPos, line2, overlayBuffer, tooltips, cameraController);
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
@@ -244,7 +245,7 @@ namespace LineTool
                 else
                 {
                     // Initial position only; just draw a straight line (constrained if required).
-                    base.DrawOverlay(overlayBuffer, tooltips);
+                    base.DrawOverlay(overlayBuffer, tooltips, cameraController);
                 }
             }
         }
