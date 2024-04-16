@@ -288,17 +288,16 @@ namespace LineTool
                 float3 offset = (segment.b - segment.a) * (lineScaleModifier * 5f / distance);
                 Line3.Segment line = new (segment.a + offset, segment.b - offset);
 
-                // Measurements for dashed line: length of dash, gap between them, and drawn width
+                // Measurements for dashed line: length of dash, width of dash, and gap between them
                 float lineDashLength = lineScaleModifier * 5f;
-                float lineGapWidth = lineScaleModifier * 3f;
                 float lineDashWidth = lineScaleModifier * 3f;
+                float lineGapLength = lineScaleModifier * 3f;
 
                 // Draw line - distance figures mimic game simple curve overlay.
-                overlayBuffer.DrawDashedLine(Color.white, line, lineDashWidth, lineDashLength, lineGapWidth);
+                overlayBuffer.DrawDashedLine(Color.white, line, lineDashWidth, lineDashLength, lineGapLength);
 
                 // Add length tooltip.
                 int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
-
                 if (length > 0)
                 {
                     tooltips.Add(new TooltipInfo(TooltipType.Length, (startPos + endPos) * 0.5f, length));
