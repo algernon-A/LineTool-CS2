@@ -196,9 +196,8 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        /// <param name="cameraController">Current camera controller.</param>
+        /// <param name="cameraController">Active camera controller instance.</param>
         public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
-        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
@@ -272,11 +271,10 @@ namespace LineTool
         /// <param name="segment">Line segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        /// <param name="cameraController">Current camera controller</param>
+        /// <param name="cameraController">Active camera controller instance.</param>
         protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
-
-            // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f
+            // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
             float currentZoom = cameraController.zoom;
             float lineScaleModifier = (currentZoom * 0.0025f) + 0.1f;
 
