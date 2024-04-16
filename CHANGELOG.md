@@ -1,4 +1,5 @@
 - Add absolute/relative rotation selection.
+- Add dynamic scaling of overlay guidelines based on zoom level (credit: phillycheeze).
 
 ### 0.8
 - Add object appearance randomization controls.

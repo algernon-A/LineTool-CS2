@@ -1,1 +1,2 @@
 - Add absolute/relative rotation selection.
+- Add dynamic scaling of overlay guidelines based on zoom level (credit: phillycheeze).
