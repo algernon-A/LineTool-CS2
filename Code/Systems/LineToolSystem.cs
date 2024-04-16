@@ -66,6 +66,7 @@ namespace LineTool
         private TerrainHeightData _terrainHeightData;
         private OverlayRenderSystem.Buffer _overlayBuffer;
         private CityConfigurationSystem _cityConfigurationSystem;
+        private CameraUpdateSystem _cameraController;
 
         // Input actions.
         private ProxyAction _applyAction;
@@ -445,6 +446,7 @@ namespace LineTool
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
             _cityConfigurationSystem = World.GetOrCreateSystemManaged<CityConfigurationSystem>();
+            _cameraController = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
 
             // Create buffers.
             _tooltips = new (8);
@@ -621,7 +623,7 @@ namespace LineTool
             }
 
             // Render any overlay.
-            _mode.DrawOverlay(_overlayBuffer, _tooltips);
+            _mode.DrawOverlay(_overlayBuffer, _tooltips, _cameraController);
 
             // Overlay control points.
             if (_fixedPreview)

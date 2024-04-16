@@ -1,4 +1,4 @@
-﻿// <copyright file="SimpleCurve.cs" company="algernon (K. Algernon A. Sheppard)">
+// <copyright file="SimpleCurve.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // Licensed under the Apache Licence, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 // See LICENSE.txt file in the project root for full license information.
@@ -227,7 +227,8 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        /// <param name="cameraController">Current camera controller.</param>
+        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
             if (m_validStart)
             {
@@ -239,8 +240,8 @@ namespace LineTool
                     Line3.Segment line2 = new (_elbowPoint, m_endPos);
 
                     // Draw lines.
-                    DrawDashedLine(m_startPos, _elbowPoint, line1, overlayBuffer, tooltips);
-                    DrawDashedLine(_elbowPoint, m_endPos, line2, overlayBuffer, tooltips);
+                    DrawDashedLine(m_startPos, _elbowPoint, line1, overlayBuffer, tooltips, cameraController);
+                    DrawDashedLine(_elbowPoint, m_endPos, line2, overlayBuffer, tooltips, cameraController);
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
@@ -248,7 +249,7 @@ namespace LineTool
                 else
                 {
                     // Initial position only; just draw a straight line (constrained if required).
-                    base.DrawOverlay(overlayBuffer, tooltips);
+                    base.DrawOverlay(overlayBuffer, tooltips, cameraController);
                 }
             }
         }
