@@ -245,6 +245,9 @@ namespace LineTool
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
+
+                    // Draw curved line.
+                    DrawCurvedDashedLine(_thisBezier, overlayBuffer, cameraController);
                 }
                 else
                 {

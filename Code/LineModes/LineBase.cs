@@ -264,7 +264,7 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Draws a dashed line overlay between the two given points.
+        /// Draws a straight dashed line overlay between the two given points.
         /// </summary>
         /// <param name="startPos">Line start position.</param>
         /// <param name="endPos">Line end position.</param>
@@ -274,6 +274,9 @@ namespace LineTool
         /// <param name="cameraController">Active camera controller instance.</param>
         protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
+            // Semi-transparent white color
+            Color color = new Color(1f, 1f, 1f, 0.6f);
+
             // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
             float currentZoom = cameraController.zoom;
             float lineScaleModifier = (currentZoom * 0.0025f) + 0.1f;
@@ -287,13 +290,13 @@ namespace LineTool
                 float3 offset = (segment.b - segment.a) * (lineScaleModifier * 5f / distance);
                 Line3.Segment line = new (segment.a + offset, segment.b - offset);
 
-                // Measurements for dashed line: length of dash, width of dash, and gap between them
+                // Measurements for dashed line: length of dash, width of dash, and gap between them.
                 float lineDashLength = lineScaleModifier * 5f;
                 float lineDashWidth = lineScaleModifier * 3f;
                 float lineGapLength = lineScaleModifier * 3f;
 
                 // Draw line - distance figures mimic game simple curve overlay.
-                overlayBuffer.DrawDashedLine(Color.white, line, lineDashWidth, lineDashLength, lineGapLength);
+                overlayBuffer.DrawDashedLine(color, line, lineDashWidth, lineDashLength, lineGapLength);
 
                 // Add length tooltip.
                 int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
@@ -302,6 +305,30 @@ namespace LineTool
                     tooltips.Add(new TooltipInfo(TooltipType.Length, (startPos + endPos) * 0.5f, length));
                 }
             }
+        }
+
+        /// <summary>
+        /// Draws a curved dashed line overlay along the given Bezier curve.
+        /// </summary>
+        /// <param name="curve">Line curve segment.</param>
+        /// <param name="overlayBuffer">Overlay buffer.</param>
+        /// <param name="cameraController">Active camera controller instance.</param>
+        protected void DrawCurvedDashedLine(Bezier4x3 curve, OverlayRenderSystem.Buffer overlayBuffer, CameraUpdateSystem cameraController)
+        {
+            // Semi-transparent white color.
+            Color color = new Color(1f, 1f, 1f, 0.6f);
+
+            // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
+            float currentZoom = cameraController.zoom;
+            float lineScaleModifier = (currentZoom * 0.0025f) + 0.1f;
+
+            // Measurements for dashed line: length of dash, width of dash, and gap between them.
+            float lineDashLength = lineScaleModifier * 4f;
+            float lineDashWidth = lineScaleModifier * 1f;
+            float lineGapLength = lineScaleModifier * 3f;
+
+            // Draw line - distance figures mimic game simple curve overlay.
+            overlayBuffer.DrawDashedCurve(color, curve, lineDashWidth, lineDashLength, lineGapLength);
         }
 
         /// <summary>
