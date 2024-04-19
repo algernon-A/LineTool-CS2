@@ -57,6 +57,8 @@ This mod supports localization. Please help out with translating this mod into d
 Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods. Come grab me on the Cities: Skylines Modding Discord!
 
 ### Credits
+Incorporates overlay improvements and enhancements by phillycheeze.
+
 Special thanks to yenyang for various tips and advice!
 
 This mod uses the Harmony Patching Library by Andreas Pardeike.

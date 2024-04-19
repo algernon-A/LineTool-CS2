@@ -64,6 +64,8 @@ Modders (and aspiring modders!), as always I'm available and happy to chat about
 Pull requests welcome! Note that translations should be submitted via CrowdIn (see link above), and not by PR.
 
 ### Credits
+Incorporates overlay improvements and enhancements by [phillycheeze](https://github.com/phillycheeze/).
+
 Special thanks to [yenyang](https://github.com/yenyang/) for various tips and advice!
 
 This mod uses the [Harmony Patching Library](url=https://github.com/pardeike/Harmony]Harmony[/url) by Andreas Pardeike.

@@ -1,3 +1,4 @@
+### 0.9
 - Add absolute/relative rotation selection.
 - Add dynamic scaling of overlay guidelines based on zoom level (credit: phillycheeze).
 - Add additional guidelines for curves and circles (credit: phillycheeze).
