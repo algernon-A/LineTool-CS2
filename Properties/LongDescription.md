@@ -61,4 +61,6 @@ Incorporates overlay improvements and enhancements by phillycheeze.
 
 Special thanks to yenyang for various tips and advice!
 
+Thumbnail design by Macwelshman.
+
 This mod uses the Harmony Patching Library by Andreas Pardeike.
