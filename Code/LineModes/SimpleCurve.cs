@@ -283,6 +283,7 @@ namespace LineTool
             if (_validElbow)
             {
                 _validElbow = false;
+                _thisBezier = new Bezier4x3();
             }
             else
             {
@@ -596,17 +597,17 @@ namespace LineTool
                 double angleRadians = math.acos(math.dot(normalizedVector1, normalizedVector2));
                 int angleDegrees = (int)math.round(math.degrees(angleRadians));
 
-                // Set overlay joints fixed distance along both lines.
-                float3 overlayJoint1 = line1.b + (normalizedVector1 * overlayLineDistance);
-                float3 overlayJoint2 = line1.b + (normalizedVector2 * overlayLineDistance);
-
                 // Calculate vector split down the middle (using vector addition parallelogram method).
                 float3 overlayJointS = line1.b + ((normalizedVector1 + normalizedVector2) * overlayLineDistance);
 
+                // Calculate joints where angle guidelines will connect at.
+                float3 overlayJoint1 = line1.b + (normalizedVector1 * overlayLineDistance);
+                float3 overlayJoint2 = line1.b + (normalizedVector2 * overlayLineDistance);
+
                 if (angleDegrees == 90)
                 {
-                    overlayBuffer.DrawLine(color, new Line3.Segment(overlayJoint1, overlayJointS), overlayLineWidth * 2f);
-                    overlayBuffer.DrawLine(color, new Line3.Segment(overlayJointS, overlayJoint2), overlayLineWidth * 2f);
+                    // Set joints inbetween and then draw full width line as "box".
+                    overlayBuffer.DrawLine(color, new Line3.Segment((overlayJoint1 + line1.b) / 2, (overlayJointS + overlayJoint2) / 2), overlayLineDistance);
                 }
                 else
                 {
