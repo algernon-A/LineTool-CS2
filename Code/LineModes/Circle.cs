@@ -112,21 +112,19 @@ namespace LineTool
         /// <param name="cameraController">Active camera controller instance.</param>
         public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
-            // If points haven't been calculated yet, fallback to straight line.
-            if (_thisCircleBeziers[0].a.x != 0f)
-            {
-                for (int i = 0; i < _thisCircleBeziers.Length; i++)
-                {
-                    DrawCurvedDashedLine(_thisCircleBeziers[i], overlayBuffer, cameraController);
-                }
-
-                // Keep straight line with distance tooltip.
-                base.DrawOverlay(overlayBuffer, tooltips, cameraController);
-            }
-            else
+            if (m_validStart)
             {
                 // Initial position only; just draw a straight line (constrained if required).
                 base.DrawOverlay(overlayBuffer, tooltips, cameraController);
+
+                // If points haven't been calculated yet, fallback to straight line.
+                if (_thisCircleBeziers[0].a.x != 0f)
+                {
+                    for (int i = 0; i < _thisCircleBeziers.Length; i++)
+                    {
+                        DrawCurvedDashedLine(_thisCircleBeziers[i], overlayBuffer, cameraController);
+                    }
+                }
             }
         }
 

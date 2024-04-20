@@ -244,7 +244,7 @@ namespace LineTool
                     DrawDashedLine(_elbowPoint, m_endPos, line2, overlayBuffer, tooltips, cameraController);
 
                     // Draw angle.
-                    DrawAngleIndicator(line1, line2, 8f, 8f, overlayBuffer, tooltips);
+                    DrawAngleIndicator(line1, line2, overlayBuffer, tooltips, cameraController);
 
                     // Draw curved line.
                     DrawCurvedDashedLine(_thisBezier, overlayBuffer, cameraController);
@@ -569,144 +569,55 @@ namespace LineTool
         /// </summary>
         /// <param name="line1">Line 1.</param>
         /// <param name="line2">Line 2.</param>
-        /// <param name="lineWidth">Overlay line width.</param>
-        /// <param name="lineLength">Overlay line length.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, float lineWidth, float lineLength, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        /// <param name="cameraController">Active camera controller instance.</param>
+        private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
-            bool angleSide = false;
+            // Semi-transparent white color.
+            Color color = new Color(1f, 1f, 1f, 0.6f);
 
             // Calculate line lengths.
             float line1Length = math.distance(line1.a.xz, line1.b.xz);
             float line2Length = math.distance(line2.a.xz, line2.b.xz);
 
+            float lineScaleModifier = (cameraController.zoom * 0.0025f) + 0.1f;
+            float overlayLineDistance = math.min(line1Length, line2Length) / 8f;
+            float overlayLineWidth = lineScaleModifier * 0.5f;
+
             // Minimum line length check.
-            if (line1Length > lineWidth * 7f && line2Length > lineWidth * 7f)
+            if (line1Length > 2f && line2Length > 2f)
             {
-                // Calculate line directions.
-                float2 line1Direction = (line1.b.xz - line1.a.xz) / line1Length;
-                float2 line2Direction = (line2.a.xz - line2.b.xz) / line2Length;
+                // Normalize vectors using elbow pivot: line1.b or line2.a.
+                float3 normalizedVector1 = (line1.a - line1.b) / line1Length;
+                float3 normalizedVector2 = (line2.b - line1.b) / line2Length;
 
-                // Display size.
-                float size = math.min(lineLength, math.min(line1Length, line2Length)) * 0.5f;
+                // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
+                double angleRadians = math.acos(math.dot(normalizedVector1, normalizedVector2));
+                int angleDegrees = (int)math.round(math.degrees(angleRadians));
 
-                // Calculate angle and determine shortest side.
-                int angle = Mathf.RoundToInt(math.degrees(math.acos(math.clamp(math.dot(line1Direction, line2Direction), -1f, 1f))));
-                if (angle < 180)
+                // Set overlay joints fixed distance along both lines.
+                float3 overlayJoint1 = line1.b + (normalizedVector1 * overlayLineDistance);
+                float3 overlayJoint2 = line1.b + (normalizedVector2 * overlayLineDistance);
+
+                // Calculate vector split down the middle (using vector addition parallelogram method).
+                float3 overlayJointS = line1.b + ((normalizedVector1 + normalizedVector2) * overlayLineDistance);
+
+                if (angleDegrees == 90)
                 {
-                    angleSide = math.dot(MathUtils.Right(line1Direction), line2Direction) < 0f;
+                    overlayBuffer.DrawLine(color, new Line3.Segment(overlayJoint1, overlayJointS), overlayLineWidth * 2f);
+                    overlayBuffer.DrawLine(color, new Line3.Segment(overlayJointS, overlayJoint2), overlayLineWidth * 2f);
+                }
+                else
+                {
+                    Bezier4x3 angleOverlayCurve = NetUtils.FitCurve(new Line3.Segment(overlayJoint1, overlayJointS), new Line3.Segment(overlayJoint2, overlayJointS));
+                    overlayBuffer.DrawCurve(color, angleOverlayCurve, overlayLineWidth);
                 }
 
-                // Check angle type - straight line, obtuse, right-angle, acute.
-                if (angle == 180)
-                {
-                    // Straight line - three lines.
-                    // Get perpendiculars.
-                    float2 angle1Direction = angleSide ? MathUtils.Right(line1Direction) : MathUtils.Left(line1Direction);
-                    float2 angle2Direction = angleSide ? MathUtils.Right(line2Direction) : MathUtils.Left(line2Direction);
-                    float3 line1Start = line1.b;
-                    line1Start.xz -= line1Direction * size;
-
-                    // Calculate three lines.
-                    float3 line1End = line1.b;
-                    float3 line2Start = line1.b;
-                    line1End.xz += (angle1Direction * (size - (lineWidth * 0.5f))) - (line1Direction * size);
-                    line2Start.xz += (angle1Direction * size) - (line1Direction * (size + (lineWidth * 0.5f)));
-                    float3 line2End = line2.a;
-                    float3 line3Start = line2.a;
-                    line2End.xz -= (angle2Direction * size) + (line2Direction * (size + (lineWidth * 0.5f)));
-                    line3Start.xz -= (angle2Direction * (size - (lineWidth * 0.5f))) + (line2Direction * size);
-                    float3 line3End = line2.a;
-                    line3End.xz -= line2Direction * size;
-
-                    // Draw lines.
-                    overlayBuffer.DrawLine(Color.white, new Line3.Segment(line1Start, line1End), lineWidth);
-                    overlayBuffer.DrawLine(Color.white, new Line3.Segment(line2Start, line2End), lineWidth);
-                    overlayBuffer.DrawLine(Color.white, new Line3.Segment(line3Start, line3End), lineWidth);
-
-                    // Add tooltip.
-                    float3 tooltipPos = line1.b;
-                    tooltipPos.xz += angle1Direction * (size * 1.5f);
-                    TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(value);
-                }
-                else if (angle > 90)
-                {
-                    // Obtuse angle - two angle indicators.
-                    float2 angleDirection = math.normalize(line1Direction + line2Direction);
-                    float3 startPoint = line1.b;
-
-                    // Calculate two sequential curves.
-                    startPoint.xz -= line1Direction * size;
-                    float3 startTangent = default;
-                    startTangent.xz = angleSide ? MathUtils.Right(line1Direction) : MathUtils.Left(line1Direction);
-                    float3 midPoint = line1.b;
-                    midPoint.xz -= angleDirection * size;
-                    float3 midTangent = default;
-                    midTangent.xz = angleSide ? MathUtils.Right(angleDirection) : MathUtils.Left(angleDirection);
-                    float3 endPoint = line2.a;
-                    endPoint.xz -= line2Direction * size;
-                    float3 endTangent = default;
-                    endTangent.xz = angleSide ? MathUtils.Right(line2Direction) : MathUtils.Left(line2Direction);
-
-                    // Draw curves.
-                    overlayBuffer.DrawCurve(Color.white, NetUtils.FitCurve(startPoint, startTangent, midTangent, midPoint), lineWidth);
-                    overlayBuffer.DrawCurve(Color.white, NetUtils.FitCurve(midPoint, midTangent, endTangent, endPoint), lineWidth);
-
-                    // Add tooltip.
-                    float3 tooltipPos = line1.b;
-                    tooltipPos.xz -= angleDirection * (size * 1.5f);
-                    TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(value);
-                }
-                else if (angle == 90)
-                {
-                    // Right angle - two lines.
-                    float3 line1Start = line1.b;
-                    line1Start.xz -= line1Direction * size;
-
-                    // Calculate two lines.
-                    float3 line1End = line1.b;
-                    float3 line2Start = line1.b;
-                    line1End.xz -= (line2Direction * (size - (lineWidth * 0.5f))) + (line1Direction * size);
-                    line2Start.xz -= (line2Direction * size) + (line1Direction * (size + (lineWidth * 0.5f)));
-                    float3 line2End = line2.a;
-                    line2End.xz -= line2Direction * size;
-
-                    // Draw lines.
-                    overlayBuffer.DrawLine(Color.white, new Line3.Segment(line1Start, line1End), lineWidth);
-                    overlayBuffer.DrawLine(Color.white, new Line3.Segment(line2Start, line2End), lineWidth);
-
-                    // Add tooltip.
-                    float3 tooltipPos = line1.b;
-                    tooltipPos.xz -= math.normalizesafe(line1Direction + line2Direction) * (size * 1.5f);
-                    TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(value);
-                }
-                else if (angle > 0)
-                {
-                    // Acute angle - one angle indicator.
-                    float3 startPos = line1.b;
-                    startPos.xz -= line1Direction * size;
-
-                    // Calculate single curve.
-                    float3 startTangent = default;
-                    startTangent.xz = angleSide ? MathUtils.Right(line1Direction) : MathUtils.Left(line1Direction);
-                    float3 endPos = line2.a;
-                    endPos.xz -= line2Direction * size;
-                    float3 endTangent = default;
-                    endTangent.xz = angleSide ? MathUtils.Right(line2Direction) : MathUtils.Left(line2Direction);
-
-                    // Draw curve.
-                    overlayBuffer.DrawCurve(Color.white, NetUtils.FitCurve(startPos, startTangent, endTangent, endPos), lineWidth);
-
-                    // Add tooltip.
-                    float3 tooltipPos = line1.b;
-                    tooltipPos.xz -= math.normalizesafe(line1Direction + line2Direction) * (size * 1.5f);
-                    TooltipInfo value = new (TooltipType.Angle, tooltipPos, angle);
-                    tooltips.Add(value);
-                }
+                // Add tooltip.
+                float3 tooltipPos = line1.b + ((line1.b - overlayJointS) * 0.3f);
+                TooltipInfo value = new (TooltipType.Angle, tooltipPos, angleDegrees);
+                tooltips.Add(value);
             }
         }
     }
