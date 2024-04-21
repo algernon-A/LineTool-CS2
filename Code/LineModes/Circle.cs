@@ -21,6 +21,7 @@ namespace LineTool
     {
         // Calculated circle Bezier parts.
         private readonly Bezier4x3[] _overlayBeziers = new Bezier4x3[4];
+        private bool _validOverlayBezier = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Circle"/> class.
@@ -57,6 +58,7 @@ namespace LineTool
             float radius = math.length(difference);
 
             // Calculate circle Bezier by combining 4 curved parts.
+            _validOverlayBezier = true;
             _overlayBeziers[0] = NetUtils.CircleCurve(m_startPos, radius, radius);
             _overlayBeziers[1] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius);
             _overlayBeziers[2] = NetUtils.CircleCurve(m_startPos, radius, radius * -1f);
@@ -117,9 +119,9 @@ namespace LineTool
                 // Draw a straight radial line (constrained if required).
                 base.DrawOverlay(overlayBuffer, tooltips, cameraController);
 
-                if (_overlayBeziers[0].a.x != 0f)
+                // Draw dashed circle overlay.
+                if (_validOverlayBezier)
                 {
-                    // Draw dashed circle overlay.
                     for (int i = 0; i < _overlayBeziers.Length; i++)
                     {
                         DrawCurvedDashedLine(_overlayBeziers[i], overlayBuffer, cameraController);
@@ -129,14 +131,26 @@ namespace LineTool
         }
 
         /// <summary>
+        /// Clears the current selection.
+        /// </summary>
+        public override void Reset()
+        {
+            base.Reset();
+
+            // Invalidate overlay Bezier.
+            _validOverlayBezier = false;
+        }
+
+        /// <summary>
         /// Performs actions after items are placed on the current line, setting up for the next line to be set.
         /// </summary>
         /// <param name="location">Click world location.</param>
         public override void ItemsPlaced(float3 location)
         {
-            // Empty, to retain original start position (centre of circle).
+            // Invalidate overlay Bezier.
+            _validOverlayBezier = false;
 
-           
+            // Otherwise empty, with no call to Base, to retain original start position (centre of circle).
         }
     }
 }
