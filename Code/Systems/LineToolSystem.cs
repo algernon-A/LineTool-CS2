@@ -533,6 +533,7 @@ namespace LineTool
                     // Reset current mode settings.
                     _mode.Reset();
                     _dragMode = DragMode.None;
+                    _fixedPreview = false;
 
                     return inputDeps;
                 }
