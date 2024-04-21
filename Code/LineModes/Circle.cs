@@ -20,7 +20,7 @@ namespace LineTool
     public class Circle : LineBase
     {
         // Calculated circle Bezier parts.
-        private Bezier4x3[] _thisCircleBeziers = new Bezier4x3[4];
+        private readonly Bezier4x3[] _overlayBeziers = new Bezier4x3[4];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Circle"/> class.
@@ -56,11 +56,11 @@ namespace LineTool
             float3 difference = currentPos - m_startPos;
             float radius = math.length(difference);
 
-            // Calculate circle bezier by combining 4 curved parts.
-            _thisCircleBeziers[0] = NetUtils.CircleCurve(m_startPos, radius, radius);
-            _thisCircleBeziers[1] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius);
-            _thisCircleBeziers[2] = NetUtils.CircleCurve(m_startPos, radius, radius * -1f);
-            _thisCircleBeziers[3] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius * -1f);
+            // Calculate circle Bezier by combining 4 curved parts.
+            _overlayBeziers[0] = NetUtils.CircleCurve(m_startPos, radius, radius);
+            _overlayBeziers[1] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius);
+            _overlayBeziers[2] = NetUtils.CircleCurve(m_startPos, radius, radius * -1f);
+            _overlayBeziers[3] = NetUtils.CircleCurve(m_startPos, radius * -1f, radius * -1f);
 
             // Calculate spacing.
             float circumference = radius * math.PI * 2f;
@@ -114,15 +114,15 @@ namespace LineTool
         {
             if (m_validStart)
             {
-                // Initial position only; just draw a straight line (constrained if required).
+                // Draw a straight radial line (constrained if required).
                 base.DrawOverlay(overlayBuffer, tooltips, cameraController);
 
-                // If points haven't been calculated yet, fallback to straight line.
-                if (_thisCircleBeziers[0].a.x != 0f)
+                if (_overlayBeziers[0].a.x != 0f)
                 {
-                    for (int i = 0; i < _thisCircleBeziers.Length; i++)
+                    // Draw dashed circle overlay.
+                    for (int i = 0; i < _overlayBeziers.Length; i++)
                     {
-                        DrawCurvedDashedLine(_thisCircleBeziers[i], overlayBuffer, cameraController);
+                        DrawCurvedDashedLine(_overlayBeziers[i], overlayBuffer, cameraController);
                     }
                 }
             }
@@ -135,6 +135,8 @@ namespace LineTool
         public override void ItemsPlaced(float3 location)
         {
             // Empty, to retain original start position (centre of circle).
+
+           
         }
     }
 }

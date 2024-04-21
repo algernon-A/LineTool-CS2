@@ -283,7 +283,7 @@ namespace LineTool
             if (_validElbow)
             {
                 _validElbow = false;
-                _thisBezier = new Bezier4x3();
+                _thisBezier = new ();
             }
             else
             {
@@ -576,7 +576,7 @@ namespace LineTool
         private void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
             // Semi-transparent white color.
-            Color color = new Color(1f, 1f, 1f, 0.6f);
+            Color lineColour = new (1f, 1f, 1f, 0.6f);
 
             // Calculate line lengths.
             float line1Length = math.distance(line1.a.xz, line1.b.xz);
@@ -606,13 +606,13 @@ namespace LineTool
 
                 if (angleDegrees == 90)
                 {
-                    // Set joints inbetween and then draw full width line as "box".
-                    overlayBuffer.DrawLine(color, new Line3.Segment((overlayJoint1 + line1.b) / 2, (overlayJointS + overlayJoint2) / 2), overlayLineDistance);
+                    // Set joints in-between and then draw full width line as "box".
+                    overlayBuffer.DrawLine(lineColour, new Line3.Segment((overlayJoint1 + line1.b) / 2, (overlayJointS + overlayJoint2) / 2), overlayLineDistance);
                 }
                 else
                 {
                     Bezier4x3 angleOverlayCurve = NetUtils.FitCurve(new Line3.Segment(overlayJoint1, overlayJointS), new Line3.Segment(overlayJoint2, overlayJointS));
-                    overlayBuffer.DrawCurve(color, angleOverlayCurve, overlayLineWidth);
+                    overlayBuffer.DrawCurve(lineColour, angleOverlayCurve, overlayLineWidth);
                 }
 
                 // Add tooltip.
