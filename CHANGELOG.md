@@ -1,3 +1,7 @@
+### 0.9.1
+- Improve angle indicator overlay display and other overlay tweaks (credit: phillycheeze).
+- Fix fixed-preview line selection circles being shown after cancellation where cursor is over the UI.
+
 ### 0.9
 - Add absolute/relative rotation selection.
 - Add dynamic scaling of overlay guidelines based on zoom level (credit: phillycheeze).
