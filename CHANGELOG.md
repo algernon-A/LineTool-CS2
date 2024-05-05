@@ -1,3 +1,6 @@
+### 0.9.2
+- Update translations.
+
 ### 0.9.1
 - Improve angle indicator overlay display and other overlay tweaks (credit: phillycheeze).
 - Fix fixed-preview line selection circles being shown after cancellation where cursor is over the UI.
