@@ -1,1 +1,1 @@
-- Update translations.
+- Replace Harmony patching with direct tool list manipulation.

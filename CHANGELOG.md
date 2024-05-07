@@ -1,3 +1,5 @@
+- Replace Harmony patching with direct tool list manipulation.
+
 ### 0.9.2
 - Update translations.
 

@@ -442,6 +442,44 @@ namespace LineTool
             // Set log.
             _log = Mod.Instance.Log;
 
+            // Try to find Line Tool reference from tool system tool list.
+            List<ToolBaseSystem> toolList = World.GetOrCreateSystemManaged<ToolSystem>().tools;
+            ToolBaseSystem thisSystem = null;
+            foreach (ToolBaseSystem tool in toolList)
+            {
+                _log.Debug($"Got tool {tool.toolID} ({tool.GetType().FullName})");
+                if (tool == this)
+                {
+                    _log.Debug("Found Line Tool reference in tool list");
+                    thisSystem = tool;
+                    continue;
+                }
+            }
+
+            // Remove existing tool reference.
+            if (thisSystem is not null)
+            {
+                toolList.Remove(this);
+            }
+
+            // Insert Line Tool at the start of the tool list, unless Tree Controller is there, in which case insert it at position 1.
+            if (toolList[0].toolID.Equals("Tree Controller Tool"))
+            {
+                _log.Info("Found Tree Controller reference in tool list at position 0");
+                toolList.Insert(1, this);
+            }
+            else
+            {
+                toolList.Insert(0, this);
+            }
+
+#if DEBUG
+            foreach (ToolBaseSystem tool in toolList)
+            {
+                _log.Debug($"Got tool {tool.toolID} {tool.GetType().FullName}");
+            }
+#endif
+
             // Get system references.
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
