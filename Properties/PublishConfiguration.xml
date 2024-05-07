@@ -77,7 +77,7 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/PlacementVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
-  <ModVersion Value="0.9.2.99" />
+  <ModVersion Value="0.9.3" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
   <ChangeLog>- Replace Harmony patching with direct tool list manipulation.</ChangeLog>
