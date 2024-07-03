@@ -8,6 +8,7 @@ namespace LineTool
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Colossal.Logging;
     using Colossal.Mathematics;
     using Game;
@@ -27,6 +28,7 @@ namespace LineTool
     using Unity.Mathematics;
     using UnityEngine.InputSystem;
     using static Game.Rendering.GuideLinesSystem;
+    using AgeMask = Game.Tools.AgeMask;
     using Random = Unity.Mathematics.Random;
     using Transform = Game.Objects.Transform;
 
@@ -118,6 +120,11 @@ namespace LineTool
         /// Gets the tool's ID string.
         /// </summary>
         public override string toolID => "Line Tool";
+
+        /// <summary>
+        /// Gets the active instance.
+        /// </summary>
+        internal static LineToolSystem Instance { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the random seed should be randomised <c>true</c> or kept constant <c>false</c>.
@@ -289,6 +296,16 @@ namespace LineTool
         internal Entity SelectedEntity => _selectedEntity;
 
         /// <summary>
+        /// Gets a value indicating whether a tree prefab (with age stages) is currently selected.
+        /// </summary>
+        internal bool TreeSelected => m_PrefabSystem.HasComponent<TreeData>(_selectedPrefab);
+
+        /// <summary>
+        /// Gets or sets the active tree age mask.
+        /// </summary>
+        internal AgeMask AgeMask { get; set; }
+
+        /// <summary>
         /// Sets the currently selected prefab.
         /// </summary>
         private PrefabBase SelectedPrefab
@@ -395,12 +412,16 @@ namespace LineTool
                 _previousTool = m_ToolSystem.activeTool;
 
                 // Check for valid prefab selection before continuing.
-                SelectedPrefab = World.GetOrCreateSystemManaged<ObjectToolSystem>().prefab;
+                ObjectToolSystem objectToolSystem = World.GetOrCreateSystemManaged<ObjectToolSystem>();
+                SelectedPrefab = objectToolSystem.prefab;
                 if (_selectedPrefab != null)
                 {
                     // Valid prefab selected - switch to this tool.
                     m_ToolSystem.selected = Entity.Null;
                     m_ToolSystem.activeTool = this;
+
+                    // Update the current tree age mask from the game's object tool.
+                    AgeMask = objectToolSystem.actualAgeMask;
                 }
             }
         }
@@ -437,6 +458,9 @@ namespace LineTool
         /// </summary>
         protected override void OnCreate()
         {
+            // Set instance reference.
+            Instance = this;
+
             base.OnCreate();
 
             // Set log.
@@ -496,9 +520,9 @@ namespace LineTool
             // Set default mode.
             _mode = new StraightLine();
 
-            // Set actions.
-            _applyAction = InputManager.instance.FindAction("Tool", "Apply");
-            _cancelAction = InputManager.instance.FindAction("Tool", "Mouse Cancel");
+            // Set apply and cancel actions from game settings.
+            _applyAction = CopyGameAction("Apply", ModSettings.ApplyActionName);
+            _cancelAction = CopyGameAction("Mouse Cancel", ModSettings.CancelActionName);
 
             // Enable fixed preview control.
             _fixedPreviewAction = new ("LineTool-FixPreview");
@@ -826,6 +850,7 @@ namespace LineTool
             definitions.m_ObjectPrefab = objectPrefab;
             definitions.m_Theme = _cityConfigurationSystem.defaultTheme;
             definitions.m_RandomSeed = randomSeed;
+            definitions.m_AgeMask = AgeMask;
             definitions.m_ControlPoint = new () { m_Position = position, m_Rotation = rotation };
             definitions.m_AttachmentPrefab = default;
             definitions.m_OwnerData = SystemAPI.GetComponentLookup<Owner>(true);
@@ -880,6 +905,45 @@ namespace LineTool
             definitions.m_TerrainHeightData = m_TerrainSystem.GetHeightData();
             definitions.m_CommandBuffer = m_ToolOutputBarrier.CreateCommandBuffer();
             definitions.Execute();
+        }
+
+        /// <summary>
+        /// Copies a game action binding to a mod-usable <see cref="ProxyBinding" />.
+        /// </summary>
+        /// <param name="gameActionName">Game action name to copy from.</param>
+        /// <param name="modActionName">Mod action name to copy to.</param>
+        /// <returns>New <see cref="ProxyBinding" /> bound to the default game action.</returns>
+        private ProxyAction CopyGameAction(string gameActionName, string modActionName)
+        {
+            // Get action references.
+            ProxyAction modAction = Mod.Instance.ActiveSettings.GetAction(modActionName);
+            ProxyAction gameAction = InputManager.instance.FindAction(InputManager.kToolMap, gameActionName);
+
+            // Enable mod action.
+            modAction.shouldBeEnabled = true;
+
+            // Find action bindings.
+            ProxyBinding modBinding = modAction.bindings.FirstOrDefault(b => b.group == nameof(Mouse));
+            ProxyBinding gameBinding = gameAction.bindings.FirstOrDefault(b => b.group == nameof(Mouse));
+
+            // Setup change watcher and apply current settings.
+            ProxyBinding.Watcher applyWatcher = new (gameBinding, binding => BindToGameAction(modBinding, binding));
+            BindToGameAction(modBinding, applyWatcher.binding);
+
+            return modAction;
+        }
+
+        /// <summary>
+        /// Binds a ProxyBinding to a game action.
+        /// </summary>
+        /// <param name="mimicBinding">ProxyBinding to bind.</param>
+        /// <param name="gameAction">Game action to bind to.</param>
+        private void BindToGameAction(ProxyBinding mimicBinding, ProxyBinding gameAction)
+        {
+            ProxyBinding newBinding = mimicBinding.Copy();
+            newBinding.path = gameAction.path;
+            newBinding.modifiers = gameAction.modifiers;
+            InputManager.instance.SetBinding(newBinding, out _);
         }
     }
 }

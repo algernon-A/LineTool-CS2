@@ -12,6 +12,8 @@ namespace LineTool
     using Game.Prefabs;
     using Game.Tools;
     using Game.UI;
+    using Game.UI.InGame;
+    using HarmonyLib;
     using Unity.Entities;
     using UnityEngine.InputSystem;
 
@@ -24,6 +26,9 @@ namespace LineTool
         private ToolSystem _toolSystem;
         private LineToolSystem _lineToolSystem;
         private ILog _log;
+
+        // ToolbarUISystem reflection.
+        private ValueBinding<int> _ageMaskBinding;
 
         // Internal status.
         private bool _toolIsActive = false;
@@ -99,6 +104,24 @@ namespace LineTool
             AddUpdateBinding(new GetterValueBinding<float>("LineTool", "OffsetVariation", () => _lineToolSystem.RandomOffset));
             AddBinding(new TriggerBinding("LineTool", "IncreaseOffsetVariation", IncreaseOffsetVariation));
             AddBinding(new TriggerBinding("LineTool", "DecreaseOffsetVariation", DecreaseOffsetVariation));
+
+            // Add additional binding to capture tree age selection changes.
+            _ageMaskBinding = AccessTools.Field(typeof(ToolbarUISystem), "m_AgeMaskBinding")?.GetValue(World.GetOrCreateSystemManaged<ToolbarUISystem>()) as ValueBinding<int>;
+            if (_ageMaskBinding is not null)
+            {
+                AddBinding(new TriggerBinding<int>("toolbar", "setAgeMask", delegate (int ageMask)
+                {
+                    // Update Line Tool tree age mask with the new selection.
+                    LineToolSystem.Instance.AgeMask = (Game.Tools.AgeMask)ageMask;
+
+                    // Update displayed binding with the new value.
+                    _ageMaskBinding?.Update((int)LineToolSystem.Instance.AgeMask);
+                }));
+            }
+            else
+            {
+                _log.Error("unable to bind ToolbarUISystem.m_AgeMaskBinding; tree age selection may not appear");
+            }
         }
 
         /// <summary>

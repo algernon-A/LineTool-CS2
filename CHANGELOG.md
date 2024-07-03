@@ -1,3 +1,7 @@
+### 0.9.4
+- Update for game version 1.1.6.
+- Add decimal place display for spacing and offset.
+
 ### 0.9.3
 - Replace Harmony patching with direct tool list manipulation.
 

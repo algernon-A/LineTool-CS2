@@ -1,1 +1,2 @@
-- Replace Harmony patching with direct tool list manipulation.
+- Update for game version 1.1.6.
+- Add decimal place display for spacing and offset.

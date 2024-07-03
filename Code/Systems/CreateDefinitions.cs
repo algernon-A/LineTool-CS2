@@ -18,6 +18,7 @@ namespace LineTool
     using Unity.Entities;
     using Unity.Mathematics;
     using static Game.Tools.ObjectToolBaseSystem;
+    using AgeMask = Game.Tools.AgeMask;
     using EditorContainer = Game.Tools.EditorContainer;
 
     /// <summary>
@@ -41,6 +42,8 @@ namespace LineTool
         public Entity m_Theme;
         [ReadOnly]
         public RandomSeed m_RandomSeed;
+        [ReadOnly]
+        public AgeMask m_AgeMask;
         [ReadOnly]
         public ControlPoint m_ControlPoint;
         [ReadOnly]
@@ -240,7 +243,7 @@ namespace LineTool
             if (m_TransformData.HasComponent(entity))
             {
                 Game.Objects.Transform transform = m_TransformData[entity];
-                m_ElevationData.TryGetComponent(entity, out var componentData4);
+                m_ElevationData.TryGetComponent(entity, out var componentData5);
                 Entity owner2 = Entity.Null;
                 if (m_OwnerData.HasComponent(entity))
                 {
@@ -265,14 +268,20 @@ namespace LineTool
 
                     bool flag3 = m_ObjectPrefab == Entity.Null;
                     Entity parent = Entity.Null;
-                    if (flag3 && m_AttachedData.TryGetComponent(entity, out var componentData5) && m_BuildingData.HasComponent(componentData5.m_Parent))
+                    if (flag3 && m_InstalledUpgrades.TryGetBuffer(entity, out var bufferData3))
                     {
-                        Game.Objects.Transform transform2 = m_TransformData[componentData5.m_Parent];
-                        parent = m_PrefabRefData[componentData5.m_Parent].m_Prefab;
-                        UpdateObject(Entity.Null, Entity.Null, componentData5.m_Parent, Entity.Null, componentData5.m_Parent, Entity.Null, transform2, 0f, default(OwnerDefinition), clearAreas, upgrade: false, relocate: false, rebuild: false, topLevel: true, optional: false, -1, -1);
+                        ClearAreaHelpers.FillClearAreas(bufferData3, Entity.Null, m_TransformData, m_AreaClearData, m_PrefabRefData, m_PrefabObjectGeometryData, m_SubAreas, m_AreaNodes, m_AreaTriangles, ref clearAreas);
+                        ClearAreaHelpers.InitClearAreas(clearAreas, transform);
                     }
 
-                    UpdateObject(Entity.Null, owner2, entity, parent, updatedTopLevel, Entity.Null, transform, componentData4.m_Elevation, default(OwnerDefinition), clearAreas, upgrade: true, relocate: false, flag3, topLevel: true, optional: false, -1, -1);
+                    if (flag3 && m_AttachedData.TryGetComponent(entity, out var componentData6) && m_BuildingData.HasComponent(componentData6.m_Parent))
+                    {
+                        Game.Objects.Transform transform2 = m_TransformData[componentData6.m_Parent];
+                        parent = m_PrefabRefData[componentData6.m_Parent].m_Prefab;
+                        UpdateObject(Entity.Null, Entity.Null, componentData6.m_Parent, Entity.Null, componentData6.m_Parent, Entity.Null, transform2, 0f, default(OwnerDefinition), clearAreas, upgrade: false, relocate: false, rebuild: false, topLevel: true, optional: false, -1, -1);
+                    }
+
+                    UpdateObject(Entity.Null, owner2, entity, parent, updatedTopLevel, Entity.Null, transform, componentData5.m_Elevation, default(OwnerDefinition), clearAreas, upgrade: true, relocate: false, flag3, topLevel: true, optional: false, -1, -1);
                     if (clearAreas.IsCreated)
                     {
                         clearAreas.Clear();
@@ -284,9 +293,9 @@ namespace LineTool
                 }
             }
 
-            if (entity2 != Entity.Null && m_InstalledUpgrades.TryGetBuffer(entity2, out var bufferData3))
+            if (entity2 != Entity.Null && m_InstalledUpgrades.TryGetBuffer(entity2, out var bufferData4))
             {
-                ClearAreaHelpers.FillClearAreas(bufferData3, Entity.Null, m_TransformData, m_AreaClearData, m_PrefabRefData, m_PrefabObjectGeometryData, m_SubAreas, m_AreaNodes, m_AreaTriangles, ref clearAreas);
+                ClearAreaHelpers.FillClearAreas(bufferData4, Entity.Null, m_TransformData, m_AreaClearData, m_PrefabRefData, m_PrefabObjectGeometryData, m_SubAreas, m_AreaNodes, m_AreaTriangles, ref clearAreas);
                 ClearAreaHelpers.TransformClearAreas(clearAreas, m_TransformData[entity2], new Game.Objects.Transform(startPoint.m_Position, startPoint.m_Rotation));
                 ClearAreaHelpers.InitClearAreas(clearAreas, new Game.Objects.Transform(startPoint.m_Position, startPoint.m_Rotation));
             }
@@ -294,13 +303,13 @@ namespace LineTool
             if (m_ObjectPrefab != Entity.Null)
             {
                 Entity entity5 = m_ObjectPrefab;
-                if (entity2 == Entity.Null && ownerDefinition.m_Prefab == Entity.Null && m_PrefabPlaceholderElements.TryGetBuffer(m_ObjectPrefab, out var bufferData4) && !m_PrefabCreatureSpawnData.HasComponent(m_ObjectPrefab))
+                if (entity2 == Entity.Null && ownerDefinition.m_Prefab == Entity.Null && m_PrefabPlaceholderElements.TryGetBuffer(m_ObjectPrefab, out var bufferData5) && !m_PrefabCreatureSpawnData.HasComponent(m_ObjectPrefab))
                 {
                     Unity.Mathematics.Random random = m_RandomSeed.GetRandom(1000000);
                     int num2 = 0;
-                    for (int j = 0; j < bufferData4.Length; j++)
+                    for (int j = 0; j < bufferData5.Length; j++)
                     {
-                        if (GetVariationData(bufferData4[j], out var variation))
+                        if (GetVariationData(bufferData5[j], out var variation))
                         {
                             num2 += variation.m_Probability;
                             if (random.NextInt(num2) < variation.m_Probability)
@@ -390,7 +399,7 @@ namespace LineTool
             return true;
         }
 
-        private void UpdateObject(Entity objectPrefab, Entity owner, Entity original, Entity parent, Entity updatedTopLevel, Entity lotEntity, Game.Objects.Transform transform, float elevation, OwnerDefinition ownerDefinition, NativeList<ClearAreaData> clearAreas, bool upgrade, bool relocate, bool rebuild, bool topLevel, bool optional, int parentMesh, int randomIndex)
+        private void UpdateObject(Entity objectPrefab, Entity owner, Entity original, Entity parent, Entity updatedTopLevel, Entity lotEntity, Transform transform, float elevation, OwnerDefinition ownerDefinition, NativeList<ClearAreaData> clearAreas, bool upgrade, bool relocate, bool rebuild, bool topLevel, bool optional, int parentMesh, int randomIndex)
         {
             OwnerDefinition ownerDefinition2 = ownerDefinition;
             Unity.Mathematics.Random random = m_RandomSeed.GetRandom(randomIndex);
@@ -474,6 +483,10 @@ namespace LineTool
                 if (m_EditorMode)
                 {
                     component2.m_Age = random.NextFloat(1f);
+                }
+                else
+                {
+                    component2.m_Age = ToolUtils.GetRandomAge(ref random, m_AgeMask);
                 }
 
                 if (ownerDefinition.m_Prefab != Entity.Null)
@@ -1311,7 +1324,7 @@ namespace LineTool
                             dynamicBuffer4[num2] = new LocalNodeCache
                             {
                                 m_Position = position,
-                                m_ParentMesh = parentMesh,
+                                m_ParentMesh = parentMesh
                             };
                         }
 

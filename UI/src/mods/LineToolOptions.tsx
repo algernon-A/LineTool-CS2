@@ -89,9 +89,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         // Number display strings.
         const renderedSpacing: string = Spacing.toFixed(1).toString() + " m";
         const renderedRotation: string = Rotation.toFixed(0).toString() + "°";
-        const renderedSpacingVariation: string = SpacingVariation.toFixed(0).toString() + " m";
-        const renderedOffsetVariation: string = OffsetVariation.toFixed(0).toString() + " m";
-        
+        const renderedSpacingVariation: string = SpacingVariation.toFixed(1).toString() + " m";
+        const renderedOffsetVariation: string = OffsetVariation.toFixed(1).toString() + " m";
+
         // Titled tooltip generator.
         function  TitledTooltip (titleKey: string, contentKey: string): JSX.Element {
             return (

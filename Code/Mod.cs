@@ -65,6 +65,11 @@ namespace LineTool
         internal ILog Log { get; private set; }
 
         /// <summary>
+        /// Gets the mod's active settings configuration.
+        /// </summary>
+        internal ModSettings ActiveSettings { get; private set; }
+
+        /// <summary>
         /// Called by the game when the mod is loaded.
         /// </summary>
         /// <param name="updateSystem">Game update system.</param>
@@ -82,8 +87,29 @@ namespace LineTool
 
             Log.Info($"loading {ModName} version {Assembly.GetExecutingAssembly().GetName().Version}");
 
+
+            // Apply harmony patches.
+            new Patcher("algernon-LineTool", Log);
+
+            // Don't do anything if Harmony patches weren't applied.
+            if (Patcher.Instance is null || !Patcher.Instance.PatchesApplied)
+            {
+                Log.Critical("Harmony patches not applied; aborting system activation");
+                return;
+            }
+
             // Load translations.
             Localization.LoadTranslations(null, Log);
+
+            // Register mod settings to game options UI.
+            ActiveSettings = new (this);
+            ActiveSettings.RegisterInOptionsUI();
+
+            // Load saved settings.
+            AssetDatabase.global.LoadSettings(ModName, ActiveSettings, new ModSettings(this));
+
+            // Apply input bindings.
+            ActiveSettings.RegisterKeyBindings();
 
             // Activate systems.
             updateSystem.UpdateAt<LineToolSystem>(SystemUpdatePhase.ToolUpdate);
@@ -98,6 +124,13 @@ namespace LineTool
         {
             Log.Info("disposing");
             Instance = null;
+
+            // Clear settings menu entry.
+            if (ActiveSettings != null)
+            {
+                ActiveSettings.UnregisterInOptionsUI();
+                ActiveSettings = null;
+            }
         }
     }
 }
