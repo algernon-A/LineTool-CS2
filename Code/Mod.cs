@@ -103,7 +103,6 @@ namespace LineTool
 
             // Register mod settings to game options UI.
             ActiveSettings = new (this);
-            ActiveSettings.RegisterInOptionsUI();
 
             // Load saved settings.
             AssetDatabase.global.LoadSettings(ModName, ActiveSettings, new ModSettings(this));
@@ -125,12 +124,8 @@ namespace LineTool
             Log.Info("disposing");
             Instance = null;
 
-            // Clear settings menu entry.
-            if (ActiveSettings != null)
-            {
-                ActiveSettings.UnregisterInOptionsUI();
-                ActiveSettings = null;
-            }
+            // Revert harmony patches.
+            Patcher.Instance?.UnPatchAll();
         }
     }
 }
