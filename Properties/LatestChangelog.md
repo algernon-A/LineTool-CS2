@@ -1,2 +1,1 @@
-- Update for game version 1.1.6.
-- Add decimal place display for spacing and offset.
+- Remove settings UI registration.

@@ -1,3 +1,6 @@
+### 0.9.5
+- Remove settings UI registration.
+
 ### 0.9.4
 - Update for game version 1.1.6.
 - Add decimal place display for spacing and offset.
