@@ -42,20 +42,15 @@ namespace LineTool
         /// Gets or sets the Line Tool apply action (copied from game action).
         /// </summary>
         [SettingsUIMouseBinding(ApplyActionName)]
-        [SettingsUIDisableByCondition(typeof(Setting), nameof(AlwaysHidden))]
+        [SettingsUIHidden]
         public ProxyBinding LineToolApply { get; set; }
 
         /// <summary>
         /// Gets or sets the Line Tool cancel action (copied from game action).
         /// </summary>
         [SettingsUIMouseBinding(CancelActionName)]
-        [SettingsUIDisableByCondition(typeof(Setting), nameof(AlwaysHidden))]
+        [SettingsUIHidden]
         public ProxyBinding LineToolCancel { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the control should be hidden (always <c>true</c>).
-        /// </summary>
-        private bool AlwaysHidden => true;
 
         /// <summary>
         /// Restores mod settings to default.
