@@ -9,6 +9,8 @@ export const pointModeEnabled$ = bindValue<boolean>('LineTool', 'PointModeEnable
 export const straightLineModeEnabled$ = bindValue<boolean>('LineTool', 'StraightLineEnabled');
 export const simpleCurveModeEnabled$ = bindValue<boolean>('LineTool', 'SimpleCurveEnabled');
 export const circleModeEnabled$ = bindValue<boolean>('LineTool', 'CircleEnabled');
+export const fenceModeAvailable$ = bindValue<boolean>('LineTool', 'FenceModeAvailable');
+export const w2wModeAvailable$ = bindValue<boolean>('LineTool', 'W2WModeAvailable');
 export const fenceModeEnabled$ = bindValue<boolean>('LineTool', 'FenceModeEnabled');
 export const w2wModeEnabled$ = bindValue<boolean>('LineTool', 'W2WModeEnabled');
 export const randomizationEnabled$ = bindValue<boolean>('LineTool', 'RandomizationEnabled');
@@ -79,6 +81,8 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const relativeRotationEnabled: boolean = useValue(relativeRotationEnabled$);
         const absoluteRotationEnabled: boolean = useValue(absoluteRotationEnabled$);
         const randomRotationEnabled: boolean = useValue(randomRotationEnabled$);
+        const fenceModeAvailable: boolean = useValue(fenceModeAvailable$);
+        const w2wModeAvailable: boolean = useValue(w2wModeAvailable$);
 
         // Number update bindings.
         const Spacing: Number = useValue(Spacing$);
@@ -112,6 +116,52 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                     <div className={descriptionTooltipTheme.content}>{translate(secondParaKey)}</div>
                 </>
             )
+        }
+        
+        // Fence mode button.
+        function FenceModeButton(): JSX.Element {
+            // Only visible if fence mode is available.
+            if (fenceModeAvailable) {
+                return (
+                    <ToolButton
+                        className={toolButtonTheme.button}
+                        src={"coui://uil/Standard/Fence.svg"}
+                        tooltip={TitledTooltip("LINETOOL.FenceMode", "LINETOOL_DESCRIPTION.FenceMode")}
+                        onSelect={fenceModeClick}
+                        selected={fenceModeAvailable && fenceModeEnabled}
+                        multiSelect={false}
+                        disabled={!fenceModeAvailable}
+                        focusKey={FocusDisabled}
+                    />
+                )
+            }
+            else {
+                // Fence mode not available - return empty.
+                return (<></>)
+            }
+        }
+
+        // Wall-to-wall mode button.
+        function W2WModeButton(): JSX.Element {
+            // Only visible if wall-to-wall mode is available.
+            if (w2wModeAvailable) {
+                return (
+                    <ToolButton
+                        className={toolButtonTheme.button}
+                        src={"coui://uil/Standard/BoxesWallToWall.svg"}
+                        tooltip={TitledTooltip("LINETOOL.W2WMode", "LINETOOL_DESCRIPTION.W2WMode")}
+                        onSelect={w2wModeClick}
+                        selected={w2wModeAvailable && w2wModeEnabled}
+                        multiSelect={false}
+                        disabled={!w2wModeAvailable}
+                        focusKey={FocusDisabled}
+                    />
+                )
+            }
+            else {
+                // Wall-to-wall mode not available - return empty.
+                return (<></>)
+            }
         }
 
         // Show mode row if set.
@@ -167,26 +217,8 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                 result.props.children?.push(
                     <>
                         <Section title={translate("LINETOOL.Options")}>
-                            <ToolButton
-                                className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/Fence.svg"}
-                                tooltip={TitledTooltip("LINETOOL.FenceMode", "LINETOOL_DESCRIPTION.FenceMode")}
-                                onSelect={fenceModeClick}
-                                selected={fenceModeEnabled}
-                                multiSelect={false}
-                                disabled={false}
-                                focusKey={FocusDisabled}
-                            />
-                            <ToolButton
-                                className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/BoxesWallToWall.svg"}
-                                tooltip={TitledTooltip("LINETOOL.W2WMode", "LINETOOL_DESCRIPTION.W2WMode")}
-                                onSelect={w2wModeClick}
-                                selected={w2wModeEnabled}
-                                multiSelect={false}
-                                disabled={false}
-                                focusKey={FocusDisabled}
-                            />
+                            {FenceModeButton()}
+                            {W2WModeButton()}
                             <ToolButton
                                 className={toolButtonTheme.button}
                                 src={"coui://uil/Standard/Dice.svg"}

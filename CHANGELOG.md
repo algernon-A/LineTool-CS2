@@ -1,3 +1,5 @@
+- Hide Fence Mode and/or Wall-to-Wall Mode buttons if the selected prefab's mesh doesn't have an effective size in the relevant axis.
+
 ### 0.9.5
 - Remove settings UI registration.
 

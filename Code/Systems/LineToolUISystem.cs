@@ -69,6 +69,8 @@ namespace LineTool
             AddBinding(new TriggerBinding("LineTool", "SetCircleMode", SetCircleMode));
 
             // Options UI bindings.
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FenceModeAvailable", () => _lineToolSystem.FenceModeValid));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "W2WModeAvailable", () => _lineToolSystem.W2WModeValid));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FenceModeEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.FenceMode));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "W2WModeEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.W2WMode));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "RandomizationEnabled", () => _lineToolSystem.RandomizationEnabled));

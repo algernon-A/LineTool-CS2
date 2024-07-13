@@ -153,26 +153,58 @@ namespace LineTool
         {
             get
             {
-                return _spacingMode switch
+                // Check for fence or wall-to-wall modes, ensuring that they're valid options for this prefab.
+                if (FenceModeValid && _spacingMode == SpacingMode.FenceMode)
                 {
-                    SpacingMode.FenceMode => _zBounds.max - _zBounds.min,
-                    SpacingMode.W2WMode => _xBounds.max - _xBounds.min,
-                    _ => _spacing,
-                };
+                    return _zBounds.max - _zBounds.min;
+                }
+                else if (W2WModeValid && _spacingMode == SpacingMode.W2WMode)
+                {
+                    return _xBounds.max - _xBounds.min;
+                }
+
+                // If we got here we're not in fence or wall-to-wall mode; just return the spacing value.
+                return _spacing;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether fence mode is valid for the selected prefab.
+        /// </summary>
+        internal bool FenceModeValid => _selectedPrefab is not null && _zBounds.min != 0 && _zBounds.max != 0;
+
+        /// <summary>
+        /// Gets a value indicating whether wall-to-wall mode is valid for the selected prefab.
+        /// </summary>
+        internal bool W2WModeValid => _selectedPrefab is not null && _xBounds.min != 0 && _xBounds.max != 0;
 
         /// <summary>
         /// Gets or sets the current spacing mode.
         /// </summary>
         internal SpacingMode CurrentSpacingMode
         {
-            get => _spacingMode;
+            get
+            {
+                // Use normal spacing mode if fence or wall-to-wall is selected but that mode isn't currently a valid option.
+                if ((!FenceModeValid && _spacingMode == SpacingMode.FenceMode) || (!W2WModeValid && _spacingMode == SpacingMode.W2WMode))
+                {
+                    return SpacingMode.Manual;
+                }
+
+                return _spacingMode;
+            }
+
             set
             {
                 // Don't do anything if no change.
                 if (_spacingMode != value)
                 {
+                    // Don't do anything if trying to set either fence or wall-to-wall mode if that mode isn't currently a valid option.
+                    if ((!FenceModeValid && value == SpacingMode.FenceMode) || (!W2WModeValid && value == SpacingMode.W2WMode))
+                    {
+                        return;
+                    }
+
                     _spacingMode = value;
                     _dirty = true;
                 }
@@ -708,7 +740,7 @@ namespace LineTool
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, _spacingMode, _rotationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, CurrentSpacingMode, _rotationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
             // Initialize randomization for this run.
             RandomSeed randomSeed = GetRandomSeed(0);
@@ -735,7 +767,7 @@ namespace LineTool
                     _selectedEntity,
                     thisPoint.Position,
                     _rotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
-                    _spacingMode == SpacingMode.FenceMode ? randomSeed : RandomizationEnabled ? GetRandomSeed(seedIndex++) : GetRandomSeed(0));
+                    CurrentSpacingMode == SpacingMode.FenceMode ? randomSeed : RandomizationEnabled ? GetRandomSeed(seedIndex++) : GetRandomSeed(0));
             }
 
             return inputDeps;
