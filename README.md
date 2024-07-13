@@ -35,6 +35,8 @@ This mod supplements existing tools so you can precisely and quickly place objec
 - Toggle **fence mode** to align objects with the line direction, and place them continuously end-to-end (like a fence).
 - Toggle **wall-to-wall mode** to align objects with the line direction, and place them continuously side-to-side (like a row of buildings).
 
+ **Note**: fence mode and/or wall-to-wall mode are not available for all prefabs (and those options will be hidden if they're not available).  This occurs when the underlying prefab doesn't have a mesh that can be used to properly calculate dimensions (e.g. parking lots).
+
 ### Appearance randomization
 - Enable **randomization** to randomize the appearance of objects to be placed (within the normal range for that object), or **disable** randomization to have all objects take their default appearance.
 - Use the **change fixed random seed** to change the appearance of objects to place to the next random option.
