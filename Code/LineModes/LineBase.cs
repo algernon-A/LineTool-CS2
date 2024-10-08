@@ -132,7 +132,7 @@ namespace LineTool
             float baseAngle = rotationMode == RotationMode.Absolute ? 0f : math.atan2(difference.x, difference.z);
 
             // Calculate applied rotation (in radians).
-            var appliedRotation = spacingMode switch
+            float appliedRotation = spacingMode switch
             {
                 SpacingMode.FenceMode => math.atan2(difference.x, difference.z),
                 SpacingMode.W2WMode => math.atan2(difference.x, difference.z) + (math.PI / 2f),

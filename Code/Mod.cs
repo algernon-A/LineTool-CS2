@@ -23,6 +23,9 @@ namespace LineTool
         /// </summary>
         public const string ModName = "Line Tool";
 
+        // The mod's Harmony ID.
+        private const string HarmonyID = "algernon-LineTool";
+
         // Mod assembly path cache.
         private string s_assemblyPath = null;
 
@@ -87,9 +90,8 @@ namespace LineTool
 
             Log.Info($"loading {ModName} version {Assembly.GetExecutingAssembly().GetName().Version}");
 
-
             // Apply harmony patches.
-            new Patcher("algernon-LineTool", Log);
+            new Patcher(HarmonyID, Log);
 
             // Don't do anything if Harmony patches weren't applied.
             if (Patcher.Instance is null || !Patcher.Instance.PatchesApplied)
