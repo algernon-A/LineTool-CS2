@@ -1,3 +1,6 @@
+### 0.9.7
+- Always use relative rotation for fence or wall-to-wall mode.
+
 ### 0.9.6
 - Hide Fence Mode and/or Wall-to-Wall Mode buttons if the selected prefab's mesh doesn't have an effective size in the relevant axis.
 
