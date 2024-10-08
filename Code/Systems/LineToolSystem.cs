@@ -216,7 +216,17 @@ namespace LineTool
         /// </summary>
         internal RotationMode CurrentRotationMode
         {
-            get => _rotationMode;
+            get
+            {
+                // Always use relative rotation for fence or wall-to-wall mode.
+                if (CurrentSpacingMode == SpacingMode.FenceMode || CurrentSpacingMode == SpacingMode.W2WMode)
+                {
+                    return RotationMode.Relative;
+                }
+
+                return _rotationMode;
+            }
+
             set
             {
                 // Don't do anything if no change.
@@ -740,7 +750,7 @@ namespace LineTool
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, CurrentSpacingMode, _rotationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, CurrentSpacingMode, CurrentRotationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
             // Initialize randomization for this run.
             RandomSeed randomSeed = GetRandomSeed(0);
@@ -759,14 +769,14 @@ namespace LineTool
                 Transform transformData = new ()
                 {
                     m_Position = thisPoint.Position,
-                    m_Rotation = _rotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
+                    m_Rotation = CurrentRotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                 };
 
                 // Create entity.
                 CreateDefinitions(
                     _selectedEntity,
                     thisPoint.Position,
-                    _rotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
+                    CurrentRotationMode == RotationMode.Random ? GetEffectiveRotation(thisPoint.Position) : thisPoint.Rotation,
                     CurrentSpacingMode == SpacingMode.FenceMode ? randomSeed : RandomizationEnabled ? GetRandomSeed(seedIndex++) : GetRandomSeed(0));
             }
 
@@ -824,8 +834,8 @@ namespace LineTool
         {
             int rotation = _rotation;
 
-            // Override fixed rotation with a random value if we're using random rotation.
-            if (_rotationMode == RotationMode.Random)
+            // Override fixed rotation with a random value if we're using random rotation and fence mode isn't selected.
+            if (CurrentRotationMode == RotationMode.Random)
             {
                 // Use position to init RNG.
                 _random.InitState((uint)(math.abs(position.x) + math.abs(position.y) + math.abs(position.z)) * 10000);
