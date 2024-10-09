@@ -70,6 +70,4 @@ Incorporates overlay improvements and enhancements by [phillycheeze](https://git
 
 Special thanks to [yenyang](https://github.com/yenyang/) for various tips and advice!
 
-Thumbnail design by Macwelshman.
-
 This mod uses the [Harmony Patching Library](url=https://github.com/pardeike/Harmony]Harmony[/url) by Andreas Pardeike.
