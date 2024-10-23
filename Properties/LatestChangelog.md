@@ -1,1 +1,1 @@
-- Always use relative rotation for fence or wall-to-wall mode.
+- Update for game version 1.1.10f1.

@@ -56,7 +56,7 @@ namespace LineTool
 
                 // Set tooltip position.
                 TooltipGroup tooltipGroup = _tooltipGroups[i];
-                float2 tooltipPos = TooltipSystemBase.WorldToTooltipPos(tooltipInfo.m_Position);
+                float2 tooltipPos = TooltipSystemBase.WorldToTooltipPos(tooltipInfo.m_Position, out _);
                 if (!tooltipGroup.position.Equals(tooltipPos))
                 {
                     tooltipGroup.position = tooltipPos;

@@ -1,3 +1,6 @@
+### 0.9.8
+- Update for game version 1.1.10f1.
+
 ### 0.9.7
 - Always use relative rotation for fence or wall-to-wall mode.
 

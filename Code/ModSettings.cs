@@ -15,8 +15,8 @@ namespace LineTool
     /// The mod's settings.
     /// </summary>
     [FileLocation(Mod.ModName)]
-    [SettingsUIMouseAction(ApplyActionName, "TestUsage")]
-    [SettingsUIMouseAction(CancelActionName, "TestUsage")]
+    [SettingsUIMouseAction(ApplyActionName, ActionType.Button, false, false, new string[] { "LineTool" })]
+    [SettingsUIMouseAction(CancelActionName, ActionType.Button, false, false, usages: new string[] { "LineTool" })]
     internal class ModSettings : ModSetting
     {
         /// <summary>
@@ -42,6 +42,7 @@ namespace LineTool
         /// Gets or sets the Line Tool apply action (copied from game action).
         /// </summary>
         [SettingsUIMouseBinding(ApplyActionName)]
+        [SettingsUIBindingMimic(InputManager.kToolMap, "Apply")]
         [SettingsUIHidden]
         public ProxyBinding LineToolApply { get; set; }
 
@@ -49,6 +50,7 @@ namespace LineTool
         /// Gets or sets the Line Tool cancel action (copied from game action).
         /// </summary>
         [SettingsUIMouseBinding(CancelActionName)]
+        [SettingsUIBindingMimic(InputManager.kToolMap, "Cancel")]
         [SettingsUIHidden]
         public ProxyBinding LineToolCancel { get; set; }
 

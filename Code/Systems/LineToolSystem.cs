@@ -8,7 +8,6 @@ namespace LineTool
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Colossal.Logging;
     using Colossal.Mathematics;
     using Game;
@@ -563,8 +562,8 @@ namespace LineTool
             _mode = new StraightLine();
 
             // Set apply and cancel actions from game settings.
-            _applyAction = CopyGameAction("Apply", ModSettings.ApplyActionName);
-            _cancelAction = CopyGameAction("Mouse Cancel", ModSettings.CancelActionName);
+            _applyAction = Mod.Instance.ActiveSettings.GetAction(ModSettings.ApplyActionName);
+            _cancelAction = Mod.Instance.ActiveSettings.GetAction(ModSettings.CancelActionName);
 
             // Enable fixed preview control.
             _fixedPreviewAction = new ("LineTool-FixPreview");
@@ -643,7 +642,7 @@ namespace LineTool
                 }
 
                 // If no cancellation, handle any fixed preview action if we're ready to place.
-                else if (_fixedPreviewAction.WasPressedThisFrame() && _mode.HasAllPoints)
+                else if (_applyAction.WasPressedThisFrame() && Keyboard.current.ctrlKey.isPressed && _mode.HasAllPoints)
                 {
                     // Are we already in fixed preview mode?
                     if (_fixedPreview)
@@ -692,7 +691,7 @@ namespace LineTool
                         _mode.ItemsPlaced(position);
 
                         // Reset tool mode if we're not building continuously.
-                        if (!_keepBuildingAction.WasPressedThisFrame())
+                        if (!Keyboard.current.shiftKey.isPressed)
                         {
                             _mode.Reset();
                         }
@@ -947,45 +946,6 @@ namespace LineTool
             definitions.m_TerrainHeightData = m_TerrainSystem.GetHeightData();
             definitions.m_CommandBuffer = m_ToolOutputBarrier.CreateCommandBuffer();
             definitions.Execute();
-        }
-
-        /// <summary>
-        /// Copies a game action binding to a mod-usable <see cref="ProxyBinding" />.
-        /// </summary>
-        /// <param name="gameActionName">Game action name to copy from.</param>
-        /// <param name="modActionName">Mod action name to copy to.</param>
-        /// <returns>New <see cref="ProxyBinding" /> bound to the default game action.</returns>
-        private ProxyAction CopyGameAction(string gameActionName, string modActionName)
-        {
-            // Get action references.
-            ProxyAction modAction = Mod.Instance.ActiveSettings.GetAction(modActionName);
-            ProxyAction gameAction = InputManager.instance.FindAction(InputManager.kToolMap, gameActionName);
-
-            // Enable mod action.
-            modAction.shouldBeEnabled = true;
-
-            // Find action bindings.
-            ProxyBinding modBinding = modAction.bindings.FirstOrDefault(b => b.group == nameof(Mouse));
-            ProxyBinding gameBinding = gameAction.bindings.FirstOrDefault(b => b.group == nameof(Mouse));
-
-            // Setup change watcher and apply current settings.
-            ProxyBinding.Watcher applyWatcher = new (gameBinding, binding => BindToGameAction(modBinding, binding));
-            BindToGameAction(modBinding, applyWatcher.binding);
-
-            return modAction;
-        }
-
-        /// <summary>
-        /// Binds a ProxyBinding to a game action.
-        /// </summary>
-        /// <param name="mimicBinding">ProxyBinding to bind.</param>
-        /// <param name="gameAction">Game action to bind to.</param>
-        private void BindToGameAction(ProxyBinding mimicBinding, ProxyBinding gameAction)
-        {
-            ProxyBinding newBinding = mimicBinding.Copy();
-            newBinding.path = gameAction.path;
-            newBinding.modifiers = gameAction.modifiers;
-            InputManager.instance.SetBinding(newBinding, out _);
         }
     }
 }
