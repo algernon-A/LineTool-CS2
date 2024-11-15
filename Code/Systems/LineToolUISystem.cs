@@ -111,7 +111,7 @@ namespace LineTool
             _ageMaskBinding = AccessTools.Field(typeof(ToolbarUISystem), "m_AgeMaskBinding")?.GetValue(World.GetOrCreateSystemManaged<ToolbarUISystem>()) as ValueBinding<int>;
             if (_ageMaskBinding is not null)
             {
-                AddBinding(new TriggerBinding<int>("toolbar", "setAgeMask", delegate (int ageMask)
+                AddBinding(new TriggerBinding<int>("toolbar", "setAgeMask", delegate(int ageMask)
                 {
                     // Update Line Tool tree age mask with the new selection.
                     LineToolSystem.Instance.AgeMask = (Game.Tools.AgeMask)ageMask;

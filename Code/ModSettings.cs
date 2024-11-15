@@ -34,7 +34,7 @@ namespace LineTool
         /// </summary>
         /// <param name="mod"><see cref="IMod"/> instance.</param>
         public ModSettings(IMod mod)
-            : base (mod)
+            : base(mod)
         {
         }
 
