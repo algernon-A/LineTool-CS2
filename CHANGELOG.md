@@ -1,3 +1,6 @@
+### 0.9.8.1
+- Fix apply action sometimes not working in editor.
+
 ### 0.9.8
 - Update for game version 1.1.10f1.
 
