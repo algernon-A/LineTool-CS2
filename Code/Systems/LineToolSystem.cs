@@ -607,7 +607,7 @@ namespace LineTool
                 // Handle any dragging.
                 if (_dragMode != DragMode.None)
                 {
-                    if (_applyAction.WasReleasedThisFrame() || _fixedPreviewAction.WasReleasedThisFrame())
+                    if (_applyAction.WasReleasedThisFrame() || (m_ToolSystem.actionMode.IsEditor() && applyAction.action.WasReleasedThisFrame()) || _fixedPreviewAction.WasReleasedThisFrame())
                     {
                         // Cancel dragging.
                         _dragMode = DragMode.None;
@@ -640,63 +640,68 @@ namespace LineTool
 
                     return inputDeps;
                 }
-
-                // If no cancellation, handle any fixed preview action if we're ready to place.
-                else if (_applyAction.WasPressedThisFrame() && Keyboard.current.ctrlKey.isPressed && _mode.HasAllPoints)
+                else
                 {
-                    // Are we already in fixed preview mode?
-                    if (_fixedPreview)
+                    // Check for apply action initiation.
+                    bool applyWasPressed = _applyAction.WasPressedThisFrame() || (m_ToolSystem.actionMode.IsEditor() && applyAction.action.WasPressedThisFrame());
+
+                    // If no cancellation, handle any fixed preview action if we're ready to place.
+                    if (applyWasPressed && Keyboard.current.ctrlKey.isPressed && _mode.HasAllPoints)
                     {
-                        // Already in fixed preview mode - check for dragging hits.
-                        _dragMode = _mode.CheckDragHit(_raycastPoint.m_HitPosition);
-                        if (_dragMode != DragMode.None)
+                        // Are we already in fixed preview mode?
+                        if (_fixedPreview)
                         {
-                            // If dragging, has started, then we're done here.
+                            // Already in fixed preview mode - check for dragging hits.
+                            _dragMode = _mode.CheckDragHit(_raycastPoint.m_HitPosition);
+                            if (_dragMode != DragMode.None)
+                            {
+                                // If dragging, has started, then we're done here.
+                                return inputDeps;
+                            }
+                        }
+                        else
+                        {
+                            // Activate fixed preview mode and fix current position.
+                            _fixedPreview = true;
+                            _fixedPos = position;
+                        }
+                    }
+
+                    // Handle basic apply action if no other actions.
+                    else if (applyWasPressed || _keepBuildingAction.WasPressedThisFrame())
+                    {
+                        // Were we in fixed state?
+                        if (_fixedPreview)
+                        {
+                            // Check for dragging hits.
+                            _dragMode = _mode.CheckDragHit(_raycastPoint.m_HitPosition);
+                            if (_dragMode != DragMode.None)
+                            {
+                                // If dragging, has started, then we're done here.
+                                return inputDeps;
+                            }
+
+                            // Yes - cancel fixed preview.
+                            _fixedPreview = false;
+                        }
+
+                        // Handle click.
+                        if (_mode.HandleClick(position))
+                        {
+                            // We're placing items.
+                            applyMode = ApplyMode.Apply;
+
+                            // Perform post-placement.
+                            _mode.ItemsPlaced(position);
+
+                            // Reset tool mode if we're not building continuously.
+                            if (!Keyboard.current.shiftKey.isPressed)
+                            {
+                                _mode.Reset();
+                            }
+
                             return inputDeps;
                         }
-                    }
-                    else
-                    {
-                        // Activate fixed preview mode and fix current position.
-                        _fixedPreview = true;
-                        _fixedPos = position;
-                    }
-                }
-
-                // Handle apply action if no other actions.
-                else if (_applyAction.WasPressedThisFrame() || _keepBuildingAction.WasPressedThisFrame())
-                {
-                    // Were we in fixed state?
-                    if (_fixedPreview)
-                    {
-                        // Check for dragging hits.
-                        _dragMode = _mode.CheckDragHit(_raycastPoint.m_HitPosition);
-                        if (_dragMode != DragMode.None)
-                        {
-                            // If dragging, has started, then we're done here.
-                            return inputDeps;
-                        }
-
-                        // Yes - cancel fixed preview.
-                        _fixedPreview = false;
-                    }
-
-                    // Handle click.
-                    if (_mode.HandleClick(position))
-                    {
-                        // We're placing items.
-                        applyMode = ApplyMode.Apply;
-
-                        // Perform post-placement.
-                        _mode.ItemsPlaced(position);
-
-                        // Reset tool mode if we're not building continuously.
-                        if (!Keyboard.current.shiftKey.isPressed)
-                        {
-                            _mode.Reset();
-                        }
-
-                        return inputDeps;
                     }
                 }
 
@@ -802,6 +807,12 @@ namespace LineTool
 
             // Clear any applications.
             applyMode = ApplyMode.Clear;
+
+            // Manually enable base action if in editor mode.
+            if (m_ToolSystem.actionMode.IsEditor())
+            {
+               applyAction.enabled = true;
+            }
         }
 
         /// <summary>
@@ -820,6 +831,12 @@ namespace LineTool
 
             // Reset state.
             _mode.Reset();
+
+            // Disable base action if in editor mode.
+            if (m_ToolSystem.actionMode.IsEditor())
+            {
+                applyAction.enabled = false;
+            }
 
             base.OnStopRunning();
         }
