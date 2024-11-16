@@ -1,1 +1,1 @@
-- Add Portuguese translation.
+- Update translations.
