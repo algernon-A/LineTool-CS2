@@ -1,1 +1,1 @@
-- Fix apply action sometimes not working in editor.
+- Add Portugese translation.

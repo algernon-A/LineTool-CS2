@@ -1,3 +1,6 @@
+### 0.9.8.2
+- Add Portugese translation.
+
 ### 0.9.8.1
 - Fix apply action sometimes not working in editor.
 
