@@ -1,3 +1,6 @@
+### 0.9.8.3
+- Update translations.
+
 ### 0.9.8.2
 - Add Portuguese translation.
 
