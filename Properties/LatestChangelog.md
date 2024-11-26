@@ -1,1 +1,1 @@
-- Update translations.
+- Update for game version 1.1.12f1.

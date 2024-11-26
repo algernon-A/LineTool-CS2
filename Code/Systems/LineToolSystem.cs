@@ -607,7 +607,7 @@ namespace LineTool
                 // Handle any dragging.
                 if (_dragMode != DragMode.None)
                 {
-                    if (_applyAction.WasReleasedThisFrame() || (m_ToolSystem.actionMode.IsEditor() && applyAction.action.WasReleasedThisFrame()) || _fixedPreviewAction.WasReleasedThisFrame())
+                    if (_applyAction.WasReleasedThisFrame() || (m_ToolSystem.actionMode.IsEditor() && applyAction.WasReleasedThisFrame()) || _fixedPreviewAction.WasReleasedThisFrame())
                     {
                         // Cancel dragging.
                         _dragMode = DragMode.None;
@@ -643,7 +643,7 @@ namespace LineTool
                 else
                 {
                     // Check for apply action initiation.
-                    bool applyWasPressed = _applyAction.WasPressedThisFrame() || (m_ToolSystem.actionMode.IsEditor() && applyAction.action.WasPressedThisFrame());
+                    bool applyWasPressed = _applyAction.WasPressedThisFrame() || (m_ToolSystem.actionMode.IsEditor() && applyAction.WasPressedThisFrame());
 
                     // If no cancellation, handle any fixed preview action if we're ready to place.
                     if (applyWasPressed && Keyboard.current.ctrlKey.isPressed && _mode.HasAllPoints)

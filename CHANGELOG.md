@@ -1,3 +1,6 @@
+### 0.9.8.4
+- Update for game version 1.1.12f1.
+
 ### 0.9.8.3
 - Update translations.
 
