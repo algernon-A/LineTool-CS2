@@ -170,7 +170,7 @@ namespace LineTool
         /// <summary>
         /// Gets a value indicating whether fence mode is valid for the selected prefab.
         /// </summary>
-        internal bool FenceModeValid => _selectedPrefab is not null && _zBounds.min != 0 && _zBounds.max != 0;
+        internal bool FenceModeValid => _selectedPrefab is not null && (_zBounds.min != 0 || _zBounds.max != 0);
 
         /// <summary>
         /// Gets a value indicating whether wall-to-wall mode is valid for the selected prefab.
