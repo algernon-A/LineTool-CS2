@@ -168,7 +168,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         let result: JSX.Element = Component();
         if (showModeRow) {
             result.props.children?.push(
-                <Section title={translate("LINETOOL.LineMode")}>
+                <Section title={translate("LINETOOL.Title")}>
                     <ToolButton
                         className={toolButtonTheme.button}
                         src={"Media/Tools/Net Tool/Point.svg"}

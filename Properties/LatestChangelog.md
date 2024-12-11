@@ -1,1 +1,1 @@
-- Enable fence mode for items with asymmetrical Z-bounds (fixes fence mode not being available for some UK pack props).
+- Update for game version 1.2.0.

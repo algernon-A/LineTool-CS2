@@ -1,6 +1,12 @@
 ## Line Tool
 This mod supplements existing tools so you can precisely and quickly place objects such as trees, shrubs, and props in lines, curves, and circles with varying parameters.
 
+It works **alongside the game's inbuilt line tool** to provide advanced functionality, including:
+- Support for objects other than trees and props
+- Circles
+- Continuous lines and curves
+- Many advanced placement options and controls (see below)
+
 ## Features
 - **Integrates directly with in-game tools**: No hotkey required.
 - **Place objects in lines**: Create straight lines, curves, or circles.

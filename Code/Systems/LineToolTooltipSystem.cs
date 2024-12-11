@@ -69,12 +69,12 @@ namespace LineTool
                 {
                     case TooltipType.Angle:
                         intTooltip.icon = "Media/Glyphs/Angle.svg";
-                        intTooltip.value = tooltipInfo.m_IntValue;
+                        intTooltip.value = (int)tooltipInfo.m_Value;
                         intTooltip.unit = "angle";
                         break;
                     case TooltipType.Length:
                         intTooltip.icon = "Media/Glyphs/Length.svg";
-                        intTooltip.value = tooltipInfo.m_IntValue;
+                        intTooltip.value = (int)tooltipInfo.m_Value;
                         intTooltip.unit = "length";
                         break;
                 }

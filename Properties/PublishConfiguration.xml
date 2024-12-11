@@ -5,6 +5,12 @@
   <LongDescription>## Line Tool
 This mod supplements existing tools so you can precisely and quickly place objects such as trees, shrubs, and props in lines, curves, and circles with varying parameters.
 
+It works **alongside the game's inbuilt line tool** to provide advanced functionality, including:
+- Support for objects other than trees and props
+- Circles
+- Continuous lines and curves
+- Many advanced placement options and controls (see below)
+
 ## Features
 - **Integrates directly with in-game tools**: No hotkey required.
 - **Place objects in lines**: Create straight lines, curves, or circles.
@@ -77,10 +83,10 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/PlacementVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
-  <ModVersion Value="0.9.8.5" />
-  <GameVersion Value="1.1.*" />
+  <ModVersion Value="0.9.8.6" />
+  <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
-  <ChangeLog>- Enable fence mode for items wtih asymmetrical Z-bounds (fixes fence mode not being available for some UK pack props).</ChangeLog>
+  <ChangeLog>- Update for game version 1.2.0.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />
