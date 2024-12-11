@@ -1,3 +1,6 @@
+### 0.9.8.6
+- Update for game version 1.2.0.
+
 ### 0.9.8.5
 - Enable fence mode for items with asymmetrical Z-bounds (fixes fence mode not being available for some UK pack props).
 
