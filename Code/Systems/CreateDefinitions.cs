@@ -1324,7 +1324,7 @@ namespace LineTool
                             dynamicBuffer4[num2] = new LocalNodeCache
                             {
                                 m_Position = position,
-                                m_ParentMesh = parentMesh
+                                m_ParentMesh = parentMesh,
                             };
                         }
 

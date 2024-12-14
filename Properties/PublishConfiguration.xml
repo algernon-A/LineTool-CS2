@@ -9,11 +9,12 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 - Support for objects other than trees and props
 - Circles
 - Continuous lines and curves
+- Grid placement
 - Many advanced placement options and controls (see below)
 
 ## Features
 - **Integrates directly with in-game tools**: No hotkey required.
-- **Place objects in lines**: Create straight lines, curves, or circles.
+- **Place objects in lines**: Create straight lines, curves, circles, or grids.
 - Works both *in-game* and *in the editor*.
 - **Fence mode**: Automatically align and place objects end-to-end.
 - **Wall-to-wall mode**: Automatically align and place objects side-to-side.
@@ -29,14 +30,14 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 - To exit the tool, select 'single placement mode' to return to the normal placement mode for the selected object, or press **Escape**.
 
 ## Place a line
-- **Click** where you want the line to begin, and click again at the desired endpoint to place the objects. **Note**: Curves require three clicks - start, guidepoint, and end.
+- **Click** where you want the line to begin, and click again at the desired endpoint to place the objects. **Note**: Curves and grids require three clicks - start, guidepoint, and end.
 - **Shift-click** at the end of a line starts a new line placement at the spot where the previous line ended.
 - **Control-click** at the end of a line leaves it in preview mode; you can adjust the settings and see the results in real-time. You can also drag the highlighted control points (blue circles) to adjust the line positioning (**Control-click** to start dragging ensures that you don't accidentally trigger placement if you miss the point circles, but regular clicking also works). When finished, **click** to place or **right-click** to cancel.
 - **Right-click** to cancel placement.
 
 ## Tool options
 ### Line modes
-- Toggle between **single object** (default game tool), **straight line**, **curved**, and **circle** modes.
+- Toggle between **single object** (default game tool), **straight line**, **curved**, **circle**, and **grid** modes.
 - Toggle **fence mode** to align objects with the line direction, and place them continuously end-to-end (like a fence).
 - Toggle **wall-to-wall mode** to align objects with the line direction, and place them continuously side-to-side (like a row of buildings).
 
@@ -49,6 +50,7 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 ### Object placement spacing
 - Adjust **distances** using the arrow buttons - click for 1m increments, **Shift-click** for 10m, and **Control-click** for 0.1m. For circle mode, spacing is rounded *up* to the nearest distance that ensures an even placement around the circle.
 - Select **fixed-length even spacing mode** to space out objects evenly over the entire length of the line, with spacing *as close as possible* to the spacing distance you set.  For circle mode, this causes spacing to be rounded to the *nearest number* (up or down) that ensures an even placement around the circle (default circle rounding is always *up*).
+- For grid mode, the set spacing will be used for both dimensions, **unless** fence mode or wall-to-wall mode is selected; in which case the set spacing will only be used for the grid depth spacing.
 
 ### Object rotation (angles)
 - Manually adjust the rotation for all items using the arrow buttons - click for 10-degree increments, **Shift-click** for 90 degrees, **Control-click** for 1 degree.
@@ -66,7 +68,7 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 This mod supports localization. Please help out with translating this mod into different languages via the CrowdIn site at crowdin.com/project/line-tool-cs2.
 
 ### Modders
-Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods. Come grab me on the Cities: Skylines Modding Discord!
+Modders (and aspiring modders!), as always I'm available and happy to chat about what I've done and answer any questions, and also about how you can implement anything that I've done for your own mods.  Come grab me on the [Cities Skylines Modding Discord](https://discord.gg/HTav7ARPs2)!
 
 ### Credits
 Incorporates overlay improvements and enhancements by phillycheeze.
@@ -83,10 +85,10 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/PlacementVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
-  <ModVersion Value="0.9.8.6" />
+  <ModVersion Value="0.9.99" />
   <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
-  <ChangeLog>- Update for game version 1.2.0.</ChangeLog>
+  <ChangeLog>- Add grid placement mode.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />

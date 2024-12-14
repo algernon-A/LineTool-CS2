@@ -30,5 +30,10 @@ namespace LineTool
         /// Circle.
         /// </summary>
         Circle,
+
+        /// <summary>
+        /// Grid mode.
+        /// </summary>
+        Grid,
     }
 }

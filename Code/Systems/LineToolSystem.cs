@@ -324,6 +324,9 @@ namespace LineTool
                     case LineMode.Circle:
                         _mode = new Circle(_mode);
                         break;
+                    case LineMode.Grid:
+                        _mode = new GridLines(_mode);
+                        break;
                 }
 
                 // Update mode.

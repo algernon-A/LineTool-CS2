@@ -9,6 +9,7 @@ export const pointModeEnabled$ = bindValue<boolean>('LineTool', 'PointModeEnable
 export const straightLineModeEnabled$ = bindValue<boolean>('LineTool', 'StraightLineEnabled');
 export const simpleCurveModeEnabled$ = bindValue<boolean>('LineTool', 'SimpleCurveEnabled');
 export const circleModeEnabled$ = bindValue<boolean>('LineTool', 'CircleEnabled');
+export const gridModeEnabled$ = bindValue<boolean>('LineTool', 'GridEnabled');
 export const fenceModeAvailable$ = bindValue<boolean>('LineTool', 'FenceModeAvailable');
 export const w2wModeAvailable$ = bindValue<boolean>('LineTool', 'W2WModeAvailable');
 export const fenceModeEnabled$ = bindValue<boolean>('LineTool', 'FenceModeEnabled');
@@ -32,6 +33,7 @@ export function pointModeClick() { trigger("LineTool", "SetPointMode"); }
 export function straightLineModeClick() { trigger("LineTool", "SetStraightLineMode"); }
 export function simpleCurveModeClick() { trigger("LineTool", "SetSimpleCurveMode"); }
 export function circleModeClick() { trigger("LineTool", "SetCircleMode"); }
+export function gridModeClick() { trigger("LineTool", "SetGridMode"); }
 export function fenceModeClick() { trigger("LineTool", "ToggleFenceMode"); }
 export function w2wModeClick() { trigger("LineTool", "ToggleW2WMode"); }
 export function randomizationClick() { trigger("LineTool", "ToggleRandomization"); }
@@ -74,6 +76,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const straightLineModeEnabled: boolean = useValue(straightLineModeEnabled$);
         const simpleCurveModeEnabled: boolean = useValue(simpleCurveModeEnabled$);
         const circleModeEnabled: boolean = useValue(circleModeEnabled$);
+        const gridModeEnabled: boolean = useValue(gridModeEnabled$);
         const fenceModeEnabled: boolean = useValue(fenceModeEnabled$);
         const w2wModeEnabled: boolean = useValue(w2wModeEnabled$);
         const randomizationEnabled: boolean = useValue(randomizationEnabled$);
@@ -209,6 +212,16 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         disabled={false}
                         focusKey={FocusDisabled}
                     />
+                    <ToolButton
+                        className={toolButtonTheme.button}
+                        src={"Media/Tools/Net Tool/Grid.svg"}
+                        tooltip={TitledTooltip("LINETOOL.Grid", "LINETOOL_DESCRIPTION.Grid")}
+                        onSelect={gridModeClick}
+                        selected={gridModeEnabled}
+                        multiSelect={false}
+                        disabled={false}
+                        focusKey={FocusDisabled}
+                    />
                 </Section>
             );
 
@@ -243,8 +256,8 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                     </>
                 );
                 
-                // Show spacing and rotation if we're not in fence or wall-to-wall modes.
-                if (!fenceModeEnabled && !w2wModeEnabled) {
+                // Show spacing and rotation if we're not in fence or wall-to-wall modes (unless we're in grid mode, in which case show it anyway).
+                if (gridModeEnabled || (!fenceModeEnabled && !w2wModeEnabled)) {
                     result.props.children?.push(
                         <>
                             <Section title={translate("LINETOOL.Spacing")}

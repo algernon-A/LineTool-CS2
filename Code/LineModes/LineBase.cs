@@ -156,7 +156,7 @@ namespace LineTool
             {
                 // Calculate interpolated point.
                 float spacingAdjustment = 0f;
-                if (randomSpacing > 0f && spacingMode != SpacingMode.FenceMode)
+                if (randomSpacing > 0f && spacingMode != SpacingMode.FenceMode && spacingMode != SpacingMode.W2WMode)
                 {
                     spacingAdjustment = (float)(random.NextDouble() * randomSpacing * 2f) - randomSpacing;
                 }
@@ -164,7 +164,7 @@ namespace LineTool
                 float3 thisPoint = math.lerp(m_startPos, currentPos, (currentDistance + spacingAdjustment) / length);
 
                 // Apply offset adjustment.
-                if (randomOffset > 0f && spacingMode != SpacingMode.FenceMode)
+                if (randomOffset > 0f && spacingMode != SpacingMode.FenceMode && spacingMode != SpacingMode.W2WMode)
                 {
                     float3 left = math.normalize(new float3(-difference.z, 0f, difference.x));
                     thisPoint += left * ((float)(randomOffset * random.NextDouble() * 2f) - randomOffset);

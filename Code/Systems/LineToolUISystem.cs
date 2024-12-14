@@ -63,10 +63,12 @@ namespace LineTool
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "StraightLineEnabled", () => _toolSystem.activeTool == _lineToolSystem && _lineToolSystem.Mode == LineMode.Straight));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "SimpleCurveEnabled", () => _toolSystem.activeTool == _lineToolSystem && _lineToolSystem.Mode == LineMode.SimpleCurve));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "CircleEnabled", () => _toolSystem.activeTool == _lineToolSystem && _lineToolSystem.Mode == LineMode.Circle));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "GridEnabled", () => _toolSystem.activeTool == _lineToolSystem && _lineToolSystem.Mode == LineMode.Grid));
             AddBinding(new TriggerBinding("LineTool", "SetPointMode", SetPointMode));
             AddBinding(new TriggerBinding("LineTool", "SetStraightLineMode", SetStraightMode));
             AddBinding(new TriggerBinding("LineTool", "SetSimpleCurveMode", SetSimpleCurveMode));
             AddBinding(new TriggerBinding("LineTool", "SetCircleMode", SetCircleMode));
+            AddBinding(new TriggerBinding("LineTool", "SetGridMode", SetGridMode));
 
             // Options UI bindings.
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FenceModeAvailable", () => _lineToolSystem.FenceModeValid));
@@ -216,6 +218,16 @@ namespace LineTool
         {
             // Ensure tool is activated.
             _lineToolSystem.Mode = LineMode.Circle;
+            _lineToolSystem.EnableTool();
+        }
+
+        /// <summary>
+        /// Event callback to set grid mode.
+        /// </summary>
+        private void SetGridMode()
+        {
+            // Ensure tool is activated.
+            _lineToolSystem.Mode = LineMode.Grid;
             _lineToolSystem.EnableTool();
         }
 
