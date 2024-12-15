@@ -95,11 +95,10 @@ namespace LineTool
         /// <summary>
         /// Performs actions after items are placed on the current line, setting up for the next line to be set.
         /// </summary>
-        /// <param name="position">Click world position.</param>
-        public virtual void ItemsPlaced(float3 position)
+        public virtual void ItemsPlaced()
         {
             // Update new starting location to the previous end point.
-            m_startPos = position;
+            m_startPos = m_endPos;
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace LineTool
         protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
             // Semi-transparent white color
-            Color color = new Color(1f, 1f, 1f, 0.6f);
+            Color color = new (1f, 1f, 1f, 0.6f);
 
             // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
             float currentZoom = cameraController.zoom;
@@ -316,7 +315,7 @@ namespace LineTool
         protected void DrawCurvedDashedLine(Bezier4x3 curve, OverlayRenderSystem.Buffer overlayBuffer, CameraUpdateSystem cameraController)
         {
             // Semi-transparent white color.
-            Color color = new Color(1f, 1f, 1f, 0.6f);
+            Color color = new (1f, 1f, 1f, 0.6f);
 
             // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
             float currentZoom = cameraController.zoom;

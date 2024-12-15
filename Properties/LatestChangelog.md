@@ -1,1 +1,2 @@
 - Add grid placement mode.
+- Add angle locking.

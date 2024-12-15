@@ -30,6 +30,7 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 - **Shift-click** at the end of a line starts a new line placement at the spot where the previous line ended.
 - **Control-click** at the end of a line leaves it in preview mode; you can adjust the settings and see the results in real-time. You can also drag the highlighted control points (blue circles) to adjust the line positioning (**Control-click** to start dragging ensures that you don't accidentally trigger placement if you miss the point circles, but regular clicking also works). When finished, **click** to place or **right-click** to cancel.
 - **Right-click** to cancel placement.
+- When placing curves and grids, holding down **Alt** will snap angles to 15-degree increments.
 
 ## Tool options
 ### Line modes

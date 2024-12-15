@@ -12,6 +12,7 @@ namespace LineTool
     using Game.Rendering;
     using Unity.Mathematics;
     using UnityEngine;
+    using UnityEngine.InputSystem;
     using static Game.Rendering.GuideLinesSystem;
     using static LineToolSystem;
 
@@ -89,11 +90,11 @@ namespace LineTool
         /// <summary>
         /// Performs actions after items are placed on the current line, setting up for the next line to be set.
         /// </summary>
-        /// <param name="position">Click world position.</param>
-        public override void ItemsPlaced(float3 position)
+        public override void ItemsPlaced()
         {
-            // Update new starting location to the previous end point and clear elbow.
-            m_startPos = position;
+            base.ItemsPlaced();
+
+            // Clear elbow.
             ValidElbow = false;
             _previousElbowPoint = ElbowPoint;
             _validPreviousElbow = true;
@@ -179,13 +180,54 @@ namespace LineTool
         /// <returns>Constrained cursor world position.</returns>
         protected float3 ConstrainPos(float3 currentPos)
         {
-            // Constrain to continuous curve.
-            if (m_validStart && !ValidElbow && _validPreviousElbow)
+            // Snapping requires at least a valid start point.
+            if (m_validStart)
             {
-                // Use closest point on infinite line projected from previous curve end tangent.
-                return math.project(currentPos - _previousElbowPoint, m_startPos - _previousElbowPoint) + _previousElbowPoint;
+                // If a there's a valid elbow position and the alt key is pressed, perform any angle constraints.
+                if (ValidElbow && Keyboard.current.altKey.isPressed)
+                {
+                    // Get 2D length of the vector to the cursor position.
+                    float elbowToCurrentLength = math.distance(ElbowPoint.xz, currentPos.xz);
+
+                    // Get the normalised direction of the base line.
+                    float3 direction = math.normalize(m_startPos - ElbowPoint);
+
+                    // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
+                    // Control for invalid values by clamping dot product to (-1, 1) and treating any NaN as zero.
+                    float dotProduct = math.clamp(math.dot(math.normalize(currentPos - ElbowPoint), direction), -1f, 1f);
+                    if (float.IsNaN(dotProduct))
+                    {
+                        dotProduct = 0;
+                    }
+
+                    // Get raw angle between lines from dot product and snap to increments of 15 degrees.
+                    int angleDegrees = (int)math.round(math.degrees(math.acos(dotProduct)));
+                    angleDegrees = (int)math.round(angleDegrees / 15f) * 15;
+
+                    // Use custom cross product to determine if the cursor point is to the left- or right- side of the base line.
+                    float crossProduct = ((ElbowPoint.x - m_startPos.x) * (currentPos.z - m_startPos.z)) - ((ElbowPoint.z - m_startPos.z) * (currentPos.x - m_startPos.x));
+                    if (crossProduct < 0)
+                    {
+                        // If the cross product is negative, the current point is to the right of the line and we need to invert the angle.
+                        angleDegrees = 360 - angleDegrees;
+                    }
+
+                    // Rotate original vector direction around the Y axis.
+                    Quaternion q = quaternion.Euler(0f, math.radians(angleDegrees), 0f);
+                    float3 rotatedVector = q * direction;
+
+                    // Set the clamped position by extrapolation from the elbow point.
+                    return ElbowPoint + (rotatedVector * elbowToCurrentLength);
+                }
+                else if (_validPreviousElbow)
+                {
+                    // If there's no a vaid elbow yet, constrain to continuous curve if there's a valid previous elbow to constrain to.
+                    // Use closest point on infinite line projected from previous curve end tangent.
+                    return math.project(currentPos - _previousElbowPoint, m_startPos - _previousElbowPoint) + _previousElbowPoint;
+                }
             }
 
+            // Default is just to return the unmodified position.
             return currentPos;
         }
 

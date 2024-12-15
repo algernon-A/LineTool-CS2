@@ -695,7 +695,7 @@ namespace LineTool
                             applyMode = ApplyMode.Apply;
 
                             // Perform post-placement.
-                            _mode.ItemsPlaced(position);
+                            _mode.ItemsPlaced();
 
                             // Reset tool mode if we're not building continuously.
                             if (!Keyboard.current.shiftKey.isPressed)

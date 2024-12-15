@@ -53,17 +53,19 @@ namespace LineTool
                 return;
             }
 
+            // Apply any poisition restraints to the cursor position.
+            m_endPos = ConstrainPos(currentPos);
+
             // If we have a valid start but no valid elbow, just draw a straight line.
             if (!ValidElbow)
             {
                 // Constrain as required.
-                m_endPos = ConstrainPos(currentPos);
                 base.CalculatePoints(m_endPos, spacingMode, rotationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
                 return;
             }
 
             // Calculate Bezier.
-            _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, ElbowPoint), new Line3.Segment(currentPos, ElbowPoint));
+            _thisBezier = NetUtils.FitCurve(new Line3.Segment(m_startPos, ElbowPoint), new Line3.Segment(m_endPos, ElbowPoint));
 
             // Calculate even full-length spacing if needed.
             float adjustedSpacing = spacing;
@@ -78,7 +80,7 @@ namespace LineTool
             quaternion qRotation = quaternion.Euler(0f, rotationRadians, 0f);
 
             // Randomizer.
-            System.Random random = new ((int)(currentPos.x + currentPos.z) * 1000);
+            System.Random random = new ((int)(m_endPos.x + m_endPos.z) * 1000);
 
             // Traverse Bezier and place objects.
             float tFactor = 0f;
@@ -158,15 +160,12 @@ namespace LineTool
             // Final item for full-length mode if required (if there was a distance overshoot).
             if (spacingMode == SpacingMode.FullLength && distanceTravelled < length + adjustedSpacing)
             {
-                float3 thisPoint = currentPos;
+                float3 thisPoint = m_endPos;
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
 
                 // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
             }
-
-            // Record end position for overlays.
-            m_endPos = currentPos;
         }
 
         /// <summary>

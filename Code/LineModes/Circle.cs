@@ -144,8 +144,7 @@ namespace LineTool
         /// <summary>
         /// Performs actions after items are placed on the current line, setting up for the next line to be set.
         /// </summary>
-        /// <param name="location">Click world location.</param>
-        public override void ItemsPlaced(float3 location)
+        public override void ItemsPlaced()
         {
             // Invalidate overlay Bezier.
             _validOverlayBezier = false;

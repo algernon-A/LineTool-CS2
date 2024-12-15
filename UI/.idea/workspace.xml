@@ -5,17 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="47e8b00f-1d8d-4177-9da5-fa3d3a29c30c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/../CHANGELOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Code/LineModes/LineBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Code/LineModes/LineBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Code/LineModes/LineMode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Code/LineModes/LineMode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Code/LineModes/SimpleCurve.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Code/LineModes/SimpleCurve.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Code/Systems/CreateDefinitions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Code/Systems/CreateDefinitions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Code/Systems/LineToolSystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Code/Systems/LineToolSystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Code/Systems/LineToolUISystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Code/Systems/LineToolUISystem.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../GlobalSuppressions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../GlobalSuppressions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../LineTool.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../LineTool.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mods/LineToolOptions.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/mods/LineToolOptions.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +63,7 @@
       <option name="presentableId" value="Default" />
       <updated>1734085309863</updated>
       <workItem from="1734085311038" duration="2132000" />
-      <workItem from="1734131420395" duration="4519000" />
+      <workItem from="1734131420395" duration="4710000" />
     </task>
     <servers />
   </component>
