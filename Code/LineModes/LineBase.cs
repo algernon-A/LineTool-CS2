@@ -110,8 +110,8 @@ namespace LineTool
         /// Handles a mouse click.
         /// </summary>
         /// <param name="position">Click world position.</param>
-        /// <returns><c>true</c> if items are to be placed as a result of this click, <c>false</c> otherwise.</returns>
-        public virtual bool HandleClick(float3 position)
+        /// <returns>The <see cref="ClickMode"/> reflecting how the click was processed.</returns>
+        public virtual ClickMode HandleClick(float3 position)
         {
             // If no valid start position is set, record it.
             if (!m_validStart)
@@ -120,12 +120,12 @@ namespace LineTool
                 m_endPos = position;
                 m_validStart = true;
 
-                // No placement at this stage (only the first click has been made).
-                return false;
+                // This is the initial click.
+                return ClickMode.Initial;
             }
 
             // Second click; we're placing items.
-            return true;
+            return ClickMode.Placed;
         }
 
         /// <summary>

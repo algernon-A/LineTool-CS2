@@ -34,9 +34,6 @@
 		<Reference Include="Colossal.Mono.Cecil">
 			<Private>false</Private>
 		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<Private>false</Private>
-		</Reference>
 		<Reference Include="Unity.Burst">
 			<Private>false</Private>
 		</Reference>
@@ -50,6 +47,12 @@
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="Unity.Mathematics">
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="UnityEngine.AudioModule">
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
 			<Private>false</Private>
 		</Reference>
 		<Reference Include="cohtml.Net">

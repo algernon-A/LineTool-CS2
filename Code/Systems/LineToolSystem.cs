@@ -12,6 +12,7 @@ namespace LineTool
     using Colossal.Mathematics;
     using Game;
     using Game.Areas;
+    using Game.Audio;
     using Game.Buildings;
     using Game.City;
     using Game.Common;
@@ -68,7 +69,11 @@ namespace LineTool
         private OverlayRenderSystem.Buffer _overlayBuffer;
         private CityConfigurationSystem _cityConfigurationSystem;
         private ObjectToolSystem _objectToolSystem;
+        private AudioManager _audioManager;
+
+        // Game settings queries.
         private EntityQuery _renderingSettingsQuery;
+        private EntityQuery _soundEffectsQuery;
 
         // Input actions.
         private ProxyAction _applyAction;
@@ -557,7 +562,11 @@ namespace LineTool
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
             _cityConfigurationSystem = World.GetOrCreateSystemManaged<CityConfigurationSystem>();
             _objectToolSystem = World.GetOrCreateSystemManaged<ObjectToolSystem>();
+            _audioManager = World.GetOrCreateSystemManaged<AudioManager>();
+
+            // Set up settings queries.
             _renderingSettingsQuery = GetEntityQuery(ComponentType.ReadOnly<GuideLineSettingsData>());
+            _soundEffectsQuery = GetEntityQuery(ComponentType.ReadOnly<ToolUXSoundSettingsData>());
 
             // Create buffers.
             _tooltips = new (8);
@@ -695,21 +704,42 @@ namespace LineTool
                         }
 
                         // Handle click.
-                        if (_mode.HandleClick(position))
+                        switch (_mode.HandleClick(position))
                         {
-                            // We're placing items.
-                            applyMode = ApplyMode.Apply;
+                            // Initial click.
+                            case ClickMode.Initial:
+                                _audioManager.PlayUISound(_soundEffectsQuery.GetSingleton<ToolUXSoundSettingsData>().m_NetStartSound);
+                                break;
 
-                            // Perform post-placement.
-                            _mode.ItemsPlaced();
+                            // Placing items.
+                            case ClickMode.Placed:
+                                applyMode = ApplyMode.Apply;
 
-                            // Reset tool mode if we're not building continuously.
-                            if (!Keyboard.current.shiftKey.isPressed)
-                            {
-                                _mode.Reset();
-                            }
+                                // Play relevant sound effect for placement (if any).
+                                if (_selectedPrefab is BuildingPrefab)
+                                {
+                                    _audioManager.PlayUISound(_soundEffectsQuery.GetSingleton<ToolUXSoundSettingsData>().m_PlaceBuildingSound);
+                                }
+                                else if (_selectedPrefab is StaticObjectPrefab || m_ToolSystem.actionMode.IsEditor())
+                                {
+                                    _audioManager.PlayUISound(_soundEffectsQuery.GetSingleton<ToolUXSoundSettingsData>().m_PlacePropSound);
+                                }
 
-                            return inputDeps;
+                                // Perform post-placement.
+                                _mode.ItemsPlaced();
+
+                                // Reset tool mode if we're not building continuously.
+                                if (!Keyboard.current.shiftKey.isPressed)
+                                {
+                                    _mode.Reset();
+                                }
+
+                                return inputDeps;
+
+                            // Midpoint click.
+                            case ClickMode.Midpoint:
+                                _audioManager.PlayUISound(_soundEffectsQuery.GetSingleton<ToolUXSoundSettingsData>().m_NetNodeSound);
+                                break;
                         }
                     }
                 }

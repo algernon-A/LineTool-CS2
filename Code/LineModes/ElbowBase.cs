@@ -66,8 +66,8 @@ namespace LineTool
         /// Handles a mouse click.
         /// </summary>
         /// <param name="position">Click world position.</param>
-        /// <returns>True if items are to be placed as a result of this click, false otherwise.</returns>
-        public override bool HandleClick(float3 position)
+        /// <returns>The <see cref="ClickMode"/> reflecting how the click was processed.</returns>
+        public override ClickMode HandleClick(float3 position)
         {
             // If no valid initial point, record this as the first point.
             if (!m_validStart)
@@ -75,7 +75,7 @@ namespace LineTool
                 m_startPos = position;
                 m_endPos = position;
                 m_validStart = true;
-                return false;
+                return ClickMode.Initial;
             }
 
             // Otherwise, if no valid elbow point, record this as the elbow point.
@@ -83,11 +83,11 @@ namespace LineTool
             {
                 ElbowPoint = ConstrainPos(position);
                 ValidElbow = true;
-                return false;
+                return ClickMode.Midpoint;
             }
 
             // Place the items on the curve.
-            return true;
+            return ClickMode.Placed;
         }
 
         /// <summary>
