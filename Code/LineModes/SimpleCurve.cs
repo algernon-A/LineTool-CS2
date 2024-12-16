@@ -188,8 +188,8 @@ namespace LineTool
                     Line3.Segment line2 = new (ElbowPoint, m_endPos);
 
                     // Draw lines.
-                    DrawDashedLine(m_startPos, ElbowPoint, line1, overlayBuffer, tooltips);
-                    DrawDashedLine(ElbowPoint, m_endPos, line2, overlayBuffer, tooltips);
+                    DrawControlLine(m_startPos, ElbowPoint, line1, overlayBuffer, tooltips);
+                    DrawControlLine(ElbowPoint, m_endPos, line2, overlayBuffer, tooltips);
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, overlayBuffer, tooltips);

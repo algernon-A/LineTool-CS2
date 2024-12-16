@@ -236,7 +236,7 @@ namespace LineTool
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
             {
-                DrawDashedLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips);
+                DrawControlLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips);
             }
         }
 
@@ -298,23 +298,29 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Draws a straight dashed line overlay between the two given points.
+        /// Draws two control point circles at the given locations with a straight dashed line overlay between them.
         /// </summary>
         /// <param name="startPos">Line start position.</param>
         /// <param name="endPos">Line end position.</param>
         /// <param name="segment">Line segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        protected void DrawControlLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Set line width.
             float lineScale = m_distanceScale * 0.125f;
 
-            // Don't draw lines for short distances.
-            if (MathUtils.Length(segment.xz) > lineScale * 7f)
+            // Don't draw line if the distance is too short.
+            float lineLength = math.distance(startPos.xz, endPos.xz);
+            if (lineLength > lineScale * 8f)
             {
-                // Draw line dashed line.
-                overlayBuffer.DrawDashedLine(m_highPriorityColor, segment, lineScale * 3f, lineScale * 5f, lineScale * 3f);
+                // Draw dashed line, inset from points to leave space for control point circles.
+                float3 insetLength = (segment.b - segment.a) * (lineScale * 4f / lineLength);
+                overlayBuffer.DrawDashedLine(m_highPriorityColor, new (segment.a + insetLength, segment.b - insetLength), lineScale * 3f, lineScale * 5f, lineScale * 3f);
+
+                // Draw control point circles.
+                overlayBuffer.DrawCircle(m_highPriorityColor, startPos, lineScale * 5f);
+                overlayBuffer.DrawCircle(m_highPriorityColor, endPos, lineScale * 5f);
 
                 // Add length tooltip.
                 int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
