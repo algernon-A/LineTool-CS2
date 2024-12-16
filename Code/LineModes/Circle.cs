@@ -115,13 +115,12 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        /// <param name="cameraController">Active camera controller instance.</param>
-        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
+        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             if (m_validStart)
             {
                 // Draw a straight radial line (constrained if required).
-                base.DrawOverlay(overlayBuffer, tooltips, cameraController);
+                base.DrawOverlay(overlayBuffer, tooltips);
 
                 // Draw circle overlay.
                 if (_validOverlayBezier)

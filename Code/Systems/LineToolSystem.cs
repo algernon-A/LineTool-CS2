@@ -67,7 +67,6 @@ namespace LineTool
         private TerrainHeightData _terrainHeightData;
         private OverlayRenderSystem.Buffer _overlayBuffer;
         private CityConfigurationSystem _cityConfigurationSystem;
-        private CameraUpdateSystem _cameraController;
         private ObjectToolSystem _objectToolSystem;
         private EntityQuery _renderingSettingsQuery;
 
@@ -557,7 +556,6 @@ namespace LineTool
             _terrainSystem = World.GetOrCreateSystemManaged<TerrainSystem>();
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
             _cityConfigurationSystem = World.GetOrCreateSystemManaged<CityConfigurationSystem>();
-            _cameraController = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
             _objectToolSystem = World.GetOrCreateSystemManaged<ObjectToolSystem>();
             _renderingSettingsQuery = GetEntityQuery(ComponentType.ReadOnly<GuideLineSettingsData>());
 
@@ -743,7 +741,7 @@ namespace LineTool
             }
 
             // Render any overlay.
-            _mode.DrawOverlay(_overlayBuffer, _tooltips, _cameraController);
+            _mode.DrawOverlay(_overlayBuffer, _tooltips);
 
             // Overlay control points.
             if (_fixedPreview)

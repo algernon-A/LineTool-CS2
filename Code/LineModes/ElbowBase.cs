@@ -241,39 +241,52 @@ namespace LineTool
         /// <param name="line2">Line 2.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        /// <param name="cameraController">Active camera controller instance.</param>
-        protected void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
+        protected void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Calculate line lengths.
             float line1Length = math.distance(line1.a.xz, line1.b.xz);
             float line2Length = math.distance(line2.a.xz, line2.b.xz);
 
-            float lineScaleModifier = (cameraController.zoom * 0.0025f) + 0.1f;
-            float overlayLineDistance = math.min(line1Length, line2Length) / 8f;
-            float overlayLineWidth = lineScaleModifier * 0.5f;
+            // Calculate line and indicator size factors.
+            float overlayLineWidth = m_distanceScale * 0.125f;
+            float maxScale = m_distanceScale * 4f;
+            float line1lengthXZ = MathUtils.Length(line1.xz);
 
             // Minimum line length check.
-            if (line1Length > 2f && line2Length > 2f)
+            if (line1lengthXZ > overlayLineWidth * 7f)
             {
-                // Normalize vectors using elbow pivot: line1.b or line2.a.
-                float3 normalizedVector1 = (line1.a - line1.b) / line1Length;
-                float3 normalizedVector2 = (line2.b - line1.b) / line2Length;
+                // Normalize vectors using elbow pivot: line1.b == line2.a.
+                float3 normalizedLine1 = (line1.a - line1.b) / line1Length;
+                float3 normalizedLine2 = (line2.b - line1.b) / line2Length;
 
                 // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
-                double angleRadians = math.acos(math.dot(normalizedVector1, normalizedVector2));
+                double angleRadians = math.acos(math.dot(normalizedLine1, normalizedLine2));
                 int angleDegrees = (int)math.round(math.degrees(angleRadians));
 
-                // Calculate vector split down the middle (using vector addition parallelogram method).
-                float3 overlayJointS = line1.b + ((normalizedVector1 + normalizedVector2) * overlayLineDistance);
-
-                // Calculate joints where angle guidelines will connect at.
-                float3 overlayJoint1 = line1.b + (normalizedVector1 * overlayLineDistance);
-                float3 overlayJoint2 = line1.b + (normalizedVector2 * overlayLineDistance);
+                // Calculate angle box points.
+                float size = math.min(line1lengthXZ, maxScale) * 0.5f;
+                float3 overlayJoint1 = line1.b + (normalizedLine1 * size);
+                float3 overlayJoint2 = line1.b + (normalizedLine2 * size);
+                float3 overlayJointS = line1.b + (normalizedLine1 * size) + (normalizedLine2 * size);
 
                 if (angleDegrees == 90)
                 {
-                    // Set joints in-between and then draw full width line as "box".
-                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment((overlayJoint1 + line1.b) / 2, (overlayJointS + overlayJoint2) / 2), overlayLineDistance);
+                    // Right angle box.
+                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment(overlayJointS, overlayJoint1), overlayLineWidth);
+                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment(overlayJointS, overlayJoint2), overlayLineWidth);
+                }
+                else if (angleDegrees >= 180 || angleDegrees <= -180)
+                {
+                    // Straight-line box; need to calculate line normal for box offset.
+                    float3 lineNormal = new (normalizedLine1.z, normalizedLine1.y, -normalizedLine1.x);
+
+                    // Calculate two offset points for corner of box, straddling the elbot pivot.
+                    overlayJointS = line1.b + (normalizedLine1 * size) + (lineNormal * size);
+                    float3 overlayJointS2 = line1.b - (normalizedLine1 * size) + (lineNormal * size);
+
+                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment(overlayJointS, overlayJoint1), overlayLineWidth);
+                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment(overlayJointS, overlayJointS2), overlayLineWidth);
+                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment(overlayJointS2, overlayJoint2), overlayLineWidth);
                 }
                 else
                 {

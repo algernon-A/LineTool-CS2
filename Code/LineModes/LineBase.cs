@@ -18,6 +18,7 @@ namespace LineTool
     /// <summary>
     /// Line placement mode.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression", Justification = "False positive")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Protected fields")]
     public abstract class LineBase
     {
@@ -230,8 +231,7 @@ namespace LineTool
         /// </summary>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        /// <param name="cameraController">Active camera controller instance.</param>
-        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
+        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
