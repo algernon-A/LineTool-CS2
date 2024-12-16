@@ -1,2 +1,3 @@
 - Add grid placement mode.
 - Add angle locking.
+- Change overlay style to match new game style.

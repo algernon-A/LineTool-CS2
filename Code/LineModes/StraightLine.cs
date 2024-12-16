@@ -6,6 +6,8 @@
 
 namespace LineTool
 {
+    using UnityEngine;
+
     /// <summary>
     /// Straight-line placement mode.
     /// </summary>
@@ -14,18 +16,23 @@ namespace LineTool
         /// <summary>
         /// Initializes a new instance of the <see cref="StraightLine"/> class.
         /// </summary>
-        public StraightLine()
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public StraightLine(Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+            : base(highPriorityColor, mediumPriorityColor, distanceScale)
         {
-            // Basic state.
-            m_validStart = false;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StraightLine"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public StraightLine(LineBase mode)
-            : base(mode)
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public StraightLine(LineBase mode, Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+            : base(mode, highPriorityColor, mediumPriorityColor, distanceScale)
         {
         }
     }

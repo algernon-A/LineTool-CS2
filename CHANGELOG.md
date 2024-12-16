@@ -1,5 +1,6 @@
 - Add grid placement mode.
 - Add angle locking.
+- Change overlay style to match new game style.
 
 ### 0.9.8.6
 - Update for game version 1.2.0.

@@ -27,8 +27,11 @@ namespace LineTool
         /// Initializes a new instance of the <see cref="SimpleCurve"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public SimpleCurve(LineBase mode)
-            : base(mode)
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public SimpleCurve(LineBase mode, Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+            : base(mode, highPriorityColor, mediumPriorityColor, distanceScale)
         {
         }
 
@@ -186,14 +189,14 @@ namespace LineTool
                     Line3.Segment line2 = new (ElbowPoint, m_endPos);
 
                     // Draw lines.
-                    DrawDashedLine(m_startPos, ElbowPoint, line1, overlayBuffer, tooltips, cameraController);
-                    DrawDashedLine(ElbowPoint, m_endPos, line2, overlayBuffer, tooltips, cameraController);
+                    DrawDashedLine(m_startPos, ElbowPoint, line1, overlayBuffer, tooltips);
+                    DrawDashedLine(ElbowPoint, m_endPos, line2, overlayBuffer, tooltips);
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, overlayBuffer, tooltips, cameraController);
 
                     // Draw curved line.
-                    DrawCurvedDashedLine(_thisBezier, overlayBuffer, cameraController);
+                    DrawCurvedLine(_thisBezier, overlayBuffer);
                 }
                 else
                 {

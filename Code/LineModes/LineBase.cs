@@ -42,6 +42,21 @@ namespace LineTool
         protected float3 m_endPos;
 
         /// <summary>
+        /// High priority line colour.
+        /// </summary>
+        protected Color m_highPriorityColor;
+
+        /// <summary>
+        /// Medium priority line colour.
+        /// </summary>
+        protected Color m_mediumPriorityColor;
+
+        /// <summary>
+        /// Line width distance scale.
+        /// </summary>
+        protected float m_distanceScale;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="LineBase"/> class.
         /// </summary>
         public LineBase()
@@ -53,11 +68,31 @@ namespace LineTool
         /// <summary>
         /// Initializes a new instance of the <see cref="LineBase"/> class.
         /// </summary>
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public LineBase(Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+        {
+            m_validStart = false;
+            m_highPriorityColor = highPriorityColor;
+            m_mediumPriorityColor = mediumPriorityColor;
+            m_distanceScale = distanceScale;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LineBase"/> class.
+        /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public LineBase(LineBase mode)
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public LineBase(LineBase mode, Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
         {
             m_validStart = mode.m_validStart;
             m_startPos = mode.m_startPos;
+            m_highPriorityColor = highPriorityColor;
+            m_mediumPriorityColor = mediumPriorityColor;
+            m_distanceScale = distanceScale;
         }
 
         /// <summary>
@@ -201,7 +236,7 @@ namespace LineTool
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
             {
-                DrawDashedLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips, cameraController);
+                DrawDashedLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips);
             }
         }
 
@@ -270,32 +305,16 @@ namespace LineTool
         /// <param name="segment">Line segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        /// <param name="cameraController">Active camera controller instance.</param>
-        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
+        protected void DrawDashedLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
-            // Semi-transparent white color
-            Color color = new (1f, 1f, 1f, 0.6f);
-
-            // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
-            float currentZoom = cameraController.zoom;
-            float lineScaleModifier = (currentZoom * 0.0025f) + 0.1f;
-
-            float distance = math.distance(startPos.xz, endPos.xz);
+            // Set line width.
+            float lineScale = m_distanceScale * 0.125f;
 
             // Don't draw lines for short distances.
-            if (distance > lineScaleModifier * 8f)
+            if (MathUtils.Length(segment.xz) > lineScale * 7f)
             {
-                // Offset segment, mimicking game simple curve overlay, to ensure dash spacing.
-                float3 offset = (segment.b - segment.a) * (lineScaleModifier * 5f / distance);
-                Line3.Segment line = new (segment.a + offset, segment.b - offset);
-
-                // Measurements for dashed line: length of dash, width of dash, and gap between them.
-                float lineDashLength = lineScaleModifier * 5f;
-                float lineDashWidth = lineScaleModifier * 3f;
-                float lineGapLength = lineScaleModifier * 3f;
-
-                // Draw line - distance figures mimic game simple curve overlay.
-                overlayBuffer.DrawDashedLine(color, line, lineDashWidth, lineDashLength, lineGapLength);
+                // Draw line dashed line.
+                overlayBuffer.DrawDashedLine(m_highPriorityColor, segment, lineScale * 3f, lineScale * 5f, lineScale * 3f);
 
                 // Add length tooltip.
                 int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
@@ -311,24 +330,7 @@ namespace LineTool
         /// </summary>
         /// <param name="curve">Line curve segment.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
-        /// <param name="cameraController">Active camera controller instance.</param>
-        protected void DrawCurvedDashedLine(Bezier4x3 curve, OverlayRenderSystem.Buffer overlayBuffer, CameraUpdateSystem cameraController)
-        {
-            // Semi-transparent white color.
-            Color color = new (1f, 1f, 1f, 0.6f);
-
-            // Dynamically scale dashed line based on current gameplay camera zoom level; vanilla range min:10f max:10000f.
-            float currentZoom = cameraController.zoom;
-            float lineScaleModifier = (currentZoom * 0.0025f) + 0.1f;
-
-            // Measurements for dashed line: length of dash, width of dash, and gap between them.
-            float lineDashLength = lineScaleModifier * 4f;
-            float lineDashWidth = lineScaleModifier * 1f;
-            float lineGapLength = lineScaleModifier * 3f;
-
-            // Draw line - distance figures mimic game simple curve overlay.
-            overlayBuffer.DrawDashedCurve(color, curve, lineDashWidth, lineDashLength, lineGapLength);
-        }
+        protected void DrawCurvedLine(Bezier4x3 curve, OverlayRenderSystem.Buffer overlayBuffer) => overlayBuffer.DrawCurve(m_mediumPriorityColor, curve, m_distanceScale * 0.125f);
 
         /// <summary>
         /// Calculates the 2D XZ angle (in radians) between two points, adding the provided adjustment.

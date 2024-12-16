@@ -38,8 +38,11 @@ namespace LineTool
         /// Initializes a new instance of the <see cref="ElbowBase"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public ElbowBase(LineBase mode)
-            : base(mode)
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public ElbowBase(LineBase mode, Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+            : base(mode, highPriorityColor, mediumPriorityColor, distanceScale)
         {
         }
 
@@ -241,9 +244,6 @@ namespace LineTool
         /// <param name="cameraController">Active camera controller instance.</param>
         protected void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips, CameraUpdateSystem cameraController)
         {
-            // Semi-transparent white color.
-            Color lineColour = new (1f, 1f, 1f, 0.6f);
-
             // Calculate line lengths.
             float line1Length = math.distance(line1.a.xz, line1.b.xz);
             float line2Length = math.distance(line2.a.xz, line2.b.xz);
@@ -273,12 +273,12 @@ namespace LineTool
                 if (angleDegrees == 90)
                 {
                     // Set joints in-between and then draw full width line as "box".
-                    overlayBuffer.DrawLine(lineColour, new Line3.Segment((overlayJoint1 + line1.b) / 2, (overlayJointS + overlayJoint2) / 2), overlayLineDistance);
+                    overlayBuffer.DrawLine(m_highPriorityColor, new Line3.Segment((overlayJoint1 + line1.b) / 2, (overlayJointS + overlayJoint2) / 2), overlayLineDistance);
                 }
                 else
                 {
                     Bezier4x3 angleOverlayCurve = NetUtils.FitCurve(new Line3.Segment(overlayJoint1, overlayJointS), new Line3.Segment(overlayJoint2, overlayJointS));
-                    overlayBuffer.DrawCurve(lineColour, angleOverlayCurve, overlayLineWidth);
+                    overlayBuffer.DrawCurve(m_highPriorityColor, angleOverlayCurve, overlayLineWidth);
                 }
 
                 // Add tooltip.

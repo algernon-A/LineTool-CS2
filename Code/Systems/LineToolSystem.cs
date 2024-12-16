@@ -68,6 +68,8 @@ namespace LineTool
         private OverlayRenderSystem.Buffer _overlayBuffer;
         private CityConfigurationSystem _cityConfigurationSystem;
         private CameraUpdateSystem _cameraController;
+        private ObjectToolSystem _objectToolSystem;
+        private EntityQuery _renderingSettingsQuery;
 
         // Input actions.
         private ProxyAction _applyAction;
@@ -312,20 +314,23 @@ namespace LineTool
                     return;
                 }
 
+                // Get current game guideline settings.
+                GuideLineSettingsData guideLineSettings = _renderingSettingsQuery.GetSingleton<GuideLineSettingsData>();
+
                 // Apply updated tool mode.
                 switch (value)
                 {
                     case LineMode.Straight:
-                        _mode = new StraightLine(_mode);
+                        _mode = new StraightLine(_mode, guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
                         break;
                     case LineMode.SimpleCurve:
-                        _mode = new SimpleCurve(_mode);
+                        _mode = new SimpleCurve(_mode, guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
                         break;
                     case LineMode.Circle:
-                        _mode = new Circle(_mode);
+                        _mode = new Circle(_mode, guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
                         break;
                     case LineMode.Grid:
-                        _mode = new GridLines(_mode);
+                        _mode = new GridLines(_mode, guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
                         break;
                 }
 
@@ -553,6 +558,8 @@ namespace LineTool
             _overlayBuffer = World.GetOrCreateSystemManaged<OverlayRenderSystem>().GetBuffer(out var _);
             _cityConfigurationSystem = World.GetOrCreateSystemManaged<CityConfigurationSystem>();
             _cameraController = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
+            _objectToolSystem = World.GetOrCreateSystemManaged<ObjectToolSystem>();
+            _renderingSettingsQuery = GetEntityQuery(ComponentType.ReadOnly<GuideLineSettingsData>());
 
             // Create buffers.
             _tooltips = new (8);
@@ -561,8 +568,9 @@ namespace LineTool
             // Create random seed list with one initial default starting randomizer.
             _randomSeeds = new () { default };
 
-            // Set default mode.
-            _mode = new StraightLine();
+            // Set straight line mode as initial mode, using current game settings.
+            GuideLineSettingsData guideLineSettings = _renderingSettingsQuery.GetSingleton<GuideLineSettingsData>();
+            _mode = new StraightLine(guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
 
             // Set apply and cancel actions from game settings.
             _applyAction = Mod.Instance.ActiveSettings.GetAction(ModSettings.ApplyActionName);

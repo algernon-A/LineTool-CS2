@@ -12,6 +12,7 @@ namespace LineTool
     using Game.Rendering;
     using Game.Simulation;
     using Unity.Mathematics;
+    using UnityEngine;
     using static Game.Rendering.GuideLinesSystem;
 
     /// <summary>
@@ -27,8 +28,11 @@ namespace LineTool
         /// Initializes a new instance of the <see cref="Circle"/> class.
         /// </summary>
         /// <param name="mode">Mode to copy starting state from.</param>
-        public Circle(LineBase mode)
-            : base(mode)
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        public Circle(LineBase mode, Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+            : base(mode, highPriorityColor, mediumPriorityColor, distanceScale)
         {
         }
 
@@ -119,12 +123,12 @@ namespace LineTool
                 // Draw a straight radial line (constrained if required).
                 base.DrawOverlay(overlayBuffer, tooltips, cameraController);
 
-                // Draw dashed circle overlay.
+                // Draw circle overlay.
                 if (_validOverlayBezier)
                 {
                     for (int i = 0; i < _overlayBeziers.Length; i++)
                     {
-                        DrawCurvedDashedLine(_overlayBeziers[i], overlayBuffer, cameraController);
+                        DrawCurvedLine(_overlayBeziers[i], overlayBuffer);
                     }
                 }
             }
