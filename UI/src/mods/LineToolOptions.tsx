@@ -184,7 +184,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                     />
                     <ToolButton
                         className={toolButtonTheme.button}
-                        src={"Media/Tools/Net Tool/Straight.svg"}
+                        src={"Media/Tools/Object Tool/Line.svg"}
                         tooltip={TitledTooltip("LINETOOL.StraightLine","LINETOOL_DESCRIPTION.PointMode")}
                         onSelect={straightLineModeClick}
                         selected={straightLineModeEnabled}
@@ -194,7 +194,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                     />
                     <ToolButton
                         className={toolButtonTheme.button}
-                        src={"Media/Tools/Net Tool/SimpleCurve.svg"}
+                        src={"Media/Tools/Object Tool/Curve.svg"}
                         tooltip={TitledTooltip("LINETOOL.SimpleCurve", "LINETOOL_DESCRIPTION.SimpleCurve")}
                         onSelect={simpleCurveModeClick}
                         selected={simpleCurveModeEnabled}

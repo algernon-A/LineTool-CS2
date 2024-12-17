@@ -1,4 +1,5 @@
 - Add grid placement mode.
 - Add angle locking.
+- Change straight line and curved line icons to match new game style.
 - Change overlay style to match new game style.
 - Add sound effects.

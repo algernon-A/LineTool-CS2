@@ -91,6 +91,7 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
   <ChangeLog>- Add grid placement mode.
 - Add angle locking.
+- Change straight line and curved line icons to match new game style.
 - Change overlay style to match new game style.
 - Add sound effects.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
