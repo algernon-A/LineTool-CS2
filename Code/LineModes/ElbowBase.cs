@@ -81,7 +81,7 @@ namespace LineTool
             // Otherwise, if no valid elbow point, record this as the elbow point.
             if (!ValidElbow)
             {
-                ElbowPoint = ConstrainPos(position);
+                ElbowPoint = position;
                 ValidElbow = true;
                 return ClickMode.Midpoint;
             }
@@ -139,6 +139,81 @@ namespace LineTool
         }
 
         /// <summary>
+        /// Applies any active constraints to the given world position.
+        /// </summary>
+        /// <param name="currentPos">World position to constrain.</param>
+        /// <param name="spacing">Spacing value to apply for length constraints.</param>
+        /// /// <param name="snapToLength"><c>true</c> if the snap-to-length is enabled, <c>false</c> otherwise.</param>
+        /// <returns>Constrained world position.</returns>
+        internal override float3 ConstrainPos(float3 currentPos, float spacing, bool snapToLength)
+        {
+            float3 startPos = currentPos;
+
+            // Apply length snapping, if active.
+            if (snapToLength)
+            {
+                if (ValidElbow)
+                {
+                    startPos = SnapToLength(currentPos, ElbowPoint, spacing);
+                }
+                else
+                {
+                    startPos = SnapToLength(currentPos, m_startPos, spacing);
+                }
+            }
+
+            // Snapping requires at least a valid start point.
+            if (m_validStart)
+            {
+                // If a there's a valid elbow position and the alt key is pressed, perform any angle constraints.
+                if (ValidElbow && Keyboard.current.altKey.isPressed)
+                {
+                    // Get 2D length of the vector to the cursor position.
+                    float elbowToCurrentLength = math.distance(ElbowPoint.xz, startPos.xz);
+
+                    // Get the normalised direction of the base line.
+                    float3 direction = math.normalize(m_startPos - ElbowPoint);
+
+                    // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
+                    // Control for invalid values by clamping dot product to (-1, 1) and treating any NaN as zero.
+                    float dotProduct = math.clamp(math.dot(math.normalize(startPos - ElbowPoint), direction), -1f, 1f);
+                    if (float.IsNaN(dotProduct))
+                    {
+                        dotProduct = 0;
+                    }
+
+                    // Get raw angle between lines from dot product and snap to increments of 15 degrees.
+                    int angleDegrees = (int)math.round(math.degrees(math.acos(dotProduct)));
+                    angleDegrees = (int)math.round(angleDegrees / 15f) * 15;
+
+                    // Use custom cross product to determine if the cursor point is to the left- or right- side of the base line.
+                    float crossProduct = ((ElbowPoint.x - m_startPos.x) * (startPos.z - m_startPos.z)) - ((ElbowPoint.z - m_startPos.z) * (startPos.x - m_startPos.x));
+                    if (crossProduct < 0)
+                    {
+                        // If the cross product is negative, the current point is to the right of the line and we need to invert the angle.
+                        angleDegrees = 360 - angleDegrees;
+                    }
+
+                    // Rotate original vector direction around the Y axis.
+                    Quaternion q = quaternion.Euler(0f, math.radians(angleDegrees), 0f);
+                    float3 rotatedVector = q * direction;
+
+                    // Set the clamped position by extrapolation from the elbow point.
+                    return ElbowPoint + (rotatedVector * elbowToCurrentLength);
+                }
+                else if (_validPreviousElbow)
+                {
+                    // If there's no a vaid elbow yet, constrain to continuous curve if there's a valid previous elbow to constrain to.
+                    // Use closest point on infinite line projected from previous curve end tangent.
+                    return math.project(startPos - _previousElbowPoint, m_startPos - _previousElbowPoint) + _previousElbowPoint;
+                }
+            }
+
+            // Default is just to return the unmodified position.
+            return startPos;
+        }
+
+        /// <summary>
         /// Checks to see if a click should initiate point dragging.
         /// </summary>
         /// <param name="position">Click position in world space.</param>
@@ -174,64 +249,6 @@ namespace LineTool
                 // Other points.
                 base.HandleDrag(dragMode, position);
             }
-        }
-
-        /// <summary>
-        /// Applies any active constraints the given current cursor world position.
-        /// </summary>
-        /// <param name="currentPos">Current cursor world position.</param>
-        /// <returns>Constrained cursor world position.</returns>
-        protected float3 ConstrainPos(float3 currentPos)
-        {
-            // Snapping requires at least a valid start point.
-            if (m_validStart)
-            {
-                // If a there's a valid elbow position and the alt key is pressed, perform any angle constraints.
-                if (ValidElbow && Keyboard.current.altKey.isPressed)
-                {
-                    // Get 2D length of the vector to the cursor position.
-                    float elbowToCurrentLength = math.distance(ElbowPoint.xz, currentPos.xz);
-
-                    // Get the normalised direction of the base line.
-                    float3 direction = math.normalize(m_startPos - ElbowPoint);
-
-                    // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
-                    // Control for invalid values by clamping dot product to (-1, 1) and treating any NaN as zero.
-                    float dotProduct = math.clamp(math.dot(math.normalize(currentPos - ElbowPoint), direction), -1f, 1f);
-                    if (float.IsNaN(dotProduct))
-                    {
-                        dotProduct = 0;
-                    }
-
-                    // Get raw angle between lines from dot product and snap to increments of 15 degrees.
-                    int angleDegrees = (int)math.round(math.degrees(math.acos(dotProduct)));
-                    angleDegrees = (int)math.round(angleDegrees / 15f) * 15;
-
-                    // Use custom cross product to determine if the cursor point is to the left- or right- side of the base line.
-                    float crossProduct = ((ElbowPoint.x - m_startPos.x) * (currentPos.z - m_startPos.z)) - ((ElbowPoint.z - m_startPos.z) * (currentPos.x - m_startPos.x));
-                    if (crossProduct < 0)
-                    {
-                        // If the cross product is negative, the current point is to the right of the line and we need to invert the angle.
-                        angleDegrees = 360 - angleDegrees;
-                    }
-
-                    // Rotate original vector direction around the Y axis.
-                    Quaternion q = quaternion.Euler(0f, math.radians(angleDegrees), 0f);
-                    float3 rotatedVector = q * direction;
-
-                    // Set the clamped position by extrapolation from the elbow point.
-                    return ElbowPoint + (rotatedVector * elbowToCurrentLength);
-                }
-                else if (_validPreviousElbow)
-                {
-                    // If there's no a vaid elbow yet, constrain to continuous curve if there's a valid previous elbow to constrain to.
-                    // Use closest point on infinite line projected from previous curve end tangent.
-                    return math.project(currentPos - _previousElbowPoint, m_startPos - _previousElbowPoint) + _previousElbowPoint;
-                }
-            }
-
-            // Default is just to return the unmodified position.
-            return currentPos;
         }
 
         /// <summary>

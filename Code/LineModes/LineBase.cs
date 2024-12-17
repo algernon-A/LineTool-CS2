@@ -212,8 +212,8 @@ namespace LineTool
                 currentDistance += adjustedSpacing;
             }
 
-            // Final item for full-length mode if required (if there was a distance overshoot).
-            if (spacingMode == SpacingMode.FullLength && currentDistance < length + adjustedSpacing)
+            // Final item if we haven't placed but are within 2% of final placement distance.
+            if (currentDistance < length + (adjustedSpacing * 0.02f))
             {
                 float3 thisPoint = currentPos;
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
@@ -259,6 +259,29 @@ namespace LineTool
         public virtual void Reset()
         {
             m_validStart = false;
+        }
+
+        /// <summary>
+        /// Applies any active constraints to the given world position.
+        /// </summary>
+        /// <param name="currentPos">World position to constrain.</param>
+        /// <param name="spacing">Spacing value to apply for length constraints.</param>
+        /// <param name="snapToLength"><c>true</c> if the snap-to-length is enabled, <c>false</c> otherwise.</param>
+        /// <returns>Constrained world position.</returns>
+        internal virtual float3 ConstrainPos(float3 currentPos, float spacing, bool snapToLength)
+        {
+            // Constrain to length.
+            if (snapToLength)
+            {
+                // Length constraint requires a valid starting poing.
+                if (m_validStart)
+                {
+                    return SnapToLength(currentPos, m_startPos, spacing);
+                }
+            }
+
+            // Default is to return the unaltered original position.
+            return currentPos;
         }
 
         /// <summary>
@@ -370,6 +393,24 @@ namespace LineTool
             }
 
             return relativeAngle;
+        }
+
+        /// <summary>
+        /// Calculates a length-snapped endpoint for the given line.
+        /// </summary>
+        /// <param name="end">Line end point (position to be snapped).</param>
+        /// <param name="start">Line start point (base position to measure snapping distance from).</param>
+        /// <param name="lengthMultiple">Snapping length multiple to apply.</param>
+        /// <returns>New length-snapped endpoint.</returns>
+        protected float3 SnapToLength(float3 end, float3 start, float lengthMultiple)
+        {
+            // Get 2D length of the vector to the cursor position.
+            float3 line = end - start;
+            float length = math.length(line);
+
+            // Round it to next lowest multiple of the current length.
+            float roundedLength = math.floor(length / lengthMultiple) * lengthMultiple;
+            return start + ((roundedLength * line) / length);
         }
     }
 }

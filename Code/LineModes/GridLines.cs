@@ -61,21 +61,17 @@ namespace LineTool
                 return;
             }
 
-            // Apply any poisition restraints to the cursor position.
-            m_endPos = ConstrainPos(currentPos);
-
             // If we have a valid start but no valid elbow, just draw a straight line.
             if (!ValidElbow)
             {
-                // Constrain as required.
-                base.CalculatePoints(m_endPos, spacingMode, rotationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
+                base.CalculatePoints(currentPos, spacingMode, rotationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
                 return;
             }
 
             // Calculate line lengths.
             float3 baseLine = ElbowPoint - m_startPos;
             float baseLength = math.length(baseLine);
-            float sideLength = math.length(m_endPos - ElbowPoint);
+            float sideLength = math.length(currentPos - ElbowPoint);
             System.Random random = new ((int)baseLength * 1000);
 
             // Calculate base line angle (for absolute/relative rotation).
@@ -135,7 +131,7 @@ namespace LineTool
 
                     // Calculate proportional point on both the base and side point.
                     float3 basePoint = math.lerp(m_startPos, ElbowPoint, baseProportion + spacingAdjustment);
-                    float3 sidePoint = math.lerp(ElbowPoint, m_endPos, sideProportion + offsetAdjustment);
+                    float3 sidePoint = math.lerp(ElbowPoint, currentPos, sideProportion + offsetAdjustment);
 
                     // Extrapolate from base point parallel to side line.
                     float3 thisPoint = basePoint + sidePoint - ElbowPoint;
@@ -151,6 +147,9 @@ namespace LineTool
                     });
                 }
             }
+
+            // Record end position for overlays.
+            m_endPos = currentPos;
         }
 
         /// <summary>

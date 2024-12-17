@@ -615,8 +615,8 @@ namespace LineTool
             float3 position = _fixedPreview ? _fixedPos : _previousPos;
             if (GetRaycastResult(out _raycastPoint))
             {
-                // Valid raycast - update position.
-                position = _fixedPreview ? _fixedPos : _raycastPoint.m_HitPosition;
+                // Valid raycast - update position, applying any constraints.
+                position = _fixedPreview ? _fixedPos : _mode.ConstrainPos(_raycastPoint.m_HitPosition, EffectiveSpacing, Keyboard.current.shiftKey.IsPressed());
 
                 // Calculate terrain height.
                 _terrainHeightData = _terrainSystem.GetHeightData();
