@@ -173,10 +173,11 @@ namespace LineTool
 
                     // Get the normalised direction of the base line.
                     float3 direction = math.normalize(m_startPos - ElbowPoint);
+                    direction.y = 0f;
 
                     // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
                     // Control for invalid values by clamping dot product to (-1, 1) and treating any NaN as zero.
-                    float dotProduct = math.clamp(math.dot(math.normalize(startPos - ElbowPoint), direction), -1f, 1f);
+                    float dotProduct = math.clamp(math.dot(math.normalize(startPos - ElbowPoint).xz, direction.xz), -1f, 1f);
                     if (float.IsNaN(dotProduct))
                     {
                         dotProduct = 0;
@@ -261,27 +262,29 @@ namespace LineTool
         protected void DrawAngleIndicator(Line3.Segment line1, Line3.Segment line2, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Calculate line lengths.
-            float line1Length = math.distance(line1.a.xz, line1.b.xz);
-            float line2Length = math.distance(line2.a.xz, line2.b.xz);
 
             // Calculate line and indicator size factors.
             float overlayLineWidth = m_distanceScale * 0.125f;
             float maxScale = m_distanceScale * 4f;
-            float line1lengthXZ = MathUtils.Length(line1.xz);
 
             // Minimum line length check.
-            if (line1lengthXZ > overlayLineWidth * 7f)
+            float line1lengthXZ = MathUtils.Length(line1.xz);
+            float line2lengthXZ = MathUtils.Length(line2.xz);
+            float minimumLength = overlayLineWidth * 7f;
+            float size = math.min(line1lengthXZ, maxScale) * 0.5f;
+            if (line1lengthXZ > minimumLength && line2lengthXZ > size)
             {
                 // Normalize vectors using elbow pivot: line1.b == line2.a.
-                float3 normalizedLine1 = (line1.a - line1.b) / line1Length;
-                float3 normalizedLine2 = (line2.b - line1.b) / line2Length;
+                float2 normalizedLine1XZ = (line1.a.xz - line1.b.xz) / line1lengthXZ;
+                float2 normalizedLine2XZ = (line2.b.xz - line1.b.xz) / line2lengthXZ;
+                float3 normalizedLine1 = new (normalizedLine1XZ.x, 0f, normalizedLine1XZ.y);
+                float3 normalizedLine2 = new (normalizedLine2XZ.x, 0f, normalizedLine2XZ.y);
 
                 // Determine angle using dot product formula for normalized vectors: a . b = cos(angle).
-                double angleRadians = math.acos(math.dot(normalizedLine1, normalizedLine2));
+                double angleRadians = math.acos(math.dot(normalizedLine1XZ, normalizedLine2XZ));
                 int angleDegrees = (int)math.round(math.degrees(angleRadians));
 
                 // Calculate angle box points.
-                float size = math.min(line1lengthXZ, maxScale) * 0.5f;
                 float3 overlayJoint1 = line1.b + (normalizedLine1 * size);
                 float3 overlayJoint2 = line1.b + (normalizedLine2 * size);
                 float3 overlayJointS = line1.b + (normalizedLine1 * size) + (normalizedLine2 * size);
