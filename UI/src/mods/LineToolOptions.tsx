@@ -15,6 +15,7 @@ export const w2wModeAvailable$ = bindValue<boolean>('LineTool', 'W2WModeAvailabl
 export const fenceModeEnabled$ = bindValue<boolean>('LineTool', 'FenceModeEnabled');
 export const w2wModeEnabled$ = bindValue<boolean>('LineTool', 'W2WModeEnabled');
 export const randomizationEnabled$ = bindValue<boolean>('LineTool', 'RandomizationEnabled');
+export const lengthSnapEnabled$ = bindValue<boolean>('LineTool', 'LengthSnapEnabled');
 export const fullLengthEnabled$ = bindValue<boolean>('LineTool', 'FullLengthEnabled');
 export const absoluteRotationEnabled$ = bindValue<boolean>('LineTool', 'AbsoluteRotationEnabled');
 
@@ -38,6 +39,7 @@ export function fenceModeClick() { trigger("LineTool", "ToggleFenceMode"); }
 export function w2wModeClick() { trigger("LineTool", "ToggleW2WMode"); }
 export function randomizationClick() { trigger("LineTool", "ToggleRandomization"); }
 export function changeRandomClick() { trigger("LineTool", "UpdateRandomSeed"); }
+export function lengthSnapClick() { trigger("LineTool", "ToggleLengthSnap"); }
 export function fullLengthClick() { trigger("LineTool", "ToggleFullLength"); }
 export function spacingUpClick() { trigger("LineTool", "IncreaseSpacing"); }
 export function spacingDownClick() { trigger("LineTool", "DecreaseSpacing"); }
@@ -80,6 +82,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const fenceModeEnabled: boolean = useValue(fenceModeEnabled$);
         const w2wModeEnabled: boolean = useValue(w2wModeEnabled$);
         const randomizationEnabled: boolean = useValue(randomizationEnabled$);
+        const lengthSnapEnabled: boolean = useValue(lengthSnapEnabled$);
         const fullLengthEnabled: boolean = useValue(fullLengthEnabled$);
         const relativeRotationEnabled: boolean = useValue(relativeRotationEnabled$);
         const absoluteRotationEnabled: boolean = useValue(absoluteRotationEnabled$);
@@ -262,6 +265,16 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         <>
                             <Section title={translate("LINETOOL.Spacing")}
                                      tooltip={translate("LINETOOL_DESCRIPTION.Spacing")}>
+                                <ToolButton
+                                    className={toolButtonTheme.button}
+                                    src={"Media/Tools/Snap Options/Distance.svg"}
+                                    tooltip={TitledTooltip("LINETOOL.LengthSnap", "LINETOOL_DESCRIPTION.LengthSnap")}
+                                    onSelect={lengthSnapClick}
+                                    selected={lengthSnapEnabled}
+                                    multiSelect={false}
+                                    disabled={false}
+                                    focusKey={FocusDisabled}
+                                />
                                 <ToolButton
                                     className={toolButtonTheme.button}
                                     src={"coui://uil/Standard/MeasureEven.svg"}

@@ -19,6 +19,8 @@
 "LINETOOL_DESCRIPTION.Circle","Define the center of the circle, then set the radius."
 "LINETOOL.Grid","Grid"
 "LINETOOL_DESCRIPTION.Grid","Define the base of the grid, then the side."
+"LINETOOL.LengthSnap","Snap to length"
+"LINETOOL_DESCRIPTION.LengthSnap","Snap guideline length to an exact multiple of the current spacing setting."
 "LINETOOL.FixedLength","Fixed length"
 "LINETOOL_DESCRIPTION.FixedLength","Space items along the full length of the line from start to end, using the set spacing distance only as an approximation. If this is NOT set then items will be spaced exactly according to the set distance, even if it means they can't be placed along the full length of the line."
 "LINETOOL.RelativeRotation","Relative rotation"

@@ -1,5 +1,6 @@
 - Add grid placement mode.
-- Add angle locking.
+- Add snap-to-length.
+- Add snap-to-angle for curves and grids.
 - Change straight line and curved line icons to match new game style.
 - Change overlay style to match new game style.
 - Add sound effects.

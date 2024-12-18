@@ -132,6 +132,11 @@ namespace LineTool
         internal static LineToolSystem Instance { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether snap-to-length is enabled.
+        /// </summary>
+        internal bool LengthSnapEnabled { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the random seed should be randomised <c>true</c> or kept constant <c>false</c>.
         /// </summary>
         internal bool RandomizationEnabled { get; set; } = true;
@@ -616,7 +621,7 @@ namespace LineTool
             if (GetRaycastResult(out _raycastPoint))
             {
                 // Valid raycast - update position, applying any constraints.
-                position = _fixedPreview ? _fixedPos : _mode.ConstrainPos(_raycastPoint.m_HitPosition, EffectiveSpacing, Keyboard.current.shiftKey.IsPressed());
+                position = _fixedPreview ? _fixedPos : _mode.ConstrainPos(_raycastPoint.m_HitPosition, EffectiveSpacing, LengthSnapEnabled);
 
                 // Calculate terrain height.
                 _terrainHeightData = _terrainSystem.GetHeightData();

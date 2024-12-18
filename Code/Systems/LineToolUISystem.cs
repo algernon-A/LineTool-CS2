@@ -81,9 +81,11 @@ namespace LineTool
             AddBinding(new TriggerBinding("LineTool", "UpdateRandomSeed", UpdateRandomSeed));
             AddBinding(new TriggerBinding("LineTool", "ToggleRandomization", ToggleRandomization));
 
-            // Spacing UI bindings.
+            // Spacing UI bindings
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "LengthSnapEnabled", () => _lineToolSystem.LengthSnapEnabled));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FullLengthEnabled", () => _lineToolSystem.CurrentSpacingMode == SpacingMode.FullLength));
             AddUpdateBinding(new GetterValueBinding<float>("LineTool", "Spacing", () => _lineToolSystem.Spacing));
+            AddBinding(new TriggerBinding("LineTool", "ToggleLengthSnap", ToggleLengthSnap));
             AddBinding(new TriggerBinding("LineTool", "ToggleFullLength", ToggleFullLength));
             AddBinding(new TriggerBinding("LineTool", "IncreaseSpacing", IncreaseSpacing));
             AddBinding(new TriggerBinding("LineTool", "DecreaseSpacing", DecreaseSpacing));
@@ -275,6 +277,11 @@ namespace LineTool
                 _lineToolSystem.CurrentSpacingMode = SpacingMode.Manual;
             }
         }
+
+        /// <summary>
+        /// Event callback to toggle snap-to-length.
+        /// </summary>
+        private void ToggleLengthSnap() => _lineToolSystem.LengthSnapEnabled = !_lineToolSystem.LengthSnapEnabled;
 
         /// <summary>
         /// Event callback to toggle randomization.
