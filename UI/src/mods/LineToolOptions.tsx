@@ -233,6 +233,16 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                 result.props.children?.push(
                     <>
                         <Section title={translate("LINETOOL.Options")}>
+                            <ToolButton
+                                className={toolButtonTheme.button}
+                                src={"Media/Tools/Snap Options/Distance.svg"}
+                                tooltip={TitledTooltip("LINETOOL.LengthSnap", "LINETOOL_DESCRIPTION.LengthSnap")}
+                                onSelect={lengthSnapClick}
+                                selected={lengthSnapEnabled}
+                                multiSelect={false}
+                                disabled={false}
+                                focusKey={FocusDisabled}
+                            />
                             {FenceModeButton()}
                             {W2WModeButton()}
                             <ToolButton
@@ -265,16 +275,6 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         <>
                             <Section title={translate("LINETOOL.Spacing")}
                                      tooltip={translate("LINETOOL_DESCRIPTION.Spacing")}>
-                                <ToolButton
-                                    className={toolButtonTheme.button}
-                                    src={"Media/Tools/Snap Options/Distance.svg"}
-                                    tooltip={TitledTooltip("LINETOOL.LengthSnap", "LINETOOL_DESCRIPTION.LengthSnap")}
-                                    onSelect={lengthSnapClick}
-                                    selected={lengthSnapEnabled}
-                                    multiSelect={false}
-                                    disabled={false}
-                                    focusKey={FocusDisabled}
-                                />
                                 <ToolButton
                                     className={toolButtonTheme.button}
                                     src={"coui://uil/Standard/MeasureEven.svg"}
