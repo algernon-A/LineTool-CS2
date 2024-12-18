@@ -1,4 +1,5 @@
-"LINETOOL.Title","Advanced line tool"
+"LINETOOL.Title","Advanced Line Tool"
+"LINETOOL.LineMode","Line mode"
 "LINETOOL.Options","Options"
 "LINETOOL.FenceMode","Fence mode"
 "LINETOOL_DESCRIPTION.FenceMode","Automatically aligns and places objects continuously end-to-end, like a fence."
