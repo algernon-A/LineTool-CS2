@@ -1,4 +1,4 @@
-"LINETOOL.Title","線性擺放工具"
+"LINETOOL.Title","Advanced Line Tool"
 "LINETOOL.LineMode","擺放模式"
 "LINETOOL.Options","設定"
 "LINETOOL.FenceMode","柵欄模式"
@@ -17,6 +17,10 @@
 "LINETOOL_DESCRIPTION.SimpleCurve","設定起點與曲率，最後設置終點。"
 "LINETOOL.Circle","圓圈"
 "LINETOOL_DESCRIPTION.Circle","設定圓心位置，再設置圓圈半徑。"
+"LINETOOL.Grid","Grid"
+"LINETOOL_DESCRIPTION.Grid","Define the base of the grid, then the side."
+"LINETOOL.LengthSnap","Snap to length"
+"LINETOOL_DESCRIPTION.LengthSnap","Snap guideline length to an exact multiple of the current spacing setting."
 "LINETOOL.FixedLength","固定端點"
 "LINETOOL_DESCRIPTION.FixedLength","啟用此功能時，物品將以預設間距作為近似值，沿線平均分佈，且起點與終點固定。
 如不啟用此功能，物品將按照設定的間距精確放置，此時擺放物品將無法平均分佈，終點位置也不固定。"

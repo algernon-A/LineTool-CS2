@@ -1,4 +1,4 @@
-"LINETOOL.Title","线性摆放工具"
+"LINETOOL.Title","Advanced Line Tool"
 "LINETOOL.LineMode","摆放模式"
 "LINETOOL.Options","设置"
 "LINETOOL.FenceMode","栅栏模式"
@@ -17,6 +17,10 @@
 "LINETOOL_DESCRIPTION.SimpleCurve","先设置起点和拐点，再设置终点。"
 "LINETOOL.Circle","圆圈"
 "LINETOOL_DESCRIPTION.Circle","先设置圆心，再设置半径。"
+"LINETOOL.Grid","Grid"
+"LINETOOL_DESCRIPTION.Grid","Define the base of the grid, then the side."
+"LINETOOL.LengthSnap","Snap to length"
+"LINETOOL_DESCRIPTION.LengthSnap","Snap guideline length to an exact multiple of the current spacing setting."
 "LINETOOL.FixedLength","固定两端"
 "LINETOOL_DESCRIPTION.FixedLength","选择此功能后，物体将以预设间距作为近似值，沿线均匀分布，并且起始与终点固定。
 若不选择此功能，物体将按照设定的间距精确间隔放置，此时物品无法均匀分布，且终点不固定。"
