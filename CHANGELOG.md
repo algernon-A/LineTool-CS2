@@ -1,4 +1,5 @@
 ### 1.0
+- Rebrand to 'Advanced Line Tool' to distinguish it from game tool.
 - Add grid placement mode.
 - Add snap-to-length.
 - Add snap-to-angle for curves and grids.
