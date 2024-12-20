@@ -1,3 +1,4 @@
+### 1.0
 - Add grid placement mode.
 - Add snap-to-length.
 - Add snap-to-angle for curves and grids.
