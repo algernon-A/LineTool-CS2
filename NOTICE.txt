@@ -1,4 +1,4 @@
-Line Tool for Cities: Skylines II
+(Advanced) Line Tool for Cities: Skylines II
 github.com/Algernon-A/LineTool-CS2
 Copyright (c) 2023-24 algernon (K. Algernon A. Sheppard).  All rights reserved.
 
