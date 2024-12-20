@@ -1,4 +1,4 @@
-## Line Tool
+## Advanced Line Tool
 This mod supplements existing tools so you can precisely and quickly place objects such as trees, shrubs, and props in lines, curves, and circles with varying parameters.
 
 It works **alongside the game's inbuilt line tool** to provide advanced functionality, including:
