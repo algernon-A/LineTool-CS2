@@ -138,8 +138,8 @@ namespace LineTool
                     }
 
                     // Calculate proportional point on both the base and side point.
-                    float3 basePoint = math.lerp(m_startPos, ElbowPoint, baseProportion + spacingAdjustment);
-                    float3 sidePoint = math.lerp(ElbowPoint, currentPos, sideProportion + offsetAdjustment);
+                    float3 basePoint = math.lerp(m_startPos, ElbowPoint, baseLerp);
+                    float3 sidePoint = math.lerp(ElbowPoint, currentPos, sideLerp);
 
                     // Extrapolate from base point parallel to side line.
                     float3 thisPoint = basePoint + sidePoint - ElbowPoint;
