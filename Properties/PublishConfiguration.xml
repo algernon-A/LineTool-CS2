@@ -83,9 +83,9 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/WindTurbines.jpg" />
   <Screenshot Value="Properties/Screenshots/FencesCirclesCurve.jpg" />
   <Screenshot Value="Properties/Screenshots/BuildingRow.png" />
-	<Screenshot Value="Properties/Screenshots/PlacementVariation.jpg" />
-	<Screenshot Value="Properties/Screenshots/TreeGrid.jpg" />
-	<Screenshot Value="Properties/Screenshots/GridVariation.jpg" />
+  <Screenshot Value="Properties/Screenshots/PlacementVariation.jpg" />
+  <Screenshot Value="Properties/Screenshots/TreeGrid.jpg" />
+  <Screenshot Value="Properties/Screenshots/GridVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
   <ModVersion Value="1.0.1" />
