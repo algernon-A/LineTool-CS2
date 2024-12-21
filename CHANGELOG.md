@@ -1,3 +1,7 @@
+### 1.0.1
+- Clamp variation offsets to positive numbers.
+- Skip any objects whose offset places them outside the grid area in grid mode.
+
 ### 1.0
 - Rebrand to 'Advanced Line Tool' to distinguish it from game tool.
 - Add grid placement mode.

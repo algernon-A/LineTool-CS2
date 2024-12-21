@@ -259,7 +259,8 @@ namespace LineTool
                 // Don't do anything if no change.
                 if (_randomSpacing != value)
                 {
-                    _randomSpacing = value;
+                    // Don't allow negative numbers.
+                    _randomSpacing = math.max(value, 0f);
                     _dirty = true;
                 }
             }
@@ -273,8 +274,13 @@ namespace LineTool
             get => _randomOffset;
             set
             {
-                _randomOffset = value;
-                _dirty = true;
+                // Don't do anything if no change.
+                if (_randomOffset != value)
+                {
+                    // Don't allow negative numbers.
+                    _randomOffset = math.max(value, 0f);
+                    _dirty = true;
+                }
             }
         }
 

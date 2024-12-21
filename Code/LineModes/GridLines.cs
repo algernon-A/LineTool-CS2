@@ -129,6 +129,14 @@ namespace LineTool
                         }
                     }
 
+                    // Skip any placement that's outside of the grid area.
+                    float baseLerp = baseProportion + spacingAdjustment;
+                    float sideLerp = sideProportion + offsetAdjustment;
+                    if (baseLerp < 0f || baseLerp > 1f || sideLerp < 0f || sideLerp > 1f)
+                    {
+                        continue;
+                    }
+
                     // Calculate proportional point on both the base and side point.
                     float3 basePoint = math.lerp(m_startPos, ElbowPoint, baseProportion + spacingAdjustment);
                     float3 sidePoint = math.lerp(ElbowPoint, currentPos, sideProportion + offsetAdjustment);

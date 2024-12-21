@@ -1,6 +1,2 @@
-- Add grid placement mode.
-- Add snap-to-length.
-- Add snap-to-angle for curves and grids.
-- Change straight line and curved line icons to match new game style.
-- Change overlay style to match new game style.
-- Add sound effects.
+- Clamp variation offsets to positive numbers.
+- Skip any objects whose offset places them outside the grid area in grid mode.
