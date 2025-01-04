@@ -1,3 +1,6 @@
+### 1.0.1.1
+- Update translations.
+
 ### 1.0.1
 - Clamp variation offsets to positive numbers.
 - Skip any objects whose offset places them outside the grid area in grid mode.

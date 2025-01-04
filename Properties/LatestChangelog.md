@@ -1,2 +1,1 @@
-- Clamp variation offsets to positive numbers.
-- Skip any objects whose offset places them outside the grid area in grid mode.
+- Update translations.
