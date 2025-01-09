@@ -30,7 +30,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<AdditionalFiles Include="stylecop.json" />
+		<AdditionalFiles Include="StyleCop/stylecop.json" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
