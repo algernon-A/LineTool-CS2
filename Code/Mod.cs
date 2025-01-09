@@ -124,10 +124,19 @@ namespace LineTool
         public void OnDispose()
         {
             Log.Info("disposing");
-            Instance = null;
+
+            // Dispose of active options settings.
+            if (ActiveSettings is not null)
+            {
+                ActiveSettings.UnregisterInOptionsUI();
+                ActiveSettings = null;
+            }
 
             // Revert harmony patches.
             Patcher.Instance?.UnPatchAll();
+
+            // Nullify instance.
+            Instance = null;
         }
     }
 }
