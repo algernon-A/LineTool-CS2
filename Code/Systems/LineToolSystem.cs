@@ -76,8 +76,6 @@ namespace LineTool
         private EntityQuery _soundEffectsQuery;
 
         // Input actions.
-        private ProxyAction _applyAction;
-        private ProxyAction _cancelAction;
         private InputAction _fixedPreviewAction;
         private InputAction _keepBuildingAction;
 
@@ -590,10 +588,6 @@ namespace LineTool
             GuideLineSettingsData guideLineSettings = _renderingSettingsQuery.GetSingleton<GuideLineSettingsData>();
             _mode = new StraightLine(guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
 
-            // Set apply and cancel actions from game settings.
-            _applyAction = Mod.Instance.ActiveSettings.GetAction(ModSettings.ApplyActionName);
-            _cancelAction = Mod.Instance.ActiveSettings.GetAction(ModSettings.CancelActionName);
-
             // Enable fixed preview control.
             _fixedPreviewAction = new ("LineTool-FixPreview");
             _fixedPreviewAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/ctrl").With("Button", "<Mouse>/leftButton");
@@ -636,7 +630,7 @@ namespace LineTool
                 // Handle any dragging.
                 if (_dragMode != DragMode.None)
                 {
-                    if (_applyAction.WasReleasedThisFrame() || applyAction.WasReleasedThisFrame() || _fixedPreviewAction.WasReleasedThisFrame())
+                    if (applyAction.WasReleasedThisFrame() || _fixedPreviewAction.WasReleasedThisFrame())
                     {
                         // Cancel dragging.
                         _dragMode = DragMode.None;
@@ -660,7 +654,7 @@ namespace LineTool
                 }
 
                 // Check for and perform any cancellation.
-                if (_cancelAction.WasPressedThisFrame())
+                if (cancelAction.WasPressedThisFrame())
                 {
                     // Reset current mode settings.
                     _mode.Reset();
@@ -672,7 +666,7 @@ namespace LineTool
                 else
                 {
                     // Check for apply action initiation.
-                    bool applyWasPressed = _applyAction.WasPressedThisFrame() || applyAction.WasPressedThisFrame();
+                    bool applyWasPressed = applyAction.WasPressedThisFrame();
 
                     // If no cancellation, handle any fixed preview action if we're ready to place.
                     if (applyWasPressed && Keyboard.current.ctrlKey.isPressed && _mode.HasAllPoints)
@@ -845,10 +839,9 @@ namespace LineTool
             _log.Debug("OnStartRunning");
             base.OnStartRunning();
 
-            // Ensure apply action is enabled.
-            _applyAction.shouldBeEnabled = true;
-            _cancelAction.shouldBeEnabled = true;
+            // Ensure relevant base actions are enabled.
             applyAction.enabled = true;
+            cancelAction.enabled = true;
 
             // Clear any previous raycast result.
             _raycastPoint = default;
@@ -875,10 +868,6 @@ namespace LineTool
 
             // Clear tooltips.
             _tooltips.Clear();
-
-            // Disable apply action.
-            _applyAction.shouldBeEnabled = false;
-            _cancelAction.shouldBeEnabled = false;
 
             // Reset state.
             _mode.Reset();
