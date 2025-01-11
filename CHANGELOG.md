@@ -1,3 +1,7 @@
+### 1.0.1.2
+- Fix fence mode sometimes leaving detached end pieces.
+- Update apply and cancel button handling.
+
 ### 1.0.1.1
 - Update translations.
 

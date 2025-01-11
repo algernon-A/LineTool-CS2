@@ -1,1 +1,2 @@
-- Update translations.
+- Fix fence mode sometimes leaving detached end pieces.
+- Update apply and cancel button handling.
