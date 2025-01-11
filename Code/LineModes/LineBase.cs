@@ -187,7 +187,7 @@ namespace LineTool
             // Create points.
             float currentDistance = spacingMode == SpacingMode.FenceMode ? -zBounds.min : 0f;
             float endLength = spacingMode == SpacingMode.FenceMode ? length - zBounds.max : length;
-            while (currentDistance < endLength)
+            while (currentDistance < endLength + 0.001f)
             {
                 // Calculate interpolated point.
                 float spacingAdjustment = 0f;
@@ -212,13 +212,19 @@ namespace LineTool
                 currentDistance += adjustedSpacing;
             }
 
-            // Final item if we haven't placed but are within 2% of final placement distance.
-            if (currentDistance < length + (adjustedSpacing * 0.02f))
+            // Final item for fence mode.
+            if (spacingMode == SpacingMode.FenceMode && currentDistance < length + zBounds.max)
+            {
+                float3 thisPoint = math.lerp(m_startPos, currentPos, (length - zBounds.max + 0.001f) / length);
+                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
+            }
+
+            // Otherwise, final item if we haven't placed but are within 2% of final placement distance.
+            else if (currentDistance < endLength + (adjustedSpacing * 0.02f))
             {
                 float3 thisPoint = currentPos;
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
-
-                // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
             }
 
@@ -410,7 +416,9 @@ namespace LineTool
 
             // Round it to next lowest multiple of the current length.
             float roundedLength = math.floor(length / lengthMultiple) * lengthMultiple;
-            return start + ((roundedLength * line) / length);
+
+            // Include small round-up adjustment.
+            return start + ((roundedLength * line) / length) + 0.01f;
         }
     }
 }
