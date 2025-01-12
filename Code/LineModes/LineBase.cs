@@ -213,7 +213,7 @@ namespace LineTool
             }
 
             // Final item for fence mode.
-            if (spacingMode == SpacingMode.FenceMode && currentDistance < length + zBounds.max)
+            if (spacingMode == SpacingMode.FenceMode && currentDistance < length - zBounds.min)
             {
                 float3 thisPoint = math.lerp(m_startPos, currentPos, (length - zBounds.max + 0.001f) / length);
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);

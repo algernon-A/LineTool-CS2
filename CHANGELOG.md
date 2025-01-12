@@ -1,5 +1,6 @@
 - Add guideline transparency control.
 - Add cancel action fallback to point mode.
+- Fix continuous fence mode last item places for fences with asymmetrical Z-bounds (some UK pack props).
 
 ### 1.0.1.2
 - Fix fence mode sometimes leaving detached end pieces.
