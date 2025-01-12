@@ -368,6 +368,11 @@ namespace LineTool
         internal AgeMask AgeMask { get; set; }
 
         /// <summary>
+        /// Gets or sets guideline transparency (inverse alpha) for guideline drawing.
+        /// </summary>
+        internal float GuidelineTransparency { get; set; }
+
+        /// <summary>
         /// Sets the currently selected prefab.
         /// </summary>
         private PrefabBase SelectedPrefab
@@ -597,6 +602,9 @@ namespace LineTool
             _keepBuildingAction = new ("LineTool-KeepBuilding");
             _keepBuildingAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
             _keepBuildingAction.Enable();
+
+            // Set guideline transparency.
+            GuidelineTransparency = Mod.Instance.ActiveSettings.GuidelineTransparency;
         }
 
         /// <summary>
@@ -775,8 +783,8 @@ namespace LineTool
                 }
             }
 
-            // Render any overlay.
-            _mode.DrawOverlay(_overlayBuffer, _tooltips);
+            // Render any overlay (inverting transparency to alpha).
+            _mode.DrawOverlay(1f - GuidelineTransparency, _overlayBuffer, _tooltips);
 
             // Overlay control points.
             if (_fixedPreview)

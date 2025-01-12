@@ -100,14 +100,15 @@ namespace LineTool
                 return;
             }
 
-            // Load translations.
-            Localization.LoadTranslations(null, Log);
-
             // Register mod settings to game options UI.
             ActiveSettings = new (this);
+            ActiveSettings.RegisterInOptionsUI();
 
             // Load saved settings.
             AssetDatabase.global.LoadSettings(ModName, ActiveSettings, new ModSettings(this));
+
+            // Load translations.
+            Localization.LoadTranslations(ActiveSettings, Log);
 
             // Apply input bindings.
             ActiveSettings.RegisterKeyBindings();

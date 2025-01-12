@@ -113,14 +113,15 @@ namespace LineTool
         /// <summary>
         /// Draws any applicable overlay.
         /// </summary>
+        /// <param name="alpha">Overlay alpha value.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        public override void DrawOverlay(float alpha, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             if (m_validStart)
             {
                 // Draw a straight radial line (constrained if required).
-                base.DrawOverlay(overlayBuffer, tooltips);
+                base.DrawOverlay(alpha, overlayBuffer, tooltips);
 
                 // Draw circle overlay.
                 if (_validOverlayBezier)

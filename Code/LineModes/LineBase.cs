@@ -235,14 +235,15 @@ namespace LineTool
         /// <summary>
         /// Draws any applicable overlay.
         /// </summary>
+        /// <param name="alpha">Overlay alpha value.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public virtual void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        public virtual void DrawOverlay(float alpha, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Don't draw overlay if we don't have a valid start.
             if (m_validStart)
             {
-                DrawControlLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), overlayBuffer, tooltips);
+                DrawControlLine(m_startPos, m_endPos, new Line3.Segment(m_startPos, m_endPos), alpha, overlayBuffer, tooltips);
             }
         }
 
@@ -332,9 +333,10 @@ namespace LineTool
         /// <param name="startPos">Line start position.</param>
         /// <param name="endPos">Line end position.</param>
         /// <param name="segment">Line segment.</param>
+        /// <param name="alpha">Overlay alpha value.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        protected void DrawControlLine(float3 startPos, float3 endPos, Line3.Segment segment, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        protected void DrawControlLine(float3 startPos, float3 endPos, Line3.Segment segment, float alpha, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             // Set line width.
             float lineScale = m_distanceScale * 0.125f;
@@ -345,6 +347,7 @@ namespace LineTool
             {
                 // Draw dashed line, inset from points to leave space for control point circles.
                 float3 insetLength = (segment.b - segment.a) * (lineScale * 4f / lineLength);
+                m_highPriorityColor.a = alpha;
                 overlayBuffer.DrawDashedLine(m_highPriorityColor, new (segment.a + insetLength, segment.b - insetLength), lineScale * 3f, lineScale * 5f, lineScale * 3f);
 
                 // Draw control point circles.

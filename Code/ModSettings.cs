@@ -8,6 +8,8 @@ namespace LineTool
 {
     using Colossal.IO.AssetDatabase;
     using Game.Modding;
+    using Game.Settings;
+    using Game.UI;
 
     /// <summary>
     /// The mod's settings.
@@ -15,6 +17,8 @@ namespace LineTool
     [FileLocation(Mod.ModName)]
     internal class ModSettings : ModSetting
     {
+        private float _guidelineTransparency = 0f;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ModSettings"/> class.
         /// </summary>
@@ -25,10 +29,32 @@ namespace LineTool
         }
 
         /// <summary>
+        /// Gets or sets the guideline transparency (0..1).
+        /// </summary>
+        [SettingsUISlider(min = 0f, max = 100f, step = 1f, scalarMultiplier = 100f, unit = Unit.kPercentage)]
+        [SettingsUICustomFormat]
+        public float GuidelineTransparency
+        {
+            get => _guidelineTransparency;
+            set
+            {
+                if (_guidelineTransparency != value)
+                {
+                    _guidelineTransparency = value;
+                    if (LineToolSystem.Instance is not null)
+                    {
+                        LineToolSystem.Instance.GuidelineTransparency = value;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Restores mod settings to default.
         /// </summary>
         public override void SetDefaults()
         {
+            GuidelineTransparency = 0f;
         }
     }
 }

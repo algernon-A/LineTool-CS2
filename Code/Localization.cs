@@ -27,7 +27,7 @@ namespace LineTool
         /// Files must be embedded under l10n in the assembly and be named for their game locale, e.g. '{Project}/l10n/en-US.csv', '{Project}/l10n/zh-HANS.csv'.
         /// Filenames not matching a supported game locale are ignored.
         ///
-        /// Files can be either comma- or tab- delimeted, with two columns in each line:
+        /// Files can be either comma- or tab- delimited, with two columns in each line:
         ///     - The first column contains the translation key.
         ///     - The second column contains the translation string for that key.
         ///
@@ -211,12 +211,14 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Upacks any settings option context packed into a localization key.
+        /// Unpacks any settings option context packed into a localization key.
         /// Packing avoids the need to put a full-length options menu translation key for each line, which gets quite long.
         /// Packing is a shortened prefix, delimited from the key value by a colon, e.g. "Options.OPTION:MyOptionsControlName".
-        /// If no colon delimter is found, the key is returned unchanged.
+        /// If no colon delimiter is found, the key is returned unchanged.
         ///
         /// Recognised packing prefixes are:
+        ///     Options.TAB - options menu tab labels.
+        ///     Options.GROUP - options menu group labels.
         ///     Options.OPTION - basic options menu control labels.
         ///     Options.OPTION_DESCRIPTION - options menu detailed control descriptions, displayed in the panel to the right of the controls.
         ///     Options.WARNING - options menu warning messaged displayed in pop-up dialogs.
@@ -242,6 +244,8 @@ namespace LineTool
             // Unpack key to full game settings key.
             return context switch
             {
+                "Options.TAB" => settings.GetOptionTabLocaleID(key),
+                "Options.GROUP" => settings.GetOptionGroupLocaleID(key),
                 "Options.OPTION" => settings.GetOptionLabelLocaleID(key),
                 "Options.OPTION_DESCRIPTION" => settings.GetOptionDescLocaleID(key),
                 "Options.WARNING" => settings.GetOptionWarningLocaleID(key),

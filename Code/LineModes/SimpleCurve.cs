@@ -173,9 +173,10 @@ namespace LineTool
         /// <summary>
         /// Draws any applicable overlay.
         /// </summary>
+        /// <param name="alpha">Overlay alpha value.</param>
         /// <param name="overlayBuffer">Overlay buffer.</param>
         /// <param name="tooltips">Tooltip list.</param>
-        public override void DrawOverlay(OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
+        public override void DrawOverlay(float alpha, OverlayRenderSystem.Buffer overlayBuffer, List<TooltipInfo> tooltips)
         {
             if (m_validStart)
             {
@@ -187,8 +188,8 @@ namespace LineTool
                     Line3.Segment line2 = new (ElbowPoint, m_endPos);
 
                     // Draw lines.
-                    DrawControlLine(m_startPos, ElbowPoint, line1, overlayBuffer, tooltips);
-                    DrawControlLine(ElbowPoint, m_endPos, line2, overlayBuffer, tooltips);
+                    DrawControlLine(m_startPos, ElbowPoint, line1, alpha, overlayBuffer, tooltips);
+                    DrawControlLine(ElbowPoint, m_endPos, line2, alpha, overlayBuffer, tooltips);
 
                     // Draw angle.
                     DrawAngleIndicator(line1, line2, overlayBuffer, tooltips);
@@ -199,7 +200,7 @@ namespace LineTool
                 else
                 {
                     // Initial position only; just draw a straight line (constrained if required).
-                    base.DrawOverlay(overlayBuffer, tooltips);
+                    base.DrawOverlay(alpha, overlayBuffer, tooltips);
                 }
             }
         }
