@@ -498,10 +498,12 @@ namespace LineTool
         /// </summary>
         internal void RestorePreviousTool()
         {
+            // Set to point mode.
+            _currentMode = LineMode.Point;
+
             if (_previousTool is not null)
             {
                 m_ToolSystem.activeTool = _previousTool;
-                _currentMode = LineMode.Point;
             }
             else
             {
@@ -664,10 +666,19 @@ namespace LineTool
                 // Check for and perform any cancellation.
                 if (cancelAction.WasPressedThisFrame())
                 {
-                    // Reset current mode settings.
-                    _mode.Reset();
-                    _dragMode = DragMode.None;
-                    _fixedPreview = false;
+                    // Are we already at the 'initial state' of the mode?
+                    if (_mode.HasStart)
+                    {
+                        // No - reset current mode settings.
+                        _mode.Reset();
+                        _dragMode = DragMode.None;
+                        _fixedPreview = false;
+                    }
+                    else
+                    {
+                        // At mode initial state - cancel back to point mode.
+                       RestorePreviousTool();
+                    }
 
                     return inputDeps;
                 }
