@@ -688,7 +688,7 @@ namespace LineTool
                     bool applyWasPressed = applyAction.WasPressedThisFrame();
 
                     // If no cancellation, handle any fixed preview action if we're ready to place.
-                    if (applyWasPressed && Keyboard.current.ctrlKey.isPressed && _mode.HasAllPoints)
+                    if (_fixedPreviewAction.WasPressedThisFrame() && _mode.HasAllPoints)
                     {
                         // Are we already in fixed preview mode?
                         if (_fixedPreview)

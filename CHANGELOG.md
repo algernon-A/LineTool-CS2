@@ -1,3 +1,5 @@
+- Fix input binding conflicts blocking entry to fixed preview mode.
+
 ### 1.1
 - Add guideline transparency control.
 - Add cancel action fallback to point mode.
