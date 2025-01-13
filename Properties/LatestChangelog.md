@@ -1,2 +1,4 @@
-- Fix fence mode sometimes leaving detached end pieces.
-- Update apply and cancel button handling.
+- Add guideline transparency control.
+- Add cancel action fallback to point mode.
+- Tweak curved fence mode to more closely match desired final point.
+- Fix continuous fence mode last item places for fences with asymmetrical Z-bounds (some UK pack props).

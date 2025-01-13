@@ -88,11 +88,13 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/GridVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
-  <ModVersion Value="1.0.1.2" />
+  <ModVersion Value="1.1" />
   <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
-  <ChangeLog>- Fix fence mode sometimes leaving detached end pieces.
-- Update apply and cancel button handling.</ChangeLog>
+  <ChangeLog>- Add guideline transparency control.
+- Add cancel action fallback to point mode.
+- Tweak curved fence mode to more closely match desired final point.
+- Fix continuous fence mode last item places for fences with asymmetrical Z-bounds (some UK pack props).</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />
