@@ -1,3 +1,4 @@
+### 1.1.0.1
 - Fix input binding conflicts blocking entry to fixed preview mode.
 
 ### 1.1
