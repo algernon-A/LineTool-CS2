@@ -60,6 +60,9 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 - Set **variable offset** greater than zero to apply a random sideways offset to each item, up to the maximum distance specified - click for 1m increments, **Shift-click** for 10m, **Control-click** for 0.1m.
 - To remove variable spacing and/or offset, set the field(s) back to zero. **Shift-click** (10m increments) to make this faster.
 
+## Mod options
+Available in the game's options menu.  There's currently only one control: a slider that allows you to control the transparency of the placement guidelines (white dashed lines).  Set to fully transparent to disable the guidelines entirely.
+
 ## Meta
 ### Translations
 This mod supports localization. Please help out with translating this mod into different languages via the CrowdIn site at crowdin.com/project/line-tool-cs2.
