@@ -47,3 +47,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","Razmak objekata duž linije će varirati nasumičnim rastojanjem do ovog maksimuma. Stavi na nulu za precizno postavljanje."
 "LINETOOL.OffsetVariation","Varijacija odstupanja"
 "LINETOOL_DESCRIPTION.OffsetVariation","Objekti će nasumično odstupati od bočne linije do ovog maksimalnog rastojanja. Stavi na nulu za precizno postavljanje."
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."

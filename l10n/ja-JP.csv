@@ -47,3 +47,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","Object spacing along the line will be varied by a random distance up to this maximum. Set to zero for precise placement."
 "LINETOOL.OffsetVariation","Offset variation"
 "LINETOOL_DESCRIPTION.OffsetVariation","Objects will be randomly offset sideways from the line up to this maximum distance. Set to zero for precise placement."
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."

@@ -47,3 +47,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","De tussenruimte van objecten langs de lijn zal variëren met een willekeurige afstand tot dit maximum. Zet op nul voor nauwkeurige plaatsing."
 "LINETOOL.OffsetVariation","Variatie in verschuiving"
 "LINETOOL_DESCRIPTION.OffsetVariation","Objecten zullen willekeurig zijdelings worden verschoven vanaf de lijn tot aan deze maximale afstand. Zet op nul voor nauwkeurige plaatsing."
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."

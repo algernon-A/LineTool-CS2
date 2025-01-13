@@ -47,3 +47,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","El espaciado de elementos a lo largo de la línea será variado por una distancia aleatoria hasta este máximo. Establece el valor a cero para una posición precisa."
 "LINETOOL.OffsetVariation","Variación de desplazamiento"
 "LINETOOL_DESCRIPTION.OffsetVariation","Los elementos serán desplazados aleatoriamente desde la línea hasta esta distancia máxima. Establece el valor a cero para una posición precisa."
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."

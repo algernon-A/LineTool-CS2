@@ -47,3 +47,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","Расстояние между объектами вдоль линии будет изменяться на случайное расстояние до этого максимума. Для точного размещения установите нулевое значение."
 "LINETOOL.OffsetVariation","Изменение смещения"
 "LINETOOL_DESCRIPTION.OffsetVariation","Объекты будут случайным образом смещены в сторону от линии до этого максимального расстояния. Для точного размещения установите нулевое значение."
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."

@@ -47,3 +47,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","Określaj odstępy między obiektami wzdłuż linii losowo z zachowaniem tej wartości maksymalnej. Przy wartości zerowej obiekty umieszczane są precyzyjnie."
 "LINETOOL.OffsetVariation","Wariancja odchylenia"
 "LINETOOL_DESCRIPTION.OffsetVariation","Określaj odchylenie obiektów w poprzek linii losowo z zachowaniem tej wartości maksymalnej. Przy wartości zerowej obiekty umieszczane są precyzyjnie."
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."

@@ -48,3 +48,6 @@
 "LINETOOL_DESCRIPTION.SpacingVariation","沿线物体的间距将按照此数值随机变化。设置为零以实现精确放置。"
 "LINETOOL.OffsetVariation","偏移范围"
 "LINETOOL_DESCRIPTION.OffsetVariation","物体将沿线向两侧随机偏移。设置为零以实现精确放置。"
+"Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
+"Options.OPTION:GuidelineTransparency","Guideline transparency"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."
