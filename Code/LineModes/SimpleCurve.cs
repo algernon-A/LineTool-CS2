@@ -81,10 +81,22 @@ namespace LineTool
             // Randomizer.
             System.Random random = new ((int)(currentPos.x + currentPos.z) * 1000);
 
+            // Calculate the center Z point as a ratio of length from end to start (i.e. reverse).
+            float zLength = math.abs(zBounds.max - zBounds.min);
+            float zCenter = zBounds.min + (zLength * 0.5f);
+            float zCenterRatio = (zCenter / zLength) + 0.5f;
+
             // Traverse Bezier and place objects.
             float tFactor = 0f;
             float distanceTravelled = 0f;
-            while (tFactor <= 1.0f)
+
+            float endTFactor = 1.0f;
+            if (spacingMode == SpacingMode.FenceMode)
+            {
+                endTFactor = BezierStepReverse(1.0f, zLength);
+            }
+
+            while (tFactor <= endTFactor)
             {
                 // Apply spacing randomization.
                 float adjustedT = tFactor;
@@ -124,7 +136,9 @@ namespace LineTool
                     // Apply rotation.
                     float effectiveRotation = CalculateRelativeAngle(thisPoint, nextPoint, 0f);
                     qRotation = quaternion.Euler(0f, effectiveRotation, 0f);
-                    thisPoint = (nextPoint + thisPoint) / 2f;
+
+                    // Interpolate exact location of this point based on the centre z point of the mesh.
+                    thisPoint = math.lerp(nextPoint, thisPoint, zCenterRatio);
                 }
                 else if (spacingMode == SpacingMode.W2WMode)
                 {
@@ -156,8 +170,31 @@ namespace LineTool
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
             }
 
-            // Final item if we haven't placed but are within 2% of final placement distance.
-            if (distanceTravelled < length + (adjustedSpacing * 0.02f))
+            // Final item for fence mode.
+            if (spacingMode == SpacingMode.FenceMode)
+            {
+                // Don't do anything if we're close enough to a natural length.
+                if (distanceTravelled - length < zLength * 0.05f)
+                {
+                    // Calculate endpoints for this item starting from the bezier end curve and working backwards.
+                    float3 endPoint = MathUtils.Position(_thisBezier, 1f);
+                    float3 previousPoint = MathUtils.Position(_thisBezier, BezierStepReverse(1f, adjustedSpacing));
+
+                    // Apply rotation.
+                    float effectiveRotation = CalculateRelativeAngle(previousPoint, endPoint, 0f);
+                    qRotation = quaternion.Euler(0f, effectiveRotation, 0f);
+
+                    // Interpolate exact location of this point based on the centre z point of the mesh.
+                    float3 thisPoint = math.lerp(endPoint, previousPoint, zCenterRatio);
+
+                    // Add point to list.
+                    thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                    pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
+                }
+            }
+
+            // Otherwise, final item if we haven't placed but are within 2% of final placement distance.
+            else if (distanceTravelled < length + (adjustedSpacing * 0.02f))
             {
                 float3 thisPoint = currentPos;
                 thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
