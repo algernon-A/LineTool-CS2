@@ -413,8 +413,8 @@ namespace LineTool
                 }
 
                 // We've been using square magnitudes for comparison, so rest to true value.
-                startDistance = Mathf.Sqrt(startDistance);
-                endDistance = Mathf.Sqrt(endDistance);
+                startDistance = math.sqrt(startDistance);
+                endDistance = math.sqrt(endDistance);
 
                 // Check for exact match.
                 float fDiff = startDistance - endDistance;
@@ -425,7 +425,7 @@ namespace LineTool
                 }
 
                 // Not an exact match - use an interpolation.
-                return Mathf.Lerp(endT, startT, Mathf.Clamp01((distance - endDistance) / fDiff));
+                return math.lerp(endT, startT, math.clamp((distance - endDistance) / fDiff, 0f, 1f));
             }
             else
             {
@@ -457,8 +457,8 @@ namespace LineTool
                 }
 
                 // We've been using square magnitudes for comparison, so rest to true value.
-                startDistance = Mathf.Sqrt(startDistance);
-                endDistance = Mathf.Sqrt(endDistance);
+                startDistance = math.sqrt(startDistance);
+                endDistance = math.sqrt(endDistance);
 
                 // Check for exact match.
                 float remainder = endDistance - startDistance;
@@ -469,7 +469,7 @@ namespace LineTool
                 }
 
                 // Not an exact match - use an interpolation.
-                return Mathf.Lerp(startT, endT, Mathf.Clamp01((distance - startDistance) / remainder));
+                return math.lerp(startT, endT, math.clamp((distance - startDistance) / remainder, 0f, 1f));
             }
         }
     }

@@ -947,7 +947,7 @@ namespace LineTool
             }
 
             // Bounds check index before returning the seed index.
-            return _randomSeeds[UnityEngine.Mathf.Clamp(seedIndex, 0, listMax)];
+            return _randomSeeds[math.clamp(seedIndex, 0, listMax)];
         }
 
         /// <summary>

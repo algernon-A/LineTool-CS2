@@ -355,7 +355,7 @@ namespace LineTool
                 overlayBuffer.DrawCircle(m_highPriorityColor, endPos, lineScale * 5f);
 
                 // Add length tooltip.
-                int length = Mathf.RoundToInt(math.distance(startPos.xz, endPos.xz));
+                int length = (int)math.round(math.distance(startPos.xz, endPos.xz));
                 if (length > 0)
                 {
                     tooltips.Add(new TooltipInfo(TooltipType.Length, (startPos + endPos) * 0.5f, length));
