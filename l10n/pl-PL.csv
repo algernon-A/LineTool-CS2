@@ -48,5 +48,5 @@
 "LINETOOL.OffsetVariation","Wariancja odchylenia"
 "LINETOOL_DESCRIPTION.OffsetVariation","Określaj odchylenie obiektów w poprzek linii losowo z zachowaniem tej wartości maksymalnej. Przy wartości zerowej obiekty umieszczane są precyzyjnie."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
-"Options.OPTION:GuidelineTransparency","Guideline transparency"
-"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."
+"Options.OPTION:GuidelineTransparency","Przeźroczystość linii pomocniczych"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Przeźroczystość linii pomocniczych; 0% jest całkowicie nieprzeźroczyste, a 100% jest w pełni przeźroczyste (niewidoczne)."

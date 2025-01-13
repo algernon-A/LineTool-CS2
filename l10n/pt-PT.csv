@@ -48,5 +48,5 @@
 "LINETOOL.OffsetVariation","Variação de deslocamento lateral"
 "LINETOOL_DESCRIPTION.OffsetVariation","Os objetos serão deslocados lateralmente de forma aleatória a partir da linha, até esta distância máxima. Define como zero para posicionamento preciso."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
-"Options.OPTION:GuidelineTransparency","Guideline transparency"
-"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."
+"Options.OPTION:GuidelineTransparency","Transparência da diretrizes"
+"Options.OPTION_DESCRIPTION:GuidelineTransparency","Define a transparência das diretrizes. 0 é completamente opaco (máxima visibilidade), 100 é completamente transparente (invisível)."
