@@ -1,3 +1,5 @@
+- Add continuation constraint cancellation as a separate step before cancelling entire line.
+
 ### 1.1.0.1
 - Fix input binding conflicts blocking entry to fixed preview mode.
 

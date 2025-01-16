@@ -130,6 +130,11 @@ namespace LineTool
             {
                 ValidElbow = false;
             }
+            else if (_validPreviousElbow)
+            {
+                // If no current elbow but we've got a previous elbow (direction lock) in place, clear that.
+                _validPreviousElbow = false;
+            }
             else
             {
                 // Otherwise, reset entire state.
@@ -202,9 +207,9 @@ namespace LineTool
                     // Set the clamped position by extrapolation from the elbow point.
                     return ElbowPoint + (rotatedVector * elbowToCurrentLength);
                 }
-                else if (_validPreviousElbow)
+                else if (!ValidElbow && _validPreviousElbow)
                 {
-                    // If there's no a vaid elbow yet, constrain to continuous curve if there's a valid previous elbow to constrain to.
+                    // If there's no valid elbow yet, constrain to continuous curve if there's a valid previous elbow to constrain to.
                     // Use closest point on infinite line projected from previous curve end tangent.
                     return math.project(startPos - _previousElbowPoint, m_startPos - _previousElbowPoint) + _previousElbowPoint;
                 }

@@ -685,10 +685,10 @@ namespace LineTool
                 else
                 {
                     // Check for apply action initiation.
-                    bool applyWasPressed = applyAction.WasPressedThisFrame();
+                    bool applyWasPressed = applyAction.WasPressedThisFrame() || _keepBuildingAction.WasPressedThisFrame();
 
-                    // If no cancellation, handle any fixed preview action if we're ready to place.
-                    if (_fixedPreviewAction.WasPressedThisFrame() && _mode.HasAllPoints)
+                    // Handle any fixed preview action if we're ready to place.
+                    if (((applyWasPressed && Keyboard.current.ctrlKey.isPressed) || _fixedPreviewAction.WasPressedThisFrame()) && _mode.HasAllPoints)
                     {
                         // Are we already in fixed preview mode?
                         if (_fixedPreview)
@@ -753,7 +753,7 @@ namespace LineTool
                                 _mode.ItemsPlaced();
 
                                 // Reset tool mode if we're not building continuously.
-                                if (!Keyboard.current.shiftKey.isPressed)
+                                if (!(Keyboard.current.shiftKey.isPressed || _keepBuildingAction.WasPressedThisFrame()))
                                 {
                                     _mode.Reset();
                                 }
