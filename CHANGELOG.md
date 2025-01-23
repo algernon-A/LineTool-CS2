@@ -1,3 +1,6 @@
+### 1.1.2
+- Remove support for buildings (hopefully temporarily) due to recent game changes causing instability.
+
 ### 1.1.1
 - Add continuation constraint cancellation as a separate step before cancelling entire line.
 

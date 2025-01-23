@@ -1,1 +1,1 @@
-- Add continuation constraint cancellation as a separate step before cancelling entire line.
+- Remove support for buildings (hopefully temporarily) due to recent game changes causing instability.
