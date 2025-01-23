@@ -41,7 +41,7 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 ### Line modes
 - Toggle between **single object** (default game tool), **straight line**, **curved**, **circle**, and **grid** modes.
 - Toggle **fence mode** to align objects with the line direction, and place them continuously end-to-end (like a fence).  If not using snap-to-length, then you may need to enable Anarchy (via the Anarchy mod) to place the final (overlapping) piece.
-- Toggle **wall-to-wall mode** to align objects with the line direction, and place them continuously side-to-side (like a row of buildings).
+- Toggle **wall-to-wall mode** to align objects with the line direction, and place them continuously side-to-side.
 
  **Note**: fence mode and/or wall-to-wall mode are not available for all prefabs (and those options will be hidden if they're not available).  This occurs when the underlying prefab doesn't have a mesh that can be used to properly calculate dimensions (e.g. parking lots).
 
