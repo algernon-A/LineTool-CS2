@@ -353,11 +353,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Gets the currently selected entity.
-        /// </summary>
-        internal Entity SelectedEntity => _selectedEntity;
-
-        /// <summary>
         /// Gets a value indicating whether a tree prefab (with age stages) is currently selected.
         /// </summary>
         internal bool TreeSelected => m_PrefabSystem.HasComponent<TreeData>(_selectedPrefab);
@@ -380,6 +375,12 @@ namespace LineTool
             set
             {
                 _selectedPrefab = value as ObjectGeometryPrefab;
+
+                // Ignore buildings.
+                if (value is BuildingPrefab)
+                {
+                    _selectedPrefab = null;
+                }
 
                 // Update selected entity.
                 if (_selectedPrefab is null)
@@ -438,8 +439,12 @@ namespace LineTool
         {
             if (m_ToolSystem.activeTool == this && prefab is ObjectGeometryPrefab objectGeometryPrefab)
             {
-                SelectedPrefab = objectGeometryPrefab;
-                return true;
+                // Ignore buildings.
+                if (objectGeometryPrefab is not BuildingPrefab)
+                {
+                    SelectedPrefab = objectGeometryPrefab;
+                    return true;
+                }
             }
 
             // If we got here, the prefab isn't supported by Line Tool.

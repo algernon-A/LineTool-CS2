@@ -58,7 +58,7 @@ namespace LineTool
             _toolSystem.EventPrefabChanged = (Action<PrefabBase>)Delegate.Combine(_toolSystem.EventPrefabChanged, new Action<PrefabBase>(OnPrefabChanged));
 
             // Mode UI bindings.
-            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "ShowModeRow", () => _toolSystem.activeTool == _lineToolSystem || _toolSystem.activeTool is ObjectToolSystem));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "ShowModeRow", () => ShouldShowModeRow()));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "PointModeEnabled", () => _lineToolSystem.Mode == LineMode.Point || _toolSystem.activeTool != _lineToolSystem));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "StraightLineEnabled", () => _toolSystem.activeTool == _lineToolSystem && _lineToolSystem.Mode == LineMode.Straight));
             AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "SimpleCurveEnabled", () => _toolSystem.activeTool == _lineToolSystem && _lineToolSystem.Mode == LineMode.SimpleCurve));
@@ -170,6 +170,28 @@ namespace LineTool
             }
         }
 
+
+        /// <summary>
+        /// Determines whether the mod's mode row should be shown, i.e. a supported prefab is selected.
+        /// </summary>
+        /// <returns><c>true</c> if the row should be shown (the selected prefab is supported by the mod), <c>false</c> otherwise.</returns>
+        private bool ShouldShowModeRow()
+        {
+            if (_toolSystem.activeTool == _lineToolSystem)
+            {
+                // Always show if the tool is active.
+                return true;
+            }
+            else if (_toolSystem.activeTool is ObjectToolSystem objectToolSystem && objectToolSystem.prefab is not BuildingPrefab)
+            {
+                // Ignoring buildings.
+                return true;
+            }
+
+            // If we got here, it's not supported; don't show the row.
+            return false;
+        }
+
         /// <summary>
         /// Handles changes in the selected prefab.
         /// </summary>
@@ -177,7 +199,7 @@ namespace LineTool
         private void OnPrefabChanged(PrefabBase prefab)
         {
             // If the line tool is currently activated and the new prefab is a placeable object, reactivate it (the game will reset the tool to the relevant object tool).
-            if (_toolSystem.activeTool == _lineToolSystem && prefab is StaticObjectPrefab)
+            if (_toolSystem.activeTool == _lineToolSystem && prefab is StaticObjectPrefab && prefab is not BuildingPrefab)
             {
                 _lineToolSystem.EnableTool();
             }
