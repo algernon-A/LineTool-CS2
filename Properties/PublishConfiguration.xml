@@ -89,10 +89,10 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/GridVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
-  <ModVersion Value="1.1.2" />
+  <ModVersion Value="1.1.3" />
   <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
-  <ChangeLog>- Remove support for buildings (hopefully temporarily) due to recent game changes causing instability.</ChangeLog>
+  <ChangeLog>- Update UI dependency versions to match game version 1.2.5.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />

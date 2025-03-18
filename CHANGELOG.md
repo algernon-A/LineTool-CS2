@@ -1,3 +1,6 @@
+### 1.1.3
+- Update UI dependency versions to match game version 1.2.5.
+
 ### 1.1.2
 - Remove support for buildings (hopefully temporarily) due to recent game changes causing instability.
 

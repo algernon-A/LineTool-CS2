@@ -1,1 +1,1 @@
-- Remove support for buildings (hopefully temporarily) due to recent game changes causing instability.
+- Update UI dependency versions to match game version 1.2.5.
