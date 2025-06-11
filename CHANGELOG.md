@@ -1,3 +1,6 @@
+### 1.1.4
+- Update UI dependency versions to match game version 1.3.3.
+
 ### 1.1.3
 - Update UI dependency versions to match game version 1.2.5.
 

@@ -1,1 +1,1 @@
-- Update UI dependency versions to match game version 1.2.5.
+- Update UI dependency versions to match game version 1.3.3.
