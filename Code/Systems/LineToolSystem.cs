@@ -16,7 +16,6 @@ namespace LineTool
     using Game.Buildings;
     using Game.City;
     using Game.Common;
-    using Game.Input;
     using Game.Net;
     using Game.Objects;
     using Game.Prefabs;
@@ -398,6 +397,13 @@ namespace LineTool
                     _zBounds.max = 0f;
                     _xBounds.min = 0f;
                     _xBounds.max = 0f;
+
+                    if (_selectedPrefab.m_Meshes is null || _selectedPrefab.m_Meshes.Length == 0)
+                    {
+                        _log.Debug($"Selected prefab {value.name} : {_selectedPrefab.GetType().FullName} has no meshes");
+                        return;
+                    }
+
                     foreach (ObjectMeshInfo mesh in _selectedPrefab.m_Meshes)
                     {
                         if (mesh.m_Mesh is RenderPrefab renderPrefab)
