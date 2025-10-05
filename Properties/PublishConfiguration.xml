@@ -89,10 +89,10 @@ This mod uses the Harmony Patching Library by Andreas Pardeike.</LongDescription
   <Screenshot Value="Properties/Screenshots/GridVariation.jpg" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/line-tool.1644734/" />
-  <ModVersion Value="1.1.4" />
+  <ModVersion Value="1.1.5" />
   <GameVersion Value="1.3.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" Version="1.0.1" />
-  <ChangeLog>- Update UI dependency versions to match game version 1.3.3.</ChangeLog>
+  <ChangeLog>- Add support for prefabs with no meshes.</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/algernon-A/LineTool-CS2" />
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/line-tool-cs2" />

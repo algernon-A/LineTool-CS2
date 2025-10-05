@@ -1,1 +1,1 @@
-- Update UI dependency versions to match game version 1.3.3.
+- Add support for prefabs with no meshes.

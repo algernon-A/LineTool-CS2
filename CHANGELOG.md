@@ -1,4 +1,7 @@
 ### 1.1.4
+- Add support for prefabs with no meshes.
+
+### 1.1.4
 - Update UI dependency versions to match game version 1.3.3.
 
 ### 1.1.3

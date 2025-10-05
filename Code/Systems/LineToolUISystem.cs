@@ -170,7 +170,6 @@ namespace LineTool
             }
         }
 
-
         /// <summary>
         /// Determines whether the mod's mode row should be shown, i.e. a supported prefab is selected.
         /// </summary>
