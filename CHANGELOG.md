@@ -1,4 +1,4 @@
-### 1.1.4
+### 1.1.5
 - Add support for prefabs with no meshes.
 
 ### 1.1.4
