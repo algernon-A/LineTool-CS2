@@ -790,7 +790,7 @@ namespace LineTool
                     }
                     else
                     {
-                        float num3 = WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, transform3.m_Position, out var waterDepth);
+                        float num3 = WaterUtils.SampleHeight(ref m_WaterSurfaceData, ref m_TerrainHeightData, transform3.m_Position, out float waterDepth);
                         if (waterDepth >= 0.2f)
                         {
                             num3 += componentData3.m_PlacementOffset.y;

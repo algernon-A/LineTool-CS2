@@ -870,8 +870,8 @@ namespace LineTool
             base.OnStartRunning();
 
             // Ensure relevant base actions are enabled.
-            applyAction.enabled = true;
-            cancelAction.enabled = true;
+            applyAction.shouldBeEnabled = true;
+            cancelAction.shouldBeEnabled = true;
 
             // Clear any previous raycast result.
             _raycastPoint = default;
@@ -885,7 +885,7 @@ namespace LineTool
             // Manually enable base action if in editor mode.
             if (m_ToolSystem.actionMode.IsEditor())
             {
-               applyAction.enabled = true;
+               applyAction.shouldBeEnabled = true;
             }
         }
 
@@ -905,7 +905,7 @@ namespace LineTool
             // Disable base action if in editor mode.
             if (m_ToolSystem.actionMode.IsEditor())
             {
-                applyAction.enabled = false;
+                applyAction.shouldBeEnabled = false;
             }
 
             base.OnStopRunning();

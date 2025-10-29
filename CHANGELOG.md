@@ -1,3 +1,6 @@
+### 1.1.6
+- Compatibility with game version 1.3.6.
+
 ### 1.1.5
 - Add support for prefabs with no meshes.
 
