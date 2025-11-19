@@ -152,7 +152,7 @@ namespace LineTool
         [ReadOnly]
         public BufferLookup<ServiceUpgradeBuilding> m_PrefabServiceUpgradeBuilding;
         [ReadOnly]
-        public WaterSurfaceData m_WaterSurfaceData;
+        public WaterSurfaceData<SurfaceWater> m_WaterSurfaceData;
         [ReadOnly]
         public TerrainHeightData m_TerrainHeightData;
         public EntityCommandBuffer m_CommandBuffer;

@@ -1,3 +1,6 @@
+### 1.1.7
+- Compatibility with game version 1.4.2.
+
 ### 1.1.6
 - Compatibility with game version 1.3.6.
 
