@@ -1,3 +1,6 @@
+### 1.1.8
+- Update UI dependency versions to match game version 1.5.2.
+
 ### 1.1.7
 - Compatibility with game version 1.4.2.
 

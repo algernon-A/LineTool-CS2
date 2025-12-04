@@ -1,1 +1,1 @@
-- Compatibility with game version 1.4.2.
+- Update UI dependency versions to match game version 1.5.2.
