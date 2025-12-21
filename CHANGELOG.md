@@ -1,3 +1,6 @@
+### 1.1.8.1
+- Add null guard to tree selection check.
+
 ### 1.1.8
 - Update UI dependency versions to match game version 1.5.2.
 

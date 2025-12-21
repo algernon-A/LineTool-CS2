@@ -1,1 +1,1 @@
-- Update UI dependency versions to match game version 1.5.2.
+- Add null guard to tree selection check.
