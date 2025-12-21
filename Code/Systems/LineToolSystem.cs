@@ -354,7 +354,7 @@ namespace LineTool
         /// <summary>
         /// Gets a value indicating whether a tree prefab (with age stages) is currently selected.
         /// </summary>
-        internal bool TreeSelected => m_PrefabSystem.HasComponent<TreeData>(_selectedPrefab);
+        internal bool TreeSelected => _selectedPrefab is not null && m_PrefabSystem.HasComponent<TreeData>(_selectedPrefab);
 
         /// <summary>
         /// Gets or sets the active tree age mask.
