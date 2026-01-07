@@ -1,3 +1,4 @@
+### 1.1.9
 - Hide game topography toggle if Topo Toggle mod is present.
 
 ### 1.1.8.1

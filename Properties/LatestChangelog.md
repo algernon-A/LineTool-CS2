@@ -1,1 +1,1 @@
-- Add null guard to tree selection check.
+- Hide game topography toggle if Topo Toggle mod is present.
