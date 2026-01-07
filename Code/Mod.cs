@@ -127,11 +127,8 @@ namespace LineTool
             Log.Info("disposing");
 
             // Dispose of active options settings.
-            if (ActiveSettings is not null)
-            {
-                ActiveSettings.UnregisterInOptionsUI();
-                ActiveSettings = null;
-            }
+            ActiveSettings?.UnregisterInOptionsUI();
+            ActiveSettings = null;
 
             // Revert harmony patches.
             Patcher.Instance?.UnPatchAll();

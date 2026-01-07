@@ -1,3 +1,5 @@
+- Hide game topography toggle if Topo Toggle mod is present.
+
 ### 1.1.8.1
 - Add null guard to tree selection check.
 

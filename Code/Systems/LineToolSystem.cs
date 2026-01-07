@@ -8,8 +8,10 @@ namespace LineTool
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using Colossal.Logging;
     using Colossal.Mathematics;
+    using Colossal.Serialization.Entities;
     using Game;
     using Game.Areas;
     using Game.Audio;
@@ -91,6 +93,9 @@ namespace LineTool
         private float _randomSpacing = 0f;
         private float _randomOffset = 0f;
         private bool _dirty = false;
+
+        // Interactions with other mods.
+        private bool _topoToggleActive = false;
 
         /// <summary>
         /// Point dragging mode.
@@ -475,8 +480,13 @@ namespace LineTool
         public override void GetAvailableSnapMask(out Snap onMask, out Snap offMask)
         {
             base.GetAvailableSnapMask(out onMask, out offMask);
-            onMask |= Snap.ContourLines;
-            offMask |= Snap.ContourLines;
+
+            // Only show countour lines via vanilla if Topo Toggle mod isn't active.
+            if (!_topoToggleActive)
+            {
+                onMask |= Snap.ContourLines;
+                offMask |= Snap.ContourLines;
+            }
         }
 
         /// <summary>
@@ -620,6 +630,22 @@ namespace LineTool
             GuidelineTransparency = Mod.Instance.ActiveSettings.GuidelineTransparency;
         }
 
+        /// <inheritdoc/>
+        protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode)
+        {
+            // Check for TopoToggle mod presence.
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
+            {
+                if (assembly.FullName.Contains("TopoToggle,"))
+                {
+                    _log.Info($"found TopoToggle assembly {assembly.FullName}");
+                    _topoToggleActive = true;
+                    break;
+                }
+            }
+        }
+
         /// <summary>
         /// Called every tool update.
         /// </summary>
@@ -688,7 +714,7 @@ namespace LineTool
                     else
                     {
                         // At mode initial state - cancel back to point mode.
-                       RestorePreviousTool();
+                        RestorePreviousTool();
                     }
 
                     return inputDeps;
@@ -885,7 +911,7 @@ namespace LineTool
             // Manually enable base action if in editor mode.
             if (m_ToolSystem.actionMode.IsEditor())
             {
-               applyAction.shouldBeEnabled = true;
+                applyAction.shouldBeEnabled = true;
             }
         }
 

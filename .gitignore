@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Library
 /package-lock.json
+/UI/.idea
