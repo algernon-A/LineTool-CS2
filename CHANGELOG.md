@@ -1,3 +1,6 @@
+### 1.1.10
+- Update UI dependency versions.
+
 ### 1.1.9
 - Hide game topography toggle if Topo Toggle mod is present.
 

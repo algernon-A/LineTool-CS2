@@ -1,1 +1,1 @@
-- Hide game topography toggle if Topo Toggle mod is present.
+- Update UI dependency versions.
