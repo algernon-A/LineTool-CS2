@@ -385,7 +385,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                                  tooltip={translate("LINETOOL_DESCRIPTION.Elevation")}>
                             <ToolButton
                                 className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/NetworkGround.svg"}
+                                src={"coui://uil/Standard/ElevationVaried.svg"}
                                 tooltip={TitledTooltip("LINETOOL.FollowTerrain", "LINETOOL_DESCRIPTION.FollowTerrain")}
                                 onSelect={followTerrainClick}
                                 selected={followTerrainEnabled}
@@ -395,7 +395,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             />
                             <ToolButton
                                 className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/NetworkElevated.svg"}
+                                src={"coui://uil/Standard/ElevationLevel.svg"}
                                 tooltip={TitledTooltip("LINETOOL.FixedElevation", "LINETOOL_DESCRIPTION.FixedElevation")}
                                 onSelect={fixedElevationClick}
                                 selected={fixedElevationEnabled}
@@ -405,7 +405,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                             />
                             <ToolButton
                                 className={toolButtonTheme.button}
-                                src={"coui://uil/Standard/NetworkSlope.svg"}
+                                src={"coui://uil/Standard/ElevationSlope.svg"}
                                 tooltip={TitledTooltip("LINETOOL.ConstantSlope", "LINETOOL_DESCRIPTION.ConstantSlope")}
                                 onSelect={constantSlopeClick}
                                 selected={constantSlopeEnabled}
