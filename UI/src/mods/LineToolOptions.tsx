@@ -381,8 +381,7 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                 // Elevation row.
                 result.props.children?.push(
                     <>
-                        <Section title={translate("LINETOOL.Elevation")}
-                                 tooltip={translate("LINETOOL_DESCRIPTION.Elevation")}>
+                        <Section title={translate("LINETOOL.Elevation")}>
                             <ToolButton
                                 className={toolButtonTheme.button}
                                 src={"coui://uil/Standard/ElevationVaried.svg"}
