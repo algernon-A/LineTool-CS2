@@ -42,6 +42,7 @@ namespace LineTool
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
         /// <param name="rotationMode">Active rotation mode.</param>
+        /// <param name="elevationMode">Active elevation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -49,7 +50,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, ElevationMode elevationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -75,6 +76,13 @@ namespace LineTool
             float startAngle = math.atan2(difference.z, difference.x);
             System.Random random = new ((int)circumference * 1000);
 
+            // Calculate line start elevation if needed for elevation modes - note that for a circle, starting and ending elevations are the same.
+            float startingElevation = 0f;
+            if (elevationMode != ElevationMode.FollowTerrain)
+            {
+                startingElevation = TerrainUtils.SampleHeight(ref heightData, m_startPos);
+            }
+
             // Create points.
             for (float i = startAngle; i < startAngle + (math.PI * 2f); i += increment)
             {
@@ -97,7 +105,7 @@ namespace LineTool
                     thisPoint += math.normalize(thisPoint - m_startPos) * ((float)(randomOffset * random.NextDouble() * 2f) - randomOffset);
                 }
 
-                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, startingElevation);
 
                 // Calculate effective rotation.
                 float effectiveRotation = rotationMode == RotationMode.Absolute ? rotation : math.radians(rotation) - i;

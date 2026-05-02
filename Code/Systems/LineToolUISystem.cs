@@ -111,6 +111,14 @@ namespace LineTool
             AddBinding(new TriggerBinding("LineTool", "IncreaseOffsetVariation", IncreaseOffsetVariation));
             AddBinding(new TriggerBinding("LineTool", "DecreaseOffsetVariation", DecreaseOffsetVariation));
 
+            // Elevation gradient UI bindings.
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FollowTerrainEnabled", () => _lineToolSystem.CurrentElevationMode == ElevationMode.FollowTerrain || _toolSystem.activeTool != _lineToolSystem));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "FixedElevationEnabled", () => _lineToolSystem.CurrentElevationMode == ElevationMode.Fixed || _toolSystem.activeTool != _lineToolSystem));
+            AddUpdateBinding(new GetterValueBinding<bool>("LineTool", "ConstantSlopeEnabled", () => _lineToolSystem.CurrentElevationMode == ElevationMode.ConstantSlope || _toolSystem.activeTool != _lineToolSystem));
+            AddBinding(new TriggerBinding("LineTool", "SetFollowTerrain", SetFollowTerrain));
+            AddBinding(new TriggerBinding("LineTool", "SetFixedElevation", SetFixedElevation));
+            AddBinding(new TriggerBinding("LineTool", "SetConstantSlope", SetConstantSlope));
+
             // Add additional binding to capture tree age selection changes.
             _ageMaskBinding = AccessTools.Field(typeof(ToolbarUISystem), "m_AgeMaskBinding")?.GetValue(World.GetOrCreateSystemManaged<ToolbarUISystem>()) as ValueBinding<int>;
             if (_ageMaskBinding is not null)
@@ -338,6 +346,21 @@ namespace LineTool
         /// Event callback to set random rotation.
         /// </summary>
         private void SetRandomRotation() => _lineToolSystem.CurrentRotationMode = RotationMode.Random;
+
+        /// <summary>
+        /// Event callback to set terrain-following elevation mode.
+        /// </summary>
+        private void SetFollowTerrain() => _lineToolSystem.CurrentElevationMode = ElevationMode.FollowTerrain;
+
+        /// <summary>
+        /// Event callback to set fixed elevation mode.
+        /// </summary>
+        private void SetFixedElevation() => _lineToolSystem.CurrentElevationMode = ElevationMode.Fixed;
+
+        /// <summary>
+        /// Event callback to set constant slope elevation mode.
+        /// </summary>
+        private void SetConstantSlope() => _lineToolSystem.CurrentElevationMode = ElevationMode.ConstantSlope;
 
         /// <summary>
         /// Event callback to increase rotation by one step.

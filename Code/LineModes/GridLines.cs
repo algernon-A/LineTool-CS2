@@ -46,6 +46,7 @@ namespace LineTool
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
         /// <param name="rotationMode">Active rotation mode.</param>
+        /// <param name="elevationMode">Active elevation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -53,7 +54,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, ElevationMode elevationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -64,7 +65,7 @@ namespace LineTool
             // If we have a valid start but no valid elbow, just draw a straight line.
             if (!ValidElbow)
             {
-                base.CalculatePoints(currentPos, spacingMode, rotationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
+                base.CalculatePoints(currentPos, spacingMode, rotationMode, elevationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
                 return;
             }
 

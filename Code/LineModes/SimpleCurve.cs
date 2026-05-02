@@ -41,6 +41,7 @@ namespace LineTool
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
         /// <param name="rotationMode">Active rotation mode.</param>
+        /// <param name="elevationMode">Active elevation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -48,7 +49,7 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
+        public override void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, ElevationMode elevationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have valid start.
             if (!m_validStart)
@@ -59,7 +60,7 @@ namespace LineTool
             // If we have a valid start but no valid elbow, just draw a straight line.
             if (!ValidElbow)
             {
-                base.CalculatePoints(currentPos, spacingMode, rotationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
+                base.CalculatePoints(currentPos, spacingMode, rotationMode, elevationMode, spacing, randomSpacing, randomOffset, rotation, zBounds, pointList, ref heightData);
                 return;
             }
 
@@ -85,6 +86,18 @@ namespace LineTool
             float zLength = math.abs(zBounds.max - zBounds.min);
             float zCenter = zBounds.min + (zLength * 0.5f);
             float zCenterRatio = (zCenter / zLength) + 0.5f;
+
+            // Calculate line start and ending elevations if needed for elevation modes.
+            float startingElevation = 0f;
+            float endingElevation = 0f;
+            if (elevationMode != ElevationMode.FollowTerrain)
+            {
+                startingElevation = TerrainUtils.SampleHeight(ref heightData, m_startPos);
+                if (elevationMode == ElevationMode.ConstantSlope)
+                {
+                    endingElevation = TerrainUtils.SampleHeight(ref heightData, m_endPos);
+                }
+            }
 
             // Traverse Bezier and place objects.
             float tFactor = 0f;
@@ -163,8 +176,8 @@ namespace LineTool
                     qRotation = quaternion.Euler(0f, relativeAngle, 0f);
                 }
 
-                // Calculate terrain height.
-                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                // Calculate point elevation.
+                thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, endingElevation);
 
                 // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
@@ -188,7 +201,7 @@ namespace LineTool
                     float3 thisPoint = math.lerp(endPoint, previousPoint, zCenterRatio);
 
                     // Add point to list.
-                    thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                    thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, endingElevation);
                     pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
                 }
             }
@@ -197,7 +210,7 @@ namespace LineTool
             else if (distanceTravelled < length + (adjustedSpacing * 0.02f))
             {
                 float3 thisPoint = currentPos;
-                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, endingElevation);
 
                 // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });

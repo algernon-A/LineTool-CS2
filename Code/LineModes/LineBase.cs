@@ -143,6 +143,7 @@ namespace LineTool
         /// <param name="currentPos">Selection current position.</param>
         /// <param name="spacingMode">Active spacing mode.</param>
         /// <param name="rotationMode">Active rotation mode.</param>
+        /// <param name="elevationMode">Active elevation mode.</param>
         /// <param name="spacing">Spacing distance.</param>
         /// <param name="randomSpacing">Random spacing offset maximum.</param>
         /// <param name="randomOffset">Random lateral offset maximum.</param>
@@ -150,12 +151,24 @@ namespace LineTool
         /// <param name="zBounds">Prefab zBounds.</param>
         /// <param name="pointList">List of points to populate.</param>
         /// <param name="heightData">Terrain height data reference.</param>
-        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
+        public virtual void CalculatePoints(float3 currentPos, SpacingMode spacingMode, RotationMode rotationMode, ElevationMode elevationMode, float spacing, float randomSpacing, float randomOffset, int rotation, Bounds1 zBounds, List<PointData> pointList, ref TerrainHeightData heightData)
         {
             // Don't do anything if we don't have a valid start point.
             if (!m_validStart)
             {
                 return;
+            }
+
+            // Calculate line start and ending elevations if needed for elevation modes.
+            float startingElevation = 0f;
+            float endingElevation = 0f;
+            if (elevationMode != ElevationMode.FollowTerrain)
+            {
+                startingElevation = TerrainUtils.SampleHeight(ref heightData, m_startPos);
+                if (elevationMode == ElevationMode.ConstantSlope)
+                {
+                    endingElevation = TerrainUtils.SampleHeight(ref heightData, m_endPos);
+                }
             }
 
             // Calculate length.
@@ -205,7 +218,7 @@ namespace LineTool
                     thisPoint += left * ((float)(randomOffset * random.NextDouble() * 2f) - randomOffset);
                 }
 
-                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, endingElevation);
 
                 // Add point to list.
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
@@ -216,7 +229,7 @@ namespace LineTool
             if (spacingMode == SpacingMode.FenceMode && currentDistance < length - zBounds.min)
             {
                 float3 thisPoint = math.lerp(m_startPos, currentPos, (length - zBounds.max + 0.001f) / length);
-                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, endingElevation);
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
             }
 
@@ -224,7 +237,7 @@ namespace LineTool
             else if (currentDistance < endLength + (adjustedSpacing * 0.02f))
             {
                 float3 thisPoint = currentPos;
-                thisPoint.y = TerrainUtils.SampleHeight(ref heightData, thisPoint);
+                thisPoint.y = CalculateElevation(elevationMode, ref heightData, thisPoint, startingElevation, endingElevation);
                 pointList.Add(new PointData { Position = thisPoint, Rotation = qRotation, });
             }
 
@@ -422,6 +435,32 @@ namespace LineTool
 
             // Include small round-up adjustment.
             return start + ((roundedLength * line) / length) + 0.01f;
+        }
+
+        /// <summary>
+        /// Calculates the elevation for a given position based on the selected elevation mode.
+        /// </summary>
+        /// <param name="elevationMode">Selected elevation mode.</param>
+        /// <param name="heightData">Terrain manaer height data.</param>
+        /// <param name="position">World position of line point.</param>
+        /// <param name="startElevation">Elevation of the starting position on the line.</param>
+        /// <param name="endElevation">Elevation at the ending position on the line.</param>
+        /// <returns>Calculated elevation for the given line point.</returns>
+        protected float CalculateElevation(ElevationMode elevationMode, ref TerrainHeightData heightData, float3 position, float startElevation, float endElevation)
+        {
+            switch (elevationMode)
+            {
+                default:
+                case ElevationMode.FollowTerrain:
+                    return TerrainUtils.SampleHeight(ref heightData, position);
+                case ElevationMode.Fixed:
+                    return startElevation;
+                case ElevationMode.ConstantSlope:
+                    float distance = math.distance(m_startPos.xz, position.xz);
+                    float totalDistance = math.distance(m_startPos.xz, m_endPos.xz);
+                    float slope = (endElevation - startElevation) / totalDistance;
+                    return startElevation + (slope * distance);
+            }
         }
     }
 }

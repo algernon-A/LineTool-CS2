@@ -1,4 +1,4 @@
-﻿// <copyright file="RotationMode.cs" company="algernon (K. Algernon A. Sheppard)">
+﻿// <copyright file="ElevationMode.cs" company="algernon (K. Algernon A. Sheppard)">
 // Copyright (c) algernon (K. Algernon A. Sheppard). All rights reserved.
 // Licensed under the Apache Licence, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 // See LICENSE.txt file in the project root for full license information.
@@ -7,23 +7,23 @@
 namespace LineTool
 {
     /// <summary>
-    /// Line tool rotation modes.
+    /// Line tool elevation modes.
     /// </summary>
-    public enum RotationMode
+    public enum ElevationMode
     {
         /// <summary>
-        /// Absolute rotation.
+        /// Follow terrain elevation.
         /// </summary>
-        Absolute,
+        FollowTerrain,
 
         /// <summary>
-        /// Relative rotation.
+        /// Fixed elevation (terrain elevation at start).
         /// </summary>
-        Relative,
+        Fixed,
 
         /// <summary>
-        /// Random rotation.
+        /// Constant slope from start to end terrain elevation.
         /// </summary>
-        Random,
+        ConstantSlope,
     }
 }

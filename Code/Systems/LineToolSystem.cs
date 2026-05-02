@@ -88,6 +88,7 @@ namespace LineTool
         // Tool settings.
         private SpacingMode _spacingMode = SpacingMode.Manual;
         private RotationMode _rotationMode = RotationMode.Relative;
+        private ElevationMode _elevationMode = ElevationMode.FollowTerrain;
         private float _spacing = 20f;
         private int _rotation = 0;
         private float _randomSpacing = 0f;
@@ -245,6 +246,24 @@ namespace LineTool
                 if (_rotationMode != value)
                 {
                     _rotationMode = value;
+                    _dirty = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the current elevation mode.
+        /// </summary>
+        internal ElevationMode CurrentElevationMode
+        {
+            get => _elevationMode;
+
+            set
+            {
+                // Don't do anything if no change.
+                if (_elevationMode != value)
+                {
+                    _elevationMode = value;
                     _dirty = true;
                 }
             }
@@ -854,7 +873,7 @@ namespace LineTool
 
             // If we got here we're (re)calculating points.
             _points.Clear();
-            _mode.CalculatePoints(position, CurrentSpacingMode, CurrentRotationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
+            _mode.CalculatePoints(position, CurrentSpacingMode, CurrentRotationMode, CurrentElevationMode, EffectiveSpacing, RandomSpacing, RandomOffset, _rotation, _zBounds, _points, ref _terrainHeightData);
 
             // Initialize randomization for this run.
             RandomSeed randomSeed = GetRandomSeed(0);

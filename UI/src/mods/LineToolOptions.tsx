@@ -15,6 +15,9 @@ export const w2wModeAvailable$ = bindValue<boolean>('LineTool', 'W2WModeAvailabl
 export const fenceModeEnabled$ = bindValue<boolean>('LineTool', 'FenceModeEnabled');
 export const w2wModeEnabled$ = bindValue<boolean>('LineTool', 'W2WModeEnabled');
 export const randomizationEnabled$ = bindValue<boolean>('LineTool', 'RandomizationEnabled');
+export const followTerrainEnabled$ = bindValue<boolean>('LineTool', 'FollowTerrainEnabled');
+export const fixedElevationEnabled$ = bindValue<boolean>('LineTool', 'FixedElevationEnabled');
+export const constantSlopeEnabled$ = bindValue<boolean>('LineTool', 'ConstantSlopeEnabled');
 export const lengthSnapEnabled$ = bindValue<boolean>('LineTool', 'LengthSnapEnabled');
 export const fullLengthEnabled$ = bindValue<boolean>('LineTool', 'FullLengthEnabled');
 export const absoluteRotationEnabled$ = bindValue<boolean>('LineTool', 'AbsoluteRotationEnabled');
@@ -46,6 +49,9 @@ export function spacingDownClick() { trigger("LineTool", "DecreaseSpacing"); }
 export function relativeRotationClick() { trigger("LineTool", "SetRelativeRotation"); }
 export function absoluteRotationClick() { trigger("LineTool", "SetAbsoluteRotation"); }
 export function randomRotationClick() { trigger("LineTool", "SetRandomRotation"); }
+export function followTerrainClick() { trigger("LineTool", "SetFollowTerrain"); }
+export function fixedElevationClick() { trigger("LineTool", "SetFixedElevation"); }
+export function constantSlopeClick() { trigger("LineTool", "SetConstantSlope"); }
 export function rotationUpClick() { trigger("LineTool", "IncreaseRotation"); }
 export function rotationDownClick() { trigger("LineTool", "DecreaseRotation"); }
 export function spacingVariationUpClick() { trigger("LineTool", "IncreaseSpacingVariation"); }
@@ -82,6 +88,9 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
         const fenceModeEnabled: boolean = useValue(fenceModeEnabled$);
         const w2wModeEnabled: boolean = useValue(w2wModeEnabled$);
         const randomizationEnabled: boolean = useValue(randomizationEnabled$);
+        const followTerrainEnabled: boolean = useValue(followTerrainEnabled$);
+        const fixedElevationEnabled: boolean = useValue(fixedElevationEnabled$);
+        const constantSlopeEnabled: boolean = useValue(constantSlopeEnabled$);
         const lengthSnapEnabled: boolean = useValue(lengthSnapEnabled$);
         const fullLengthEnabled: boolean = useValue(fullLengthEnabled$);
         const relativeRotationEnabled: boolean = useValue(relativeRotationEnabled$);
@@ -368,6 +377,45 @@ export const LineToolOptionsComponent = (moduleRegistry: ModuleRegistry) => (Com
                         </>
                     );
                 }
+                
+                // Elevation row.
+                result.props.children?.push(
+                    <>
+                        <Section title={translate("LINETOOL.Elevation")}
+                                 tooltip={translate("LINETOOL_DESCRIPTION.Elevation")}>
+                            <ToolButton
+                                className={toolButtonTheme.button}
+                                src={"coui://uil/Standard/NetworkGround.svg"}
+                                tooltip={TitledTooltip("LINETOOL.FollowTerrain", "LINETOOL_DESCRIPTION.FollowTerrain")}
+                                onSelect={followTerrainClick}
+                                selected={followTerrainEnabled}
+                                multiSelect={false}
+                                disabled={false}
+                                focusKey={FocusDisabled}
+                            />
+                            <ToolButton
+                                className={toolButtonTheme.button}
+                                src={"coui://uil/Standard/NetworkElevated.svg"}
+                                tooltip={TitledTooltip("LINETOOL.FixedElevation", "LINETOOL_DESCRIPTION.FixedElevation")}
+                                onSelect={fixedElevationClick}
+                                selected={fixedElevationEnabled}
+                                multiSelect={false}
+                                disabled={false}
+                                focusKey={FocusDisabled}
+                            />
+                            <ToolButton
+                                className={toolButtonTheme.button}
+                                src={"coui://uil/Standard/NetworkSlope.svg"}
+                                tooltip={TitledTooltip("LINETOOL.ConstantSlope", "LINETOOL_DESCRIPTION.ConstantSlope")}
+                                onSelect={constantSlopeClick}
+                                selected={constantSlopeEnabled}
+                                multiSelect={false}
+                                disabled={false}
+                                focusKey={FocusDisabled}
+                            />
+                        </Section>
+                    </>
+                );
                 
                 // Variation rows.
                 result.props.children?.push(
