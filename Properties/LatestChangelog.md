@@ -1,1 +1,1 @@
-- Update UI dependency versions.
+- Add elevation modes.

@@ -1,3 +1,6 @@
+### 1.2
+- Add elevation modes.
+
 ### 1.1.10
 - Update UI dependency versions.
 

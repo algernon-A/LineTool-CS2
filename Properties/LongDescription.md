@@ -14,6 +14,7 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 - Works both *in-game* and *in the editor*.
 - **Fence mode**: Automatically align and place objects end-to-end.
 - **Wall-to-wall mode**: Automatically align and place objects side-to-side.
+- **Elevation modes**: Control whether objects are placed at terrain level, at the height of the first object, or along a smooth gradient from start to end.
 - **Appearance randomization controls**: Settings to control object appearance randomization.
 - **Accurate placement**: No worrying about imprecision.
 - **Adjust spacing and rotation**: Use the in-game tool UI for more control, including random rotation for a more natural look.
@@ -55,8 +56,14 @@ It works **alongside the game's inbuilt line tool** to provide advanced function
 - Select **absolute rotation** to make the objects all face in the same direction (ignoring the line direction).
 - Select **random rotation** to have each object in the line have a different randomly-chosen rotation.
 
+### Elevation modes
+- Select **terrain elevation** to place objects at terrain level (default behavior).
+- Select **fixed elevation** to place all objects at the same elevaton as the terrain elevation at the start of the line.
+- Select **constant slope** to place all objects along a smooth gradient from the terrain elevation at the start point to the terrain elevation at the end point.
+
 ### Placement randomization
-- Set **variable spacing** greater than zero to apply a random length offset to each item's spacing, up to the maximum distance specified - click for 1m increments, **Shift-click** for 10m, **Control-click** for 0.1m.
+- Set **variable spacing** greater than zero to apply a random length offset to each item's spacing, up to 
+- the maximum distance specified - click for 1m increments, **Shift-click** for 10m, **Control-click** for 0.1m.
 - Set **variable offset** greater than zero to apply a random sideways offset to each item, up to the maximum distance specified - click for 1m increments, **Shift-click** for 10m, **Control-click** for 0.1m.
 - To remove variable spacing and/or offset, set the field(s) back to zero. **Shift-click** (10m increments) to make this faster.
 
