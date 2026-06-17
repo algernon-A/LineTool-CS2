@@ -29,24 +29,6 @@ namespace LineTool
         }
 
         /// <summary>
-        /// Returns true if Hover Colors is loaded.
-        /// </summary>
-        /// <returns>True if Hover Colors is loaded; otherwise false.</returns>
-        public bool IsHoverColorsLoaded()
-        {
-            return CompatibilityHoverColors.IsHoverColorsLoaded();
-        }
-
-        /// <summary>
-        /// Returns true if Hover Colors is not loaded.
-        /// </summary>
-        /// <returns>True if Hover Colors is not loaded; otherwise false.</returns>
-        public bool IsHoverColorsNotLoaded()
-        {
-            return !CompatibilityHoverColors.IsHoverColorsLoaded();
-        }
-
-        /// <summary>
         /// Gets or sets the guideline transparency (0..1).
         /// </summary>
         [SettingsUIHideByCondition(typeof(ModSettings), nameof(IsHoverColorsLoaded))]
@@ -76,6 +58,24 @@ namespace LineTool
         public string HoverColorsGuidelineTransparencyNotice
         {
             get => "Hover Colors mod is installed, use the guideline transparency sliders in that mod.";
+        }
+
+        /// <summary>
+        /// Returns true if Hover Colors is loaded.
+        /// </summary>
+        /// <returns>True if Hover Colors is loaded; otherwise false.</returns>
+        public bool IsHoverColorsLoaded()
+        {
+            return CompatibilityHoverColors.IsHoverColorsLoaded();
+        }
+
+        /// <summary>
+        /// Returns true if Hover Colors is not loaded.
+        /// </summary>
+        /// <returns>True if Hover Colors is not loaded; otherwise false.</returns>
+        public bool IsHoverColorsNotLoaded()
+        {
+            return !CompatibilityHoverColors.IsHoverColorsLoaded();
         }
 
         /// <summary>
