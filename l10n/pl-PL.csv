@@ -1,4 +1,4 @@
-"LINETOOL.Title","Zaawansowany Line Tool"
+﻿"LINETOOL.Title","Zaawansowany Line Tool"
 "LINETOOL.LineMode","Tryb linii"
 "LINETOOL.Options","Opcje"
 "LINETOOL.FenceMode","Tryb ogrodzenia"
@@ -55,5 +55,6 @@
 "LINETOOL.OffsetVariation","Wariancja odchylenia"
 "LINETOOL_DESCRIPTION.OffsetVariation","Określaj odchylenie obiektów w poprzek linii losowo z zachowaniem tej wartości maksymalnej. Przy wartości zerowej obiekty umieszczane są precyzyjnie."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
-"Options.OPTION:GuidelineTransparency","Przeźroczystość linii pomocniczych"
-"Options.OPTION_DESCRIPTION:GuidelineTransparency","Przeźroczystość linii pomocniczych; 0% jest całkowicie nieprzeźroczyste, a 100% jest w pełni przeźroczyste (niewidoczne)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","Przezroczystość linii pomocniczych"
+"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice","Mod Hover Colors jest zainstalowany. Użyj suwaków przezroczystości linii pomocniczych w tym modzie."
+

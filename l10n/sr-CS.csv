@@ -1,4 +1,4 @@
-"LINETOOL.Title","Advanced Line Tool"
+﻿"LINETOOL.Title","Advanced Line Tool"
 "LINETOOL.LineMode","Oblik linije"
 "LINETOOL.Options","Opcije"
 "LINETOOL.FenceMode","Ograda"
@@ -55,5 +55,6 @@
 "LINETOOL.OffsetVariation","Varijacija odstupanja"
 "LINETOOL_DESCRIPTION.OffsetVariation","Objekti će nasumično odstupati od bočne linije do ovog maksimalnog rastojanja. Stavi na nulu za precizno postavljanje."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
-"Options.OPTION:GuidelineTransparency","Guideline transparency"
-"Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","Transparentnost smernica"
+"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice","Mod Hover Colors je instaliran. Koristite klizače za transparentnost smernica u tom modu."
+

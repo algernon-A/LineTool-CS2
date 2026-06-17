@@ -1,4 +1,4 @@
-"LINETOOL.Title","Advanced Line Tool"
+﻿"LINETOOL.Title","Advanced Line Tool"
 "LINETOOL.LineMode","Режим линии"
 "LINETOOL.Options","Параметры"
 "LINETOOL.FenceMode","Режим ограждений"
@@ -55,5 +55,6 @@
 "LINETOOL.OffsetVariation","Изменение смещения"
 "LINETOOL_DESCRIPTION.OffsetVariation","Объекты будут случайным образом смещены в сторону от линии до этого максимального расстояния. Для точного размещения установите нулевое значение."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
-"Options.OPTION:GuidelineTransparency","Прозрачность направляющей"
-"Options.OPTION_DESCRIPTION:GuidelineTransparency","Устанавливает прозрачность направляющих. 0 - полностью непрозрачные (максимальная видимость), 100 - полностью прозрачные (невидимые)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","Прозрачность направляющих"
+"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice","Мод Hover Colors установлен. Используйте ползунки прозрачности направляющих в этом моде."
+
