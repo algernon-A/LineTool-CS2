@@ -646,7 +646,9 @@ namespace LineTool
             _keepBuildingAction.Enable();
 
             // Set guideline transparency.
-            GuidelineTransparency = Mod.Instance.ActiveSettings.GuidelineTransparency;
+            GuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
+                ? 0f
+                : Mod.Instance.ActiveSettings.GuidelineTransparency;
         }
 
         /// <inheritdoc/>

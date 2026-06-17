@@ -31,6 +31,7 @@ namespace LineTool
         /// <summary>
         /// Gets or sets the guideline transparency (0..1).
         /// </summary>
+        [SettingsUIHideByCondition(typeof(CompatibilityHoverColors), nameof(CompatibilityHoverColors.IsHoverColorsLoaded))]
         [SettingsUISlider(min = 0f, max = 100f, step = 1f, scalarMultiplier = 100f, unit = Unit.kPercentage)]
         [SettingsUICustomFormat]
         public float GuidelineTransparency
@@ -41,12 +42,22 @@ namespace LineTool
                 if (_guidelineTransparency != value)
                 {
                     _guidelineTransparency = value;
-                    if (LineToolSystem.Instance is not null)
+                    if (!CompatibilityHoverColors.IsHoverColorsLoaded() && LineToolSystem.Instance is not null)
                     {
                         LineToolSystem.Instance.GuidelineTransparency = value;
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the Hover Colors compatibility message.
+        /// </summary>
+        [SettingsUIHideByCondition(typeof(CompatibilityHoverColors), nameof(CompatibilityHoverColors.IsHoverColorsLoaded))]
+        [SettingsUIMultilineText]
+        public string HoverColorsGuidelineTransparencyNotice
+        {
+            get => "Hover Colors is installed. Guideline transparency is controlled by Hover Colors.";
         }
 
         /// <summary>

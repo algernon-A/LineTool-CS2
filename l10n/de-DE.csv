@@ -1,4 +1,4 @@
-"LINETOOL.Title","Erweitertes Linienwerkzeug"
+﻿"LINETOOL.Title","Erweitertes Linienwerkzeug"
 "LINETOOL.LineMode","Linienmodus"
 "LINETOOL.Options","Einstellungen"
 "LINETOOL.FenceMode","Zaunmodus"
@@ -57,3 +57,5 @@
 "Options.SECTION:[algernon.LineTool]","Erweitertes Linienwerkzeug"
 "Options.OPTION:GuidelineTransparency","Leitlinientransparenz"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Legt die Transparenz der Leitlinien fest. 0 ist vollständig undurchsichtig (maximale Sichtbarkeit), 100 ist vollständig transparent (unsichtbar)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","Leitlinientransparenz"
+"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice","Der Hover Colors-Mod ist installiert. Verwenden Sie die Leitlinientransparenz-Schieberegler in diesem Mod."
