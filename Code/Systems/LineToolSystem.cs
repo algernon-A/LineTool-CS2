@@ -645,8 +645,8 @@ namespace LineTool
             _keepBuildingAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
             _keepBuildingAction.Enable();
 
-            // Set guideline transparency.
-            // Load ALT transparency only when Hover Colors is not managing guideline opacity.
+  
+            // Load ALT guideline transparency only when Hover Colors is not managing guideline opacity.
             GuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
                 ? 0f
                 : Mod.Instance.ActiveSettings.GuidelineTransparency;
@@ -854,8 +854,8 @@ namespace LineTool
             }
 
             // Render any overlay (inverting transparency to alpha).
-            // Guard rare case if Hover Colors is loaded, keep Line Tool's overlay at full alpha so
-            // Line Tool's saved transparency setting does not additionally dim the guideline.
+            // Guard rare case: if Hover Colors is loaded, keep ALT's overlay at full alpha so
+            // ALT's saved transparency setting does not additionally dim the guideline.
             float effectiveGuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
                 ? 0f
                 : GuidelineTransparency;
