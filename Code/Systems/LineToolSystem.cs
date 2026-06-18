@@ -852,8 +852,14 @@ namespace LineTool
                 }
             }
 
+
             // Render any overlay (inverting transparency to alpha).
-            _mode.DrawOverlay(1f - GuidelineTransparency, _overlayBuffer, _tooltips);
+            float guidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
+                ? 0f
+                : GuidelineTransparency;
+
+            _mode.DrawOverlay(1f - guidelineTransparency, _overlayBuffer, _tooltips);
+
 
             // Overlay control points.
             if (_fixedPreview)
