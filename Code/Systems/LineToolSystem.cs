@@ -646,6 +646,7 @@ namespace LineTool
             _keepBuildingAction.Enable();
 
             // Set guideline transparency.
+            // Load ALT transparency only when Hover Colors is not managing guideline opacity.
             GuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
                 ? 0f
                 : Mod.Instance.ActiveSettings.GuidelineTransparency;
@@ -853,11 +854,13 @@ namespace LineTool
             }
 
             // Render any overlay (inverting transparency to alpha).
-            float guidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
+            // Guard - rare case or load order. If Hover Colors is loaded, keep ALT's overlay at full alpha so
+            // the saved Line Tool transparency setting does not also dim the guideline.
+            float effectiveGuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
                 ? 0f
                 : GuidelineTransparency;
 
-            _mode.DrawOverlay(1f - guidelineTransparency, _overlayBuffer, _tooltips);
+            _mode.DrawOverlay(1f - effectiveGuidelineTransparency, _overlayBuffer, _tooltips);
 
             // Overlay control points.
             if (_fixedPreview)
