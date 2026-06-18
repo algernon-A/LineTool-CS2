@@ -55,6 +55,5 @@
 "LINETOOL.OffsetVariation","오프셋 변형"
 "LINETOOL_DESCRIPTION.OffsetVariation","물체들은 선으로부터 최대 이 정도의 거리로 측면에서 무작위로 오프셋됩니다. 정확한 배치를 위해 값을 0으로 설정하세요."
 "Options.SECTION:[algernon.LineTool]","고급 라인 도구(Advanced Line Tool)"
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","가이드라인 투명도"
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice","Hover Colors 모드가 설치되어 있습니다. 가이드라인 투명도는 해당 모드의 슬라이더를 사용하세요."
-
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","Hover Colors 모드가 설치되어 있습니다. 가이드라인 투명도는 해당 모드의 슬라이더를 사용하세요."
+"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""

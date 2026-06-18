@@ -57,7 +57,7 @@ namespace LineTool
         [SettingsUIMultilineText]
         public string HoverColorsGuidelineTransparencyNotice
         {
-            get => "Hover Colors mod is installed, use the guideline transparency sliders in that mod.";
+             get => string.Empty;
         }
 
         /// <summary>

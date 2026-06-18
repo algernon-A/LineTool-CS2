@@ -58,5 +58,5 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","導線透明度"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","設定導線的透明度。0 表示完全不透明（可見度最高），100 表示完全透明（不可見）。"
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","導線透明度"
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice","已安裝 Hover Colors 模組。請使用該模組中的導線透明度滑桿。"
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","已安裝 Hover Colors 模組。請使用該模組中的導線透明度滑桿。"
+"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""
