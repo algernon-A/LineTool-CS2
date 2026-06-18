@@ -58,4 +58,4 @@
 "Options.SECTION:[algernon.LineTool]","高级线性摆放工具"
 "Options.OPTION:GuidelineTransparency","辅助线透明度"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","设置辅助线的透明度。0为完全不透明（最大可见性），100为完全透明（隐藏）。"
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","已安装 Hover Colors 模组。请使用该模组中的辅助线透明度滑块。"
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<已安装 Hover Colors 模组>。请使用该模组中的辅助线透明度滑块。"
