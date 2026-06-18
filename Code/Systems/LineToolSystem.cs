@@ -854,8 +854,8 @@ namespace LineTool
             }
 
             // Render any overlay (inverting transparency to alpha).
-            // Guard - rare case or load order. If Hover Colors is loaded, keep ALT's overlay at full alpha so
-            // the saved Line Tool transparency setting does not also dim the guideline.
+            // Guard rare case if Hover Colors is loaded, keep Line Tool's overlay at full alpha so
+            // Line Tool's saved transparency setting does not additionally dim the guideline.
             float effectiveGuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
                 ? 0f
                 : GuidelineTransparency;
