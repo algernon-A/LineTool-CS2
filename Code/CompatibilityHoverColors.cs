@@ -30,6 +30,7 @@ namespace LineTool
                 return true;
             }
 
+            // Detect Hover Colors by loaded assembly/type names.
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 try
