@@ -56,6 +56,6 @@
 "LINETOOL_DESCRIPTION.OffsetVariation","Objects will be randomly offset sideways from the line up to this maximum distance. Set to zero for precise placement."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:HoverColorsGuidelineTransparencyNotice","Hover Colors Mod がインストールされています。ガイドラインの透明度はその Mod のスライダーで設定してください。"
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""
+
 
 

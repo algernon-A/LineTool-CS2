@@ -57,7 +57,10 @@ namespace LineTool
         [SettingsUIMultilineText]
         public string HoverColorsGuidelineTransparencyNotice
         {
-             get => string.Empty;
+            get
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>

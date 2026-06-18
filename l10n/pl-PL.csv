@@ -56,4 +56,4 @@
 "LINETOOL_DESCRIPTION.OffsetVariation","Określaj odchylenie obiektów w poprzek linii losowo z zachowaniem tej wartości maksymalnej. Przy wartości zerowej obiekty umieszczane są precyzyjnie."
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:HoverColorsGuidelineTransparencyNotice","Mod Hover Colors jest zainstalowany. Użyj suwaków przezroczystości linii pomocniczych w tym modzie."
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""
+

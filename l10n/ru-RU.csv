@@ -58,4 +58,3 @@ Options.SECTION:[algernon.LineTool]	Advanced Line Tool
 Options.OPTION:GuidelineTransparency	Прозрачность направляющей
 Options.OPTION_DESCRIPTION:GuidelineTransparency	Устанавливает прозрачность направляющих. 0 - полностью непрозрачные (максимальная видимость), 100 - полностью прозрачные (невидимые).
 "Options.OPTION:HoverColorsGuidelineTransparencyNotice","Мод Hover Colors установлен. Используйте ползунки прозрачности направляющих в этом моде."
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""

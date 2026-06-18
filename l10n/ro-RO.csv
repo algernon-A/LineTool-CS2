@@ -58,4 +58,3 @@
 Options.OPTION:GuidelineTransparency	Transparența liniei de ghid
 Options.OPTION_DESCRIPTION:GuidelineTransparency	Setează transparența liniilor de ghid. 0 este complet opac (vizibilitate maximă), 100 este complet transparent (invizibil).
 "Options.OPTION:HoverColorsGuidelineTransparencyNotice","Modul Hover Colors este instalat. Folosiți glisoarele pentru transparența liniilor de ghid din acel mod."
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""

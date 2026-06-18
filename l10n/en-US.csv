@@ -57,5 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Guideline transparency"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","Hover Colors mod is installed, use the guideline transparency sliders in that mod."
-"Options.OPTION_DESCRIPTION:HoverColorsGuidelineTransparencyNotice",""
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Hover Colors mod is installed>, use the guideline transparency sliders in that mod."
