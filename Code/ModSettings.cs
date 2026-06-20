@@ -31,6 +31,7 @@ namespace LineTool
         /// <summary>
         /// Gets or sets the guideline transparency (0..1).
         /// </summary>
+        [SettingsUIHideByCondition(typeof(ModSettings), nameof(IsHoverColorsLoaded))]
         [SettingsUISlider(min = 0f, max = 100f, step = 1f, scalarMultiplier = 100f, unit = Unit.kPercentage)]
         [SettingsUICustomFormat]
         public float GuidelineTransparency
@@ -41,12 +42,43 @@ namespace LineTool
                 if (_guidelineTransparency != value)
                 {
                     _guidelineTransparency = value;
-                    if (LineToolSystem.Instance is not null)
+                    if (!CompatibilityHoverColors.IsHoverColorsLoaded() && LineToolSystem.Instance is not null)
                     {
                         LineToolSystem.Instance.GuidelineTransparency = value;
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the Hover Colors compatibility message.
+        /// </summary>
+        [SettingsUIHideByCondition(typeof(ModSettings), nameof(IsHoverColorsNotLoaded))]
+        [SettingsUIMultilineText]
+        public string HoverColorsGuidelineTransparencyNotice
+        {
+            get
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if Hover Colors is loaded.
+        /// </summary>
+        /// <returns>True if Hover Colors is loaded; otherwise false.</returns>
+        public bool IsHoverColorsLoaded()
+        {
+            return CompatibilityHoverColors.IsHoverColorsLoaded();
+        }
+
+        /// <summary>
+        /// Returns true if Hover Colors is not loaded.
+        /// </summary>
+        /// <returns>True if Hover Colors is not loaded; otherwise false.</returns>
+        public bool IsHoverColorsNotLoaded()
+        {
+            return !CompatibilityHoverColors.IsHoverColorsLoaded();
         }
 
         /// <summary>

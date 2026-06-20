@@ -1,4 +1,4 @@
-"LINETOOL.Title","Line Tool avançado"
+﻿"LINETOOL.Title","Line Tool avançado"
 "LINETOOL.LineMode","Modo de linha"
 "LINETOOL.Options","Opções"
 "LINETOOL.FenceMode","Modo de cerca"
@@ -57,3 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Transparência da diretrizes"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Define a transparência das diretrizes. 0 é completamente opaco (máxima visibilidade), 100 é completamente transparente (invisível)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<O mod Hover Colors está instalado>. Use os controlos deslizantes de transparência das linhas-guia nesse mod."

@@ -1,4 +1,4 @@
-"LINETOOL.Title","Advanced Line Tool"
+﻿"LINETOOL.Title","Advanced Line Tool"
 "LINETOOL.LineMode","Lijn modus"
 "LINETOOL.Options","Opties"
 "LINETOOL.FenceMode","Schutting modus"
@@ -57,3 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Richtlijn transparantie"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Stelt de transparantie van de richtlijnen in. 0 is volledig dekkend (maximale zichtbaarheid), 100 is volledig transparant (onzichtbaar)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<De Hover Colors-mod is geïnstalleerd>. Gebruik de schuifregelaars voor richtlijntransparantie in die mod."

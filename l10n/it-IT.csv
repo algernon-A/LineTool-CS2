@@ -1,4 +1,4 @@
-"LINETOOL.Title","Advanced Line Tool"
+﻿"LINETOOL.Title","Advanced Line Tool"
 "LINETOOL.LineMode","Modalità linea"
 "LINETOOL.Options","Opzioni"
 "LINETOOL.FenceMode","Modalità staccionata"
@@ -57,3 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Guideline transparency"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Sets the transparency of guidelines. 0 is fully opaque (maximum visibility), 100 is fully transparent (invisible)."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Il mod Hover Colors è installato>. Usa i cursori di trasparenza delle linee guida in quel mod."
