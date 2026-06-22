@@ -9,7 +9,7 @@
 "LINETOOL.FollowTerrain","Seguir terreno"
 "LINETOOL_DESCRIPTION.FollowTerrain","Los objetos se sitúan sobre el terreno siguiendo su elevación."
 "LINETOOL.FixedElevation","Elevación fija"
-"LINETOOL_DESCRIPTION.FixedElevation","Los objetos son situados a la misma altura que el punto inicial."
+"LINETOOL_DESCRIPTION.FixedElevation","Los objetos se sitúan a la misma altura que el punto inicial."
 "LINETOOL.ConstantSlope","Pendiente constante"
 "LINETOOL_DESCRIPTION.ConstantSlope","Los objetos se sitúan en forma de pendiente constante entre la elevación del punto de inicio y el punto final."
 "LINETOOL.RandomizationEnabled","Modo aleatorio habilitado"
@@ -57,6 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Transparencia de líneas guía"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Establece la transparencia de las líneas guía. 0 es totalmente opaco (máxima visibilidad), 100 es totalmente transparente (invisible)."
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<El mod Hover Colors está instalado>. Use los controles deslizantes de transparencia de líneas guía de ese mod."
-
-
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Hover Colors mod is installed>, use the guideline transparency sliders in that mod."
