@@ -1,3 +1,6 @@
+### 1.2.2
+- Add support for Hover Colors mod guideline transparency settings.
+
 ### 1.2.1
 - Update UI dependency versions.
 
