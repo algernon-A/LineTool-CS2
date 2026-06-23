@@ -57,4 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Transparência da diretrizes"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Define a transparência das diretrizes. 0 é completamente opaco (máxima visibilidade), 100 é completamente transparente (invisível)."
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Hover Colors mod is installed>, use the guideline transparency sliders in that mod."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<O mod Hover Colors está instalado>. Use os controlos deslizantes de transparência das linhas-guia nesse mod."

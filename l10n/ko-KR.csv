@@ -57,4 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","고급 라인 도구(Advanced Line Tool)"
 "Options.OPTION:GuidelineTransparency","가이드라인 투명도"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","가이드라인의 투명도를 설정합니다. 0은 완전히 불투명 (최대 가시성), 100은 완전히 투명 (보이지 않음)입니다."
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Hover Colors mod is installed>, use the guideline transparency sliders in that mod."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Hover Colors 모드가 설치되어 있습니다>. 가이드라인 투명도는 해당 모드의 슬라이더를 사용하세요."

@@ -57,4 +57,4 @@
 "Options.SECTION:[algernon.LineTool]","Advanced Line Tool"
 "Options.OPTION:GuidelineTransparency","Przeźroczystość linii pomocniczych"
 "Options.OPTION_DESCRIPTION:GuidelineTransparency","Przeźroczystość linii pomocniczych; 0% jest całkowicie nieprzeźroczyste, a 100% jest w pełni przeźroczyste (niewidoczne)."
-"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Hover Colors mod is installed>, use the guideline transparency sliders in that mod."
+"Options.OPTION:HoverColorsGuidelineTransparencyNotice","<Mod Hover Colors jest zainstalowany>. Użyj suwaków przezroczystości linii pomocniczych w tym modzie."
