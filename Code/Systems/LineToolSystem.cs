@@ -853,14 +853,21 @@ namespace LineTool
             }
 
             // Render any overlay (inverting transparency to alpha).
-            float overlayAlpha = 1f - GuidelineTransparency;
-            if (CompatibilityHoverColors.IsHoverColorsLoaded())
+            bool hoverColorsLoaded = CompatibilityHoverColors.IsHoverColorsLoaded();
+            float overlayAlpha;
+            if (hoverColorsLoaded)
             {
                 // Hover Colors manages GuideLineSettingsData; refresh each draw so ALT doesn't
                 // keep stale cached colors, and preserve HC's own dashed-line alpha.
                 GuideLineSettingsData guideLineSettings = _renderingSettingsQuery.GetSingleton<GuideLineSettingsData>();
                 _mode.UpdateGuideLineSettings(guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
-                overlayAlpha = guideLineSettings.m_HighPriorityColor.a;
+                overlayAlpha = math.clamp(guideLineSettings.m_HighPriorityColor.a, 0f, 1f);
+            }
+            else
+            {
+                // Without Hover Colors, ALT's own Options slider stays authoritative.
+                GuidelineTransparency = Mod.Instance.ActiveSettings.GuidelineTransparency;
+                overlayAlpha = math.clamp(1f - GuidelineTransparency, 0f, 1f);
             }
 
             _mode.DrawOverlay(overlayAlpha, _overlayBuffer, _tooltips);
