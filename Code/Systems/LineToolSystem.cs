@@ -645,7 +645,6 @@ namespace LineTool
             _keepBuildingAction.AddCompositeBinding("ButtonWithOneModifier").With("Modifier", "<Keyboard>/shift").With("Button", "<Mouse>/leftButton");
             _keepBuildingAction.Enable();
 
-  
             // Load ALT guideline transparency only when Hover Colors is not managing guideline opacity.
             GuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
                 ? 0f
@@ -854,13 +853,24 @@ namespace LineTool
             }
 
             // Render any overlay (inverting transparency to alpha).
-            // Guard rare case: if Hover Colors is loaded, keep ALT's overlay at full alpha so
-            // ALT's saved transparency setting does not additionally dim the guideline.
-            float effectiveGuidelineTransparency = CompatibilityHoverColors.IsHoverColorsLoaded()
-                ? 0f
-                : GuidelineTransparency;
+            bool hoverColorsLoaded = CompatibilityHoverColors.IsHoverColorsLoaded();
+            float overlayAlpha;
+            if (hoverColorsLoaded)
+            {
+                // Hover Colors manages GuideLineSettingsData; refresh each draw so ALT doesn't
+                // keep stale cached colors, and preserve HC's own dashed-line alpha.
+                GuideLineSettingsData guideLineSettings = _renderingSettingsQuery.GetSingleton<GuideLineSettingsData>();
+                _mode.UpdateGuideLineSettings(guideLineSettings.m_HighPriorityColor, guideLineSettings.m_MediumPriorityColor, _objectToolSystem.distanceScale);
+                overlayAlpha = math.clamp(guideLineSettings.m_HighPriorityColor.a, 0f, 1f);
+            }
+            else
+            {
+                // Without Hover Colors, ALT's own Options slider stays authoritative.
+                GuidelineTransparency = Mod.Instance.ActiveSettings.GuidelineTransparency;
+                overlayAlpha = math.clamp(1f - GuidelineTransparency, 0f, 1f);
+            }
 
-            _mode.DrawOverlay(1f - effectiveGuidelineTransparency, _overlayBuffer, _tooltips);
+            _mode.DrawOverlay(overlayAlpha, _overlayBuffer, _tooltips);
 
             // Overlay control points.
             if (_fixedPreview)

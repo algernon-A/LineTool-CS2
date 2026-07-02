@@ -282,6 +282,19 @@ namespace LineTool
         }
 
         /// <summary>
+        /// Refreshes guideline rendering colors from the shared game settings.
+        /// </summary>
+        /// <param name="highPriorityColor">High priority line colour.</param>
+        /// <param name="mediumPriorityColor">Medium priority line colour.</param>
+        /// <param name="distanceScale">Line width distance scale.</param>
+        internal void UpdateGuideLineSettings(Color highPriorityColor, Color mediumPriorityColor, float distanceScale)
+        {
+            m_highPriorityColor = highPriorityColor;
+            m_mediumPriorityColor = mediumPriorityColor;
+            m_distanceScale = distanceScale;
+        }
+
+        /// <summary>
         /// Applies any active constraints to the given world position.
         /// </summary>
         /// <param name="currentPos">World position to constrain.</param>
