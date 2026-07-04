@@ -86,6 +86,9 @@ namespace LineTool
 #if DEBUG
             Log.Info("setting logging level to Debug");
             Log.effectivenessLevel = Level.Debug;
+#else
+            Log.Info("setting logging level to Info");
+            Log.effectivenessLevel = Level.Info;
 #endif
 
             Log.Info($"loading {ModName} version {Assembly.GetExecutingAssembly().GetName().Version}");

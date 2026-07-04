@@ -31,8 +31,6 @@ namespace LineTool
             // Get tool system.
             if (LineToolSystem.Instance.World.GetOrCreateSystemManaged<ToolSystem>() is ToolSystem toolSystem && toolSystem.actionMode.IsGame())
             {
-                Patcher.Instance.Log.Debug("ToolbarUISystem.Apply postfix with active toolSystem in game");
-
                 // Check if we're in-game, Line Tool is active, and a tree is currently selected.
                 if (toolSystem.activeTool is LineToolSystem lineToolSystem && lineToolSystem.TreeSelected)
                 {
