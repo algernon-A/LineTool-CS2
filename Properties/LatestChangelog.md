@@ -1,1 +1,1 @@
-- Update UI dependency versions.
+- Add support for Hover Colors mod guideline transparency settings.
