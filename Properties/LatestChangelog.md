@@ -1,1 +1,1 @@
-- Add support for Hover Colors mod guideline transparency settings.
+- Suppress debugging logging by default.

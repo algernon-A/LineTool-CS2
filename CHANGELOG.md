@@ -1,3 +1,7 @@
+
+### 1.2.3
+-Suppress debugging logging by default.
+
 ### 1.2.2
 - Add support for Hover Colors mod guideline transparency settings.
 
