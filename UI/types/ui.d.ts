@@ -34,14 +34,18 @@ declare module "cs2/ui" {
   export interface TooltipProps extends ClassProps {
   	tooltip: ReactNode;
   	disabled?: boolean;
+  	delayTime?: number;
   	forceVisible?: boolean;
+  	hideOnInteraction?: boolean;
   	theme?: Partial<BalloonTheme>;
   	direction?: BalloonDirection;
   	alignment?: BalloonAlignment;
   	children: RefReactElement;
   	anchorElRef?: RefObject<HTMLElement>;
   }
-  export export const Tooltip: ({ tooltip, forceVisible, disabled, theme, direction, alignment, className, children, anchorElRef }: PropsWithChildren<TooltipProps>) => JSX.Element;
+  export export const Tooltip: import("react").MemoExoticComponent<(props: TooltipProps & {
+  	children?: ReactNode;
+  } & import("react").RefAttributes<HTMLElement>) => import("react").ReactElement<any, string | import("react").JSXElementConstructor<any>> | null>;
   export class FocusSymbol {
   	readonly debugName: string;
   	readonly r: number;
@@ -58,6 +62,7 @@ declare module "cs2/ui" {
   	content: string;
   	footer: string;
   	floatingHint?: string;
+  	tooltipHint?: string;
   }
   export interface PanelTitleBarTheme {
   	titleBar: string;
@@ -80,17 +85,103 @@ declare module "cs2/ui" {
   }
   export export const DialogContext: import("react").Context<DialogContextProps>;
   export export const DialogRenderer: ({ children }: PropsWithChildren) => JSX.Element;
-  export interface ConfirmationDialogProps {
+  export interface Typed<T extends string> {
+  	__Type: T;
+  }
+  export type TypeFromMap<T extends Record<string, any>> = {
+  	[K in keyof T]: K extends string ? T[K] & Typed<K> : never;
+  }[keyof T];
+  export enum Unit {
+  	Integer = "integer",
+  	IntegerRounded = "integerRounded",
+  	IntegerPerMonth = "integerPerMonth",
+  	IntegerPerHour = "integerPerHour",
+  	FloatSingleFraction = "floatSingleFraction",
+  	FloatTwoFractions = "floatTwoFractions",
+  	FloatThreeFractions = "floatThreeFractions",
+  	Percentage = "percentage",
+  	PercentageSingleFraction = "percentageSingleFraction",
+  	PercentagePrecise = "percentagePrecise",
+  	Angle = "angle",
+  	Length = "length",
+  	Area = "area",
+  	Volume = "volume",
+  	VolumePerMonth = "volumePerMonth",
+  	Weight = "weight",
+  	WeightPerCell = "weightPerCell",
+  	WeightPerMonth = "weightPerMonth",
+  	Power = "power",
+  	Energy = "energy",
+  	DataRate = "dataRate",
+  	DataBytes = "dataBytes",
+  	DataMegabytes = "dataMegabytes",
+  	Money = "money",
+  	MoneyPerCell = "moneyPerCell",
+  	MoneyPerMonth = "moneyPerMonth",
+  	MoneyPerHour = "moneyPerHour",
+  	MoneyPerDistance = "moneyPerDistance",
+  	MoneyPerDistancePerMonth = "moneyPerDistancePerMonth",
+  	BodiesPerMonth = "bodiesPerMonth",
+  	XP = "xp",
+  	Temperature = "temperature",
+  	TemperaturePrecise = "temperaturePrecise",
+  	NetElevation = "netElevation",
+  	ScreenFrequency = "screenFrequency",
+  	Height = "height",
+  	Custom = "custom",
+  	DurationSeconds = "durationSeconds"
+  }
+  export enum LocElementType {
+  	Bounds = "Game.UI.Localization.LocalizedBounds",
+  	Fraction = "Game.UI.Localization.LocalizedFraction",
+  	Number = "Game.UI.Localization.LocalizedNumber",
+  	String = "Game.UI.Localization.LocalizedString"
+  }
+  export interface LocElements {
+  	[LocElementType.Bounds]: LocalizedBounds;
+  	[LocElementType.Fraction]: LocalizedFraction;
+  	[LocElementType.Number]: LocalizedNumber;
+  	[LocElementType.String]: LocalizedString;
+  }
+  export type LocElement = TypeFromMap<LocElements>;
+  export interface LocalizedBounds {
+  	min: number;
+  	max: number;
+  	unit?: Unit;
+  }
+  export interface LocalizedFraction {
+  	value: number;
+  	total: number;
+  	unit?: Unit;
+  }
+  export interface LocalizedNumber {
+  	value: number;
+  	unit?: Unit;
+  	signed: boolean;
+  }
+  export interface LocalizedString {
+  	id: string | null;
+  	value: string | null;
+  	args: Record<string, LocElement> | null;
+  }
+  export interface Number2 {
+  	readonly x: number;
+  	readonly y: number;
+  }
+  export interface ConfirmationDialogProps extends PropsWithChildren {
   	title?: ReactNode;
-  	message: ReactNode;
+  	message?: ReactNode;
   	details?: string;
   	confirm?: ReactNode;
   	cancel?: ReactNode;
+  	disabled?: boolean;
+  	disableContinue?: boolean;
   	onConfirm: (dismiss: boolean) => void;
   	onCancel?: () => void;
   	dismissible?: boolean;
   	cancellable?: boolean;
   	zIndex?: number;
+  	multiline?: boolean;
   }
   export const UITriggeredConfirmationDialog: React.FC<ConfirmationDialogProps>;
   export enum UISound {
@@ -138,11 +229,8 @@ declare module "cs2/ui" {
   	openPanel = "open-panel",
   	closePanel = "close-panel",
   	openMenu = "open-menu",
-  	closeMenu = "close-menu"
-  }
-  export interface Number2 {
-  	readonly x: number;
-  	readonly y: number;
+  	closeMenu = "close-menu",
+  	clickDisableButton = "click-disable-button"
   }
   export type Action = () => void | boolean;
   export type Action1D = (value: number) => void | boolean;
@@ -152,6 +240,7 @@ declare module "cs2/ui" {
   	"Change Tool Option": Action1D;
   	"Change Value": Action1D;
   	"Change Line Schedule": Action1D;
+  	"Select Popup Button": Action1D;
   	"Move Vertical": Action1D;
   	"Switch Radio Station": Action1D;
   	"Scroll Vertical": Action1D;
@@ -161,11 +250,13 @@ declare module "cs2/ui" {
   	"Select Chirp Sender": Action;
   	"Save Game": Action;
   	"Overwrite Save": Action;
+  	"Confirm": Action;
   	"Expand Group": Action;
   	"Collapse Group": Action;
   	"Select Route": Action;
   	"Remove Operating District": Action;
   	"Upgrades Menu": Action;
+  	"Upgrades Menu Secondary": Action;
   	"Purchase Map Tile": Action;
   	"Unfollow Citizen": Action;
   	"Like Chirp": Action;
@@ -180,6 +271,7 @@ declare module "cs2/ui" {
   	"Focus Line Panel": Action;
   	"Focus Occupants Panel": Action;
   	"Focus Info Panel": Action;
+  	"Quaternary Action": Action;
   	"Close": Action;
   	"Back": Action;
   	"Leave Underground Mode": Action;
@@ -194,6 +286,7 @@ declare module "cs2/ui" {
   	"Change Time Scale": Action1D;
   	"Switch Page": Action1D;
   	"Default Tool": Action;
+  	"Default Tool UI": Action;
   	"Tool Options": Action;
   	"Switch Toolmode": Action;
   	"Toggle Snapping": Action;
@@ -230,10 +323,12 @@ declare module "cs2/ui" {
   	"Economy Panel": Action;
   	"City Information Panel": Action;
   	"Statistic Panel": Action;
+  	"Toggle Global Contour Lines": Action;
   	"Transportation Overview Panel": Action;
   	"Notification Panel": Action;
   	"Chirper Panel": Action;
   	"Lifepath Panel": Action;
+  	"Universal Mod Panel": Action;
   	"Event Journal Panel": Action;
   	"Radio Panel": Action;
   	"Photo Mode Panel": Action;
@@ -258,12 +353,17 @@ declare module "cs2/ui" {
   	"Select Directory": Action;
   	"Search Options": Action;
   	"Clear Search": Action;
+  	"Credit Speed": Action1D;
   	"Debug UI": Action;
   	"Debug Prefab Tool": Action;
   	"Debug Change Field": Action1D;
   	"Debug Multiplier": Action1D;
   }
   export type InputAction = keyof InputActionsDefinition;
+  export type InputActionRequest = {
+  	action: InputAction;
+  	actionContext?: string;
+  };
   export interface ButtonTheme {
   	button: string;
   	hint: string;
@@ -287,8 +387,9 @@ declare module "cs2/ui" {
   	onSelect?: () => void;
   	as?: "button" | "div";
   	hintAction?: InputAction;
+  	actionContext?: string;
   	forceHint?: boolean;
-  	shortcut?: InputAction;
+  	shortcut?: InputAction | InputActionRequest;
   	allowFocusableChildren?: boolean;
   }
   export interface IconButtonTheme extends ButtonTheme {
@@ -307,7 +408,7 @@ declare module "cs2/ui" {
   }
   type ButtonTheme$1 = Partial<LabeledIconButtonTheme>;
   type ButtonProps$1 = ButtonProps & Partial<LabeledIconButtonProps> & {
-  	variant?: "flat" | "primary" | "round" | "menu" | "icon" | "floating" | "default";
+  	variant?: "flat" | "primary" | "round" | "menu" | "icon" | "floating" | "text" | "default";
   	theme?: ButtonTheme$1;
   };
   export export const Button: (props: ButtonProps$1) => JSX.Element;
@@ -330,6 +431,7 @@ declare module "cs2/ui" {
   }
   export interface DropdownItemTheme {
   	dropdownItem: string;
+  	icon?: string;
   }
   export interface DropdownProps {
   	focusKey?: FocusKey;
@@ -355,10 +457,19 @@ declare module "cs2/ui" {
   	selectSound?: UISound | string | null;
   	tooltipLabel?: ReactNode;
   }
-  export interface DropdownItemProps<T> extends ClassProps {
-  	focusKey?: FocusKey;
+  export interface DropdownItem<T> {
   	value: T;
+  	displayName: LocElement;
+  	tooltip?: LocElement;
+  	icon?: string;
+  	iconTint?: string;
+  	disabled?: boolean;
+  }
+  export interface DropdownItemProps<T> extends ClassProps, Partial<Omit<DropdownItem<T>, "displayName">> {
+  	value: T;
+  	focusKey?: FocusKey;
   	selected?: boolean;
+  	hasIcons?: boolean;
   	theme?: DropdownItemTheme;
   	sounds?: ButtonSounds | null;
   	closeOnSelect?: boolean;
@@ -378,7 +489,7 @@ declare module "cs2/ui" {
    *
    * When the item is clicked, the dropdown menu is automatically hidden.
    */
-  export export function DropdownItem<T>({ focusKey, value, selected, theme, sounds, className, onChange, onToggleSelected, closeOnSelect, children }: PropsWithChildren<DropdownItemProps<T>>): JSX.Element;
+  export function DropdownItem$1<T>({ focusKey, value, disabled, icon, iconTint, selected, hasIcons, theme, sounds, className, onChange, onToggleSelected, closeOnSelect, tooltip, children }: PropsWithChildren<DropdownItemProps<T>>): JSX.Element;
   export interface TransitionSounds {
   	enter?: UISound | string | null;
   	exit?: UISound | string | null;
@@ -397,7 +508,9 @@ declare module "cs2/ui" {
   	hintClassName?: string;
   	showCloseHint?: boolean | InputAction;
   	unfocusedHintAction?: InputAction;
-  	backActionOverride?: string;
+  	footerHintAsTooltip?: boolean;
+  	backActionOverride?: InputAction;
+  	actionContext?: string;
   	allowLooping?: boolean;
   }
   export interface DraggablePanelProps extends PanelProps {
@@ -419,14 +532,18 @@ declare module "cs2/ui" {
   export interface InfoRowProps extends ClassProps {
   	icon?: string;
   	left?: ReactNode;
+  	center?: ReactNode;
   	right?: ReactNode;
   	tooltip?: ReactNode;
   	link?: ReactNode;
   	uppercase?: boolean;
   	subRow?: boolean;
+  	subRowDimmed?: boolean;
   	disableFocus?: boolean;
+  	noShrinkRight?: boolean;
+  	justifyLeft?: boolean;
   }
-  export const InfoRow: ({ icon, left, right, tooltip, link, uppercase, subRow, disableFocus, className }: InfoRowProps) => JSX.Element;
+  export const InfoRow: ({ icon, left, center, right, tooltip, link, uppercase, subRow, subRowDimmed, disableFocus, className, noShrinkRight, justifyLeft }: InfoRowProps) => JSX.Element;
   export interface SimplePanelProps extends PanelProps {
   	draggable?: false | undefined;
   }
@@ -437,10 +554,11 @@ declare module "cs2/ui" {
   export export const Panel: (props: PropsWithChildren<PanelProps$1>) => JSX.Element;
   export interface IconProps {
   	src: string;
-  	tinted?: boolean;
+  	tinted?: boolean | string;
   	className?: string;
+  	children?: ReactNode;
   }
-  export export const Icon: ({ tinted, className, src }: IconProps) => JSX.Element;
+  export export const Icon: ({ tinted, className, src, children }: IconProps) => JSX.Element;
   export const PortalContainerProvider: ({ children }: {
   	children: RefReactElement<HTMLElement>;
   }) => JSX.Element;
@@ -458,6 +576,7 @@ declare module "cs2/ui" {
   	minOverflow: number;
   }
   export interface ScrollControllerCallback {
+  	container: null | HTMLDivElement;
   	scrollTo(x: number, y: number): void;
   	scrollBy(x: number, y: number): void;
   	smoothScrollTo(x: number, y: number): void;
@@ -469,13 +588,14 @@ declare module "cs2/ui" {
   	scrollBy(x: number, y: number): void;
   	smoothScrollTo(x: number, y: number): void;
   	scrollIntoView(element: Element): void;
+  	get container(): HTMLDivElement | null | undefined;
   	_attachCallback(callback: ScrollControllerCallback): void;
   	_detachCallback(callback: ScrollControllerCallback): void;
   }
   export interface ScrollableProps {
   	horizontal?: boolean;
   	vertical?: boolean;
-  	trackVisibility?: "always" | "scrollable";
+  	trackVisibility?: "always" | "scrollable" | "reserve";
   	overshootX?: number;
   	overshootY?: number;
   	smooth?: boolean;
@@ -487,6 +607,7 @@ declare module "cs2/ui" {
   	onOverflowY?: (overflow: boolean) => void;
   	autoScroll?: boolean;
   	autoScrollSettings?: AutoScrollSettings;
+  	useNewStyle?: boolean;
   }
   export export const Scrollable: (props: ScrollableProps & {
   	children?: import("react").ReactNode;
@@ -526,8 +647,10 @@ declare module "cs2/ui" {
   	theme?: Partial<FormattedTextTheme>;
   	renderer?: FormattedTextRenderer;
   	onLinkSelect?: (data: string) => void;
+  	selectAction?: InputAction;
+  	nonInline?: boolean;
   }
-  export export const FormattedText: ({ focusKey, text, theme: partialTheme, renderer, className, onLinkSelect, ...props }: FormattedTextProps) => JSX.Element;
+  export export const FormattedText: ({ focusKey, text, theme: partialTheme, renderer, className, onLinkSelect, selectAction, nonInline, ...props }: FormattedTextProps) => JSX.Element;
   export interface FormattedParagraphsTheme extends FormattedTextTheme {
   	paragraphs: string;
   }
@@ -538,10 +661,12 @@ declare module "cs2/ui" {
   	theme?: Partial<FormattedParagraphsTheme>;
   	renderer?: FormattedTextRenderer;
   	onLinkSelect?: (data: string) => void;
+  	selectAction?: InputAction;
   	maxLineLength?: number;
   	splitLineLength?: number;
+  	nonInline?: boolean;
   }
-  export export const FormattedParagraphs: ({ focusKey, text, theme: partialTheme, renderer, className, children, onLinkSelect, maxLineLength, splitLineLength, ...props }: PropsWithChildren<FormattedParagraphsProps>) => JSX.Element;
+  export export const FormattedParagraphs: ({ focusKey, text, theme: partialTheme, renderer, className, children, onLinkSelect, selectAction, nonInline, maxLineLength, splitLineLength, ...props }: PropsWithChildren<FormattedParagraphsProps>) => JSX.Element;
   export export class MarkdownRenderer implements FormattedTextRenderer {
   	render(str: string): FormattedTextRenderResult;
   }
@@ -570,6 +695,7 @@ declare module "cs2/ui" {
   
   export {
   	ButtonProps$1 as ButtonProps,
+  	DropdownItem$1 as DropdownItem,
   	InfoRow as PanelSectionRow,
   	InfoSection as PanelSection,
   	InfoSectionFoldout as PanelFoldout,

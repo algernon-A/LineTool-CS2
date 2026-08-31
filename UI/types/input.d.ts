@@ -202,24 +202,52 @@ declare module "cs2/input" {
   export export const focusAnchorBottom: Number2;
   export export const focusAnchorRight: Number2;
   export export function getElementFocusPosition(rect: FocusDOMRect | null, anchor: Number2): Number2 | null;
+  export interface NavigationScopeProps {
+  	focusKey?: FocusKey;
+  	debugName?: string;
+  	focused: UniqueFocusKey | null;
+  	direction?: NavigationDirection;
+  	activation?: FocusActivation;
+  	limits?: FocusLimits;
+  	onFocused?: (focused: boolean) => void;
+  	onChange: (key: UniqueFocusKey | null) => void;
+  	onRefocus?: RefocusHandler;
+  	allowFocusExit?: boolean;
+  	allowLooping?: boolean | "x" | "y";
+  	jumpSections?: boolean;
+  }
+  /**
+   * A stateless component that allows the user to navigate between multiple focusable children with a gamepad.
+   *
+   * The `onRefocus` callback controls what happens when the focus is lost within the scope.
+   *
+   * The focus behavior of the scope can be controlled by the `activation` prop.
+   *
+   * Optionally, a `focusKey` for the component itself can be set.
+   */
+  export export const NavigationScope: ({ focusKey, debugName, focused, direction, activation, limits, children, onFocused, onChange, onRefocus, allowFocusExit, allowLooping, jumpSections, }: React$1.PropsWithChildren<NavigationScopeProps>) => JSX.Element;
+  export type RefocusHandler = (focusController: MultiChildFocusController, lastElement: FocusController | null) => UniqueFocusKey | null;
+  export export const refocusClosestKeyIfNoFocus: RefocusHandler;
+  export export const refocusClosestKey: RefocusHandler;
   export interface AutoNavigationScopeProps {
   	focusKey?: FocusKey;
   	initialFocused?: UniqueFocusKey | null;
   	direction?: NavigationDirection;
   	activation?: FocusActivation;
   	limits?: FocusLimits;
-  	onRefocus?: (controller: MultiChildFocusController, lastElement: FocusController | null) => UniqueFocusKey | null;
+  	onRefocus?: RefocusHandler;
   	onChange?: (key: UniqueFocusKey | null) => void;
+  	onFocused?: (focused: boolean) => void;
   	allowFocusExit?: boolean;
   	forceFocus?: UniqueFocusKey | null;
   	debugName?: string;
-  	allowLooping?: boolean;
+  	allowLooping?: boolean | "x" | "y";
   	jumpSections?: boolean;
   }
   /**
    * Automatic navigation in lists, grids and forms.
    */
-  export export const AutoNavigationScope: ({ focusKey, initialFocused, direction, activation, limits, children, onChange, onRefocus, allowFocusExit, forceFocus, debugName, allowLooping, jumpSections }: React$1.PropsWithChildren<AutoNavigationScopeProps>) => JSX.Element;
+  export export const AutoNavigationScope: ({ onRefocus, onChange, allowFocusExit, allowLooping, debugName, focusKey, forceFocus, initialFocused, ...props }: React$1.PropsWithChildren<AutoNavigationScopeProps>) => JSX.Element;
   export interface FocusBoundaryProps {
   	disabled?: boolean;
   	onFocusChange?: FocusCallback;
@@ -291,7 +319,8 @@ declare module "cs2/input" {
   	openPanel = "open-panel",
   	closePanel = "close-panel",
   	openMenu = "open-menu",
-  	closeMenu = "close-menu"
+  	closeMenu = "close-menu",
+  	clickDisableButton = "click-disable-button"
   }
   export interface PassiveFocusDivProps extends React$1.HTMLAttributes<HTMLDivElement> {
   	onFocusChange?: (focused: boolean) => void;
@@ -356,32 +385,6 @@ declare module "cs2/input" {
    * Optionally, a `focusKey` for the component itself can be set.
    */
   export export const FocusScope: ({ focusKey, debugName, focused, activation, limits, children }: React$1.PropsWithChildren<FocusScopeProps>) => JSX.Element;
-  export interface NavigationScopeProps {
-  	focusKey?: FocusKey;
-  	debugName?: string;
-  	focused: UniqueFocusKey | null;
-  	direction?: NavigationDirection;
-  	activation?: FocusActivation;
-  	limits?: FocusLimits;
-  	onChange: (key: UniqueFocusKey | null) => void;
-  	onRefocus?: (controller: MultiChildFocusController, lastElement: FocusController | null) => UniqueFocusKey | null;
-  	allowFocusExit?: boolean;
-  	allowLooping?: boolean;
-  	jumpSections?: boolean;
-  }
-  /**
-   * A stateless component that allows the user to navigate between multiple focusable children with a gamepad.
-   *
-   * The `onRefocus` callback controls what happens when the focus is lost within the scope.
-   *
-   * The focus behavior of the scope can be controlled by the `activation` prop.
-   *
-   * Optionally, a `focusKey` for the component itself can be set.
-   */
-  export export const NavigationScope: ({ focusKey, debugName, focused, direction, activation, limits, children, onChange, onRefocus, allowFocusExit, allowLooping, jumpSections, }: React$1.PropsWithChildren<NavigationScopeProps>) => JSX.Element;
-  export type RefocusHandler = (focusController: MultiChildFocusController, lastElement: FocusController | null) => UniqueFocusKey | null;
-  export export const refocusClosestKeyIfNoFocus: RefocusHandler;
-  export export const refocusClosestKey: RefocusHandler;
   export interface SelectableFocusBoundaryProps {
   	onSelectedStateChanged?: (selected: boolean) => void;
   }
@@ -395,6 +398,7 @@ declare module "cs2/input" {
   	"Change Tool Option": Action1D;
   	"Change Value": Action1D;
   	"Change Line Schedule": Action1D;
+  	"Select Popup Button": Action1D;
   	"Move Vertical": Action1D;
   	"Switch Radio Station": Action1D;
   	"Scroll Vertical": Action1D;
@@ -404,11 +408,13 @@ declare module "cs2/input" {
   	"Select Chirp Sender": Action;
   	"Save Game": Action;
   	"Overwrite Save": Action;
+  	"Confirm": Action;
   	"Expand Group": Action;
   	"Collapse Group": Action;
   	"Select Route": Action;
   	"Remove Operating District": Action;
   	"Upgrades Menu": Action;
+  	"Upgrades Menu Secondary": Action;
   	"Purchase Map Tile": Action;
   	"Unfollow Citizen": Action;
   	"Like Chirp": Action;
@@ -423,6 +429,7 @@ declare module "cs2/input" {
   	"Focus Line Panel": Action;
   	"Focus Occupants Panel": Action;
   	"Focus Info Panel": Action;
+  	"Quaternary Action": Action;
   	"Close": Action;
   	"Back": Action;
   	"Leave Underground Mode": Action;
@@ -437,6 +444,7 @@ declare module "cs2/input" {
   	"Change Time Scale": Action1D;
   	"Switch Page": Action1D;
   	"Default Tool": Action;
+  	"Default Tool UI": Action;
   	"Tool Options": Action;
   	"Switch Toolmode": Action;
   	"Toggle Snapping": Action;
@@ -473,10 +481,12 @@ declare module "cs2/input" {
   	"Economy Panel": Action;
   	"City Information Panel": Action;
   	"Statistic Panel": Action;
+  	"Toggle Global Contour Lines": Action;
   	"Transportation Overview Panel": Action;
   	"Notification Panel": Action;
   	"Chirper Panel": Action;
   	"Lifepath Panel": Action;
+  	"Universal Mod Panel": Action;
   	"Event Journal Panel": Action;
   	"Radio Panel": Action;
   	"Photo Mode Panel": Action;
@@ -501,14 +511,22 @@ declare module "cs2/input" {
   	"Select Directory": Action;
   	"Search Options": Action;
   	"Clear Search": Action;
+  	"Credit Speed": Action1D;
   	"Debug UI": Action;
   	"Debug Prefab Tool": Action;
   	"Debug Change Field": Action1D;
   	"Debug Multiplier": Action1D;
   }
   export type InputAction = keyof InputActionsDefinition;
+  export type InputActionRequest = {
+  	action: InputAction;
+  	actionContext?: string;
+  };
   export type InputActions = {
-  	[K in InputAction]?: InputActionsDefinition[K] | null;
+  	[K in InputAction]?: InputActionsDefinition[K] | {
+  		actionContext?: string;
+  		onAction: InputActionsDefinition[K] | null;
+  	} | null;
   };
   export interface ButtonTheme {
   	button: string;
@@ -533,8 +551,9 @@ declare module "cs2/input" {
   	onSelect?: () => void;
   	as?: "button" | "div";
   	hintAction?: InputAction;
+  	actionContext?: string;
   	forceHint?: boolean;
-  	shortcut?: InputAction;
+  	shortcut?: InputAction | InputActionRequest;
   	allowFocusableChildren?: boolean;
   }
   export interface ClassProps {
@@ -605,12 +624,15 @@ declare module "cs2/input" {
   }
   export interface InputHintProps extends ClassProps, StyleProps {
   	action?: InputAction;
+  	actionContext?: string;
   	bindingIndex?: number;
   	active?: boolean;
   	controlScheme?: ControlScheme;
   	theme?: Partial<InputHintTheme>;
   	shortName?: ShortInputPathOption;
   	showLabel?: boolean;
+  	tooltip?: boolean;
+  	tooltipClassName?: string;
   }
   export export const InputHint: ({ action, active, controlScheme, ...props }: InputHintProps) => JSX.Element | null;
   export export const ActiveControlSchemeInputHint: (props: InputHintProps) => JSX.Element;
@@ -672,13 +694,15 @@ declare module "cs2/input" {
   export export const InputActionBarrier: React$1.NamedExoticComponent<React$1.PropsWithChildren<InputActionBarrierProps>>;
   export interface InputActionConsumerProps {
   	actions: InputActions | null;
+  	actionContext?: string;
   	disabled?: boolean;
   	ignoreFocusState?: boolean;
   }
   export export const InputActionConsumer: React$1.NamedExoticComponent<React$1.PropsWithChildren<InputActionConsumerProps>>;
   export interface SingleActionConsumerProps {
-  	action: string;
+  	action: InputAction;
   	disabled?: boolean;
+  	actionContext?: string;
   	onAction?: () => void;
   }
   /** When the Gamepad "A" button is pressed */
@@ -698,12 +722,21 @@ declare module "cs2/input" {
   export export const inputActionNames$: ValueBinding<(keyof InputActionsDefinition)[]>;
   export export const onInputActionPerformed$: EventBinding<InputActionEvent>;
   export export const onInputActionReleased$: EventBinding<InputActionEvent>;
-  export export function setInputActionPriority(action: InputAction, priority: number, force: boolean): void;
+  export export function setInputActionPriority(action: InputAction, requestId: string | null, priority: number, force: boolean): void;
   export export class InputStack {
   	_items: InputStackItem[];
   	contains(action: InputAction): boolean;
   	indexOf(action: InputAction): number;
-  	push(action: InputAction, callback: Function): void;
+  	lastIndexOf(action: InputAction): number;
+  	findItem(action: InputAction): {
+  		context: string;
+  		index: number;
+  	};
+  	findLastItem(action: InputAction): {
+  		context: string;
+  		index: number;
+  	};
+  	push(action: InputAction, context: string, callback: Function): void;
   	removeWhere(predicate: (action: InputAction) => boolean): void;
   	clear(): void;
   	dispatchInputEvent(action: InputAction, value: any): boolean;
@@ -711,8 +744,9 @@ declare module "cs2/input" {
   }
   export class InputStackItem {
   	readonly action: InputAction;
+  	readonly context: string;
   	readonly callback: Function;
-  	constructor(action: InputAction, callback: Function);
+  	constructor(action: InputAction, context: string, callback: Function);
   }
   export interface InputController {
   	attachChild(controller: InputController): void;
